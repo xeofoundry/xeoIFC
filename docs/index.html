@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IFC Viewer — WebGPU / Rust WASM</title>
+    <script>
+      // Restore theme before first paint to avoid a flash of the wrong theme.
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.dataset.theme = saved;
+      function toggleTheme() {
+        const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('theme', next);
+      }
+    </script>
+    <script type="module" crossorigin src="./assets/index-BXUBNxR6.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CQYPgVxq.css">
+  </head>
+  <body>
+    <div id="app">
+      <header id="toolbar">
+        <span class="title">
+          <img src="./creoox.png" style="height:30px" alt="Creoox" />
+        </span>
+        <button id="open-button" type="button">Open IFC…</button>
+        <input id="file-input" type="file" accept=".ifc,.ifczip" hidden />
+        <button id="isolate-button" type="button" disabled>Isolate</button>
+        <button id="show-all-button" type="button" disabled>Show all</button>
+        <span id="selection"></span>
+        <button id="theme-button" type="button" onclick="toggleTheme()" title="Toggle dark/light mode">🌓</button>
+      </header>
+      <div id="main">
+        <aside id="sidebar">
+          <div id="tree-header">
+            <input id="tree-search" type="search" placeholder="Search…" />
+            <div id="tree-tabs">
+              <button type="button" data-tab="spatial" class="active">Spatial</button>
+              <button type="button" data-tab="class">Class</button>
+              <button type="button" data-tab="type">Type</button>
+              <button type="button" data-tab="material">Material</button>
+            </div>
+            <select id="tree-sort" title="Sort">
+              <option value="name-asc">Sort: Name A–Z</option>
+              <option value="name-desc">Sort: Name Z–A</option>
+              <option value="elev-asc">Sort: Elevation low–high</option>
+              <option value="elev-desc">Sort: Elevation high–low</option>
+            </select>
+          </div>
+          <div id="tree"></div>
+          <div id="sidebar-resizer" title="Drag to resize"></div>
+          <div id="properties" class="properties empty">Select an element to inspect properties</div>
+        </aside>
+        <div id="main-resizer" title="Drag to resize"></div>
+        <div id="viewport-container">
+          <canvas id="viewport"></canvas>
+          <div id="error-banner" hidden></div>
+        </div>
+      </div>
+      <footer id="status-bar" aria-live="polite">
+        <span id="fps">FPS —</span>
+        <span id="status">Ready</span>
+        <progress id="load-progress" hidden></progress>
+        <span id="mesh-count">Meshes — / unique —</span>
+        <span id="element-count">Elements —</span>
+        <span id="triangle-count">Triangles —</span>
+        <span id="draw-calls">Draws —</span>
+        <span id="memory-used">Memory —</span>
+      </footer>
+    </div>
+  </body>
+</html>

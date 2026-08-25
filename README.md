@@ -5,6 +5,14 @@ Public repository of the Creoox IFC to glTF conversion tool.
 xeoIFC is a native Rust converter for `.ifc` and `.ifczip` files. It writes glTF 2.0 output
 (`.glb`, `.gltf`, or `.html`) plus XeoKit-style metadata and manifest JSON, with cxconverter-compatible configuration and output conventions.
 
+## Demo
+
+Try the browser demo:
+https://xeofoundry.github.io/xeoIfc/
+
+The demo runs locally in the browser. Use **Open IFC...** to select an `.ifc` or `.ifczip` file from
+your machine.
+
 ## Compatibility
 
 xeoIFC targets XeoKit-compatible glTF/GLB and metadata output. It is designed as the Rust successor to
@@ -135,4 +143,4 @@ Diagnostic environment variables:
 
 ## License
 
-
+The Rust workspace is licensed as `MIT OR Apache-2.0`.
