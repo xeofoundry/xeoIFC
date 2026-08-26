@@ -56,8 +56,7 @@ marks the model root as an evaluation version. Supplying a valid license key rem
 ## Run the application
 
 ```powershell
-cargo build --release
-.\target\release\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
+.\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
 ```
 
 Common options:
