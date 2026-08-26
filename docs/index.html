@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/png" href="./creoox-icon.png" />
-    <script type="module" crossorigin src="./assets/index-DSylW1AD.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BKpsp2tE.css">
+    <script type="module" crossorigin src="./assets/index-YOVtnaql.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CfyuMTm1.css">
   </head>
   <body>
     <div id="app">
@@ -46,6 +46,19 @@
             <hr />
             <button id="welcome-open" type="button">Open .ifc file</button>
             <div class="hint">or drag &amp; drop anywhere</div>
+            <button id="welcome-about" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
+          </div>
+          <div id="about-panel" role="dialog" aria-labelledby="about-title" hidden>
+            <button id="about-close" type="button">Close</button>
+            <img src="./creoox.png" alt="Creoox" />
+            <hr />
+            <h2 id="about-title">About xeoIFC demo viewer</h2>
+            <p>This demo viewer showcases xeoIFC in the browser. It loads IFC models locally with WebAssembly and renders them with WebGPU.</p>
+            <p>No IFC model information is uploaded or stored server side by this viewer. All IFC data is processed in the client web browser.</p>
+            <p>This demo viewer has restrictions regarding the file size, because it runs in WebAssembly.</p>
+            <p>xeoIFC as native converter application does not have such restrictions, and converts any IFC file: IFC2X3, IFC4 or newer.</p>
+            <a href="https://github.com/xeofoundry/xeoIFC" target="_blank" rel="noreferrer">github.com/xeofoundry/xeoIFC</a>
+            <p class="powered-by">Powered by Creoox - www.creoox.com</p>
           </div>
           <div id="error-banner" hidden></div>
         </div>
@@ -59,6 +72,7 @@
         <span id="triangle-count">Triangles —</span>
         <span id="draw-calls">Draws —</span>
         <span id="memory-used">Memory —</span>
+        <button id="about-link" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
       </footer>
     </div>
   </body>

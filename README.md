@@ -8,10 +8,9 @@ xeoIFC is a native Rust converter for `.ifc` and `.ifczip` files. It writes glTF
 ## Demo
 
 Try the browser demo:
-https://xeofoundry.github.io/xeoIfc/
+https://xeofoundry.github.io/xeoIFC/
 
-The demo runs locally in the browser. Use **Open IFC...** to select an `.ifc` or `.ifczip` file from
-your machine.
+The demo runs locally in the browser. Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
 
 ## Compatibility
 
