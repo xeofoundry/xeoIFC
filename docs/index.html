@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/png" href="./creoox-icon.png" />
-    <script type="module" crossorigin src="./assets/index-BK7UIgMt.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Cheivpar.css">
+    <script type="module" crossorigin src="./assets/index-CDUvD_uC.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BRvRdmsr.css">
   </head>
   <body>
     <div id="app">
@@ -60,13 +60,16 @@
             <a href="https://github.com/xeofoundry/xeoIFC" target="_blank" rel="noreferrer">github.com/xeofoundry/xeoIFC</a>
             <p class="powered-by">Powered by Creoox - <a href="http://www.creoox.com" target="_blank">www.creoox.com</a></p>
           </div>
+          <div id="load-overlay" role="status" aria-live="polite" hidden>
+            <span id="load-message"></span>
+            <progress id="load-progress"></progress>
+          </div>
           <div id="error-banner" hidden></div>
         </div>
       </div>
       <footer id="status-bar" aria-live="polite">
         <span id="fps">FPS —</span>
         <span id="status">Ready</span>
-        <progress id="load-progress" hidden></progress>
         <span id="mesh-count">Meshes — / unique —</span>
         <span id="element-count">Elements —</span>
         <span id="triangle-count">Triangles —</span>
