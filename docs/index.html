@@ -4,34 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
-    <script>
-      // Restore theme before first paint to avoid a flash of the wrong theme.
-      const saved = localStorage.getItem('theme');
-      if (saved) document.documentElement.dataset.theme = saved;
-      function toggleTheme() {
-        const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
-        document.documentElement.dataset.theme = next;
-        localStorage.setItem('theme', next);
-      }
-    </script>
-    <script type="module" crossorigin src="./assets/index-BXUBNxR6.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CQYPgVxq.css">
+    <link rel="icon" type="image/png" href="./creoox-icon.png" />
+    <script type="module" crossorigin src="./assets/index-DSylW1AD.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BKpsp2tE.css">
   </head>
   <body>
     <div id="app">
-      <header id="toolbar">
-        <span class="title">
-          <img src="./creoox.png" style="height:30px" alt="Creoox" />
-        </span>
-        <button id="open-button" type="button">Open IFC…</button>
-        <input id="file-input" type="file" accept=".ifc,.ifczip" hidden />
-        <button id="isolate-button" type="button" disabled>Isolate</button>
-        <button id="show-all-button" type="button" disabled>Show all</button>
-        <span id="selection"></span>
-        <button id="theme-button" type="button" onclick="toggleTheme()" title="Toggle dark/light mode">🌓</button>
-      </header>
       <div id="main">
         <aside id="sidebar">
+          <header id="toolbar">
+            <button id="open-button" type="button">Load</button>
+            <input id="file-input" type="file" accept=".ifc,.ifczip" hidden />
+            <button id="isolate-button" type="button" disabled>Isolate</button>
+            <button id="show-all-button" type="button" disabled>Show all</button>
+            <span id="selection"></span>
+          </header>
           <div id="tree-header">
             <input id="tree-search" type="search" placeholder="Search…" />
             <div id="tree-tabs">
@@ -54,6 +41,12 @@
         <div id="main-resizer" title="Drag to resize"></div>
         <div id="viewport-container">
           <canvas id="viewport"></canvas>
+          <div id="welcome-panel">
+            <img src="./creoox.png" alt="Creoox" />
+            <hr />
+            <button id="welcome-open" type="button">Open .ifc file</button>
+            <div class="hint">or drag &amp; drop anywhere</div>
+          </div>
           <div id="error-banner" hidden></div>
         </div>
       </div>
