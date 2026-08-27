@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/png" href="./creoox-icon.png" />
-    <script type="module" crossorigin src="./assets/index-C2_WX0QE.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BRvRdmsr.css">
+    <script type="module" crossorigin src="./assets/index-CqOvJkFU.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-ByMHhOiF.css">
   </head>
   <body>
     <div id="app">
@@ -46,7 +46,7 @@
             <hr />
             <button id="welcome-open" type="button">Open .ifc file</button>
             <div class="hint">or drag &amp; drop anywhere</div>
-            <button id="welcome-about" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
+            <button id="welcome-about" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About xeoIFC</button>
           </div>
           <div id="about-panel" role="dialog" aria-labelledby="about-title" hidden>
             <button id="about-close" type="button">Close</button>
@@ -60,9 +60,10 @@
             <a href="https://github.com/xeofoundry/xeoIFC" target="_blank" rel="noreferrer">github.com/xeofoundry/xeoIFC</a>
             <p class="powered-by">Powered by Creoox - <a href="http://www.creoox.com" target="_blank">www.creoox.com</a></p>
           </div>
-          <div id="load-overlay" role="status" aria-live="polite" hidden>
-            <span id="load-message"></span>
-            <progress id="load-progress"></progress>
+          <div id="load-overlay" role="group" aria-label="Loading progress" hidden>
+            <span id="load-message" role="status" aria-live="polite"></span>
+            <progress id="load-progress" aria-label="Loading progress"></progress>
+            <button id="load-cancel" type="button" disabled>Cancel</button>
           </div>
           <div id="error-banner" hidden></div>
         </div>
