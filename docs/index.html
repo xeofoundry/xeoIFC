@@ -56,6 +56,8 @@
             <p>This demo viewer showcases xeoIFC in the browser. It loads IFC models locally with WebAssembly and renders them with WebGPU.</p>
             <p>No IFC model information is uploaded or stored server side by this viewer. All IFC data is processed in the client web browser.</p>
             <p>This demo viewer has restrictions regarding the file size, because it runs in WebAssembly.</p>
+            <p>Most web browsers have limits for drag&dop of files (Chrome has 1 GByte). This limit can be avoided by compressing the .ifc file to an .ifczip file and then loading it.
+              That works with most models tested so far, but does not guarantee that the WASM memory limit is enough for very large models.</p>
             <p>xeoIFC as native converter application does not have such restrictions, and converts any IFC file: IFC2X3, IFC4 or newer.</p>
             <a href="https://github.com/xeofoundry/xeoIFC" target="_blank" rel="noreferrer">github.com/xeofoundry/xeoIFC</a>
             <p class="powered-by">Powered by Creoox - <a href="http://www.creoox.com" target="_blank">www.creoox.com</a></p>
