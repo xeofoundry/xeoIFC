@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeofoundry-icon.svg" />
-    <script type="module" crossorigin src="./assets/index-3karcYwu.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-B8Hf1Ul0.css">
+    <script type="module" crossorigin src="./assets/index-B1h96vcR.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BOgq78K8.css">
   </head>
   <body>
     <div id="app">
       <div id="main">
         <aside id="sidebar">
-          <header id="toolbar">
-            <button id="open-button" type="button">Load</button>
-            <input id="file-input" type="file" accept=".ifc,.ifczip" multiple hidden />
-            <button id="isolate-button" type="button" disabled>Isolate</button>
-            <button id="show-all-button" type="button" disabled>Show all</button>
-          </header>
           <div id="tree-header">
             <input id="tree-search" type="search" placeholder="Search…" />
             <div id="tree-tabs">
@@ -37,7 +31,15 @@
           <div id="sidebar-resizer" title="Drag to resize"></div>
           <div id="properties" class="properties empty">Select an element to inspect properties</div>
           <footer id="status-bar" aria-live="polite">
+            <input id="file-input" type="file" accept=".ifc,.ifczip" multiple hidden />
             <button id="about-link" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
+            <button id="open-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3.5 6.5h6l2 2h9v9.5h-17z" />
+                <path d="M3.5 8.5v-3h5.6l2 3" />
+              </svg>
+              <span>Open</span>
+            </button>
             <button id="model-details-link" type="button" aria-expanded="false" aria-controls="viewer-status-bar">Model details &gt;&gt;</button>
           </footer>
         </aside>
@@ -62,6 +64,12 @@
           </div>
           <canvas id="nav-cube" width="96" height="96" title="Click a face to view, drag to rotate" aria-label="Navigation cube"></canvas>
           <div id="area-selection-box" hidden></div>
+          <div id="selection-menu" role="menu" hidden>
+            <button id="selection-isolate" type="button" role="menuitem">Isolate</button>
+            <button id="selection-hide" type="button" role="menuitem">Hide</button>
+            <button id="selection-transparent" type="button" role="menuitem">Set transparent</button>
+            <button id="selection-show-all" type="button" role="menuitem">Show all</button>
+          </div>
           <div id="viewer-status-bar" aria-live="polite" hidden>
             <span id="fps">FPS —</span>
             <span id="status">Ready</span>
@@ -72,21 +80,20 @@
             <span id="memory-used">Memory —</span>
           </div>
           <div id="settings-panel" role="dialog" aria-labelledby="settings-title" hidden>
-            <button id="settings-close" type="button" aria-label="Close settings">Close</button>
+            <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
             <h2 id="settings-title">Settings</h2>
-            <label><input id="setting-clear-scene" type="checkbox" /> Clear scene before loading a model, add to scene otherwise.</label>
             <label><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
             <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
           </div>
           <div id="welcome-panel">
             <img src="./xeofoundry-logo.svg" alt="XeoFoundry" />
             <hr />
-            <button id="welcome-open" type="button">Open .ifc file</button>
+            <button id="welcome-open" type="button">Open .ifc/.ifczip file</button>
             <div class="hint">or drag &amp; drop anywhere</div>
             <button id="welcome-about" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About xeoIFC</button>
           </div>
           <div id="about-panel" role="dialog" aria-labelledby="about-title" hidden>
-            <button id="about-close" type="button">Close</button>
+            <button id="about-close" class="panel-close" type="button" aria-label="Close about"></button>
             <img src="./xeofoundry-logo.svg" alt="XeoFoundry" />
             <hr />
             <h2 id="about-title">About xeoIFC demo viewer</h2>
