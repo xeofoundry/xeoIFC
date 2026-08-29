@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeofoundry-icon.svg" />
-    <script type="module" crossorigin src="./assets/index-B1h96vcR.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BOgq78K8.css">
+    <script type="module" crossorigin src="./assets/index-1WZ2j6Y9.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DjjkQ2HW.css">
   </head>
   <body>
     <div id="app">
@@ -39,6 +39,14 @@
                 <path d="M3.5 8.5v-3h5.6l2 3" />
               </svg>
               <span>Open</span>
+            </button>
+            <button id="export-button" type="button" disabled title="Export selected elements (or all loaded models if nothing is selected) to a new IFC file">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4v10" />
+                <path d="M8 10l4 4 4-4" />
+                <path d="M4.5 17.5h15" />
+              </svg>
+              <span>Export</span>
             </button>
             <button id="model-details-link" type="button" aria-expanded="false" aria-controls="viewer-status-bar">Model details &gt;&gt;</button>
           </footer>
@@ -82,6 +90,7 @@
           <div id="settings-panel" role="dialog" aria-labelledby="settings-title" hidden>
             <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
             <h2 id="settings-title">Settings</h2>
+            <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
             <label><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
             <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
           </div>
