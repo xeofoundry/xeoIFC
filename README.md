@@ -2,15 +2,22 @@
 
 Public repository of the XeoFoundry IFC to glTF conversion tool.
 
-xeoIFC is a native Rust converter for `.ifc` and `.ifczip` files. It writes glTF 2.0 output
+xeoIFC is a native converter application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It writes glTF 2.0 output
 (`.glb`, `.gltf`, or `.html`) plus XeoKit-style metadata and manifest JSON, with cxconverter-compatible configuration and output conventions.
 
-## Demo for WebAssembly browser version
+## Demo for WebAssembly (WASM) browser version
 
 Try the browser demo:
 https://xeofoundry.github.io/xeoIFC/
 
 The demo runs locally in the browser. Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
+
+The WASM viewer supports 
+- Loading of any number of files into one scene.
+- Selecting elements in the tree view or 3D view, show element properties and property sets/quantities.
+- Search for GUIDs, names, types etc.
+- Export of selected elements to a new IFC file (split).
+- Export of several loaded files to a new IFC file (merge).
 
 ## Compatibility
 
