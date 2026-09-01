@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeofoundry-icon.svg" />
-    <script type="module" crossorigin src="./assets/index-D4UZlt0t.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BzO058sq.css">
+    <script type="module" crossorigin src="./assets/index-so-YOBtd.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-ni4wWAD6.css">
   </head>
   <body>
     <div id="app">
@@ -69,6 +69,11 @@
             <button id="settings-button" class="tool-icon" type="button" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="settings-panel">
               <img src="./icons/settings32.png" alt="" aria-hidden="true" />
             </button>
+            <button id="terrain-button" class="tool-icon" type="button" title="Terrain" aria-label="Terrain" aria-haspopup="dialog" aria-expanded="false" aria-controls="terrain-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3.2 18.4h17.6L14.4 5.6l-4.3 6.5-2.3-2.8z" />
+              </svg>
+            </button>
           </div>
           <canvas id="nav-cube" width="96" height="96" title="Click a face to view, drag to rotate" aria-label="Navigation cube"></canvas>
           <div id="area-selection-box" hidden></div>
@@ -80,6 +85,7 @@
           </div>
           <div id="viewer-status-bar" aria-live="polite" hidden>
             <span id="status">Ready</span>
+            <span id="cursor-world-point">World —</span>
             <span id="mesh-count">Meshes — / unique —</span>
             <span id="element-count">Elements —</span>
             <span id="triangle-count">Triangles —</span>
@@ -91,8 +97,41 @@
             <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
             <h2 id="settings-title">Settings</h2>
             <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
+            <label><span>Viewer background</span><input id="setting-background-color" type="color" /></label>
             <label><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
             <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
+          </div>
+          <div id="terrain-panel" role="dialog" aria-labelledby="terrain-title" hidden>
+            <button id="terrain-close" class="panel-close" type="button" aria-label="Close terrain settings"></button>
+            <h2 id="terrain-title">Terrain</h2>
+            <label><input id="setting-terrain-only-georef" type="checkbox" /> Terrain only for georeferenced models</label>
+            <div class="terrain-inline" role="radiogroup" aria-label="Terrain surface">
+              <label><input id="setting-terrain-surface-osm" name="setting-terrain-surface" type="radio" value="osm" /> OpenStreetMap map</label>
+              <label><input id="setting-terrain-surface-shaded" name="setting-terrain-surface" type="radio" value="shaded" /> Height shading</label>
+            </div>
+            <label><span>Max detail</span><input id="setting-terrain-zoom" type="range" min="10" max="15" step="1" /><output id="setting-terrain-zoom-value">z15</output></label>
+            <label><span>Grid size</span><input id="setting-terrain-extent" type="number" min="0" max="10000" step="50" /><span>m</span></label>
+            <label><span>Height offset</span><input id="setting-terrain-height-offset" type="number" min="-500" max="500" step="0.5" /><span>m</span></label>
+            <label><input id="setting-terrain-fill-triangles" type="checkbox" /> Add transparent triangles</label>
+            <label><span>Triangle color</span><input id="setting-terrain-triangle-color" type="color" /></label>
+            <label><span>Triangle opacity</span><input id="setting-terrain-triangle-opacity" type="range" min="0" max="100" step="1" /><output id="setting-terrain-triangle-opacity-value">28%</output></label>
+            <div id="terrain-position">Position: no model loaded</div>
+            <label><span>Model EPSG</span><input id="setting-terrain-model-epsg" type="text" placeholder="e.g. 31467" autocomplete="off" spellcheck="false" /></label>
+            <div class="terrain-inline">
+              <label><span>Lat</span><input id="setting-terrain-lat" type="number" min="-85" max="85" step="0.00001" /></label>
+              <label><span>Lon</span><input id="setting-terrain-lon" type="number" min="-180" max="180" step="0.00001" /></label>
+            </div>
+            <label><span>Cache folder</span><input id="setting-terrain-cache-dir" type="text" value="Browser cache" disabled /></label>
+            <label><span>Cache max</span><input id="setting-terrain-cache-max" type="number" min="100" max="50000" step="100" /><span>MB</span></label>
+            <div class="terrain-footer">
+              <span id="terrain-cache-size">Cache: ?</span>
+              <div class="terrain-actions">
+                <button id="terrain-unload" class="panel-secondary" type="button" hidden>Unload terrain</button>
+                <button id="terrain-load" class="panel-primary" type="button">Load terrain</button>
+              </div>
+            </div>
+            <div id="terrain-status" aria-live="polite"></div>
+            <div class="terrain-attribution">Elevation: Mapzen/AWS Terrain Tiles    Map (c) OpenStreetMap contributors</div>
           </div>
           <div id="welcome-panel">
             <h1 class="brand-title" aria-label="XeoIFC">
