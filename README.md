@@ -3,7 +3,7 @@
 Public repository of the xeoFoundry IFC to glTF conversion tool.
 
 xeoIFC is a native converter application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It writes glTF 2.0 output
-(`.glb`, `.gltf`, or `.html`) plus xeoKit-style metadata and manifest JSON, with cxconverter-compatible configuration and output conventions.
+(`.glb`, `.gltf`, or `.html`) plus xeokit-style metadata and manifest JSON, with cxconverter-compatible configuration and output conventions.
 
 ## Demo for WebAssembly (WASM) browser version
 
@@ -22,16 +22,16 @@ The WASM viewer supports
 
 ## Compatibility
 
-xeoIFC targets xeoKit-compatible glTF/GLB and metadata output. It is designed as a successor to
+xeoIFC targets xeokit-compatible glTF/GLB and metadata output. It is designed as a successor to
 cxconverter, so existing conversion setups can keep using the familiar command-line flags and
 `cxconverter.json` configuration shape.
 
-For xeoKit conversion tooling, see:
+For xeokit conversion tooling, see:
 https://github.com/xeokit/xeokit-convert
 
 ## Features include:
 
-- Extraction of the element tree structure from the IFC model and export as a scene graph, preserving GUIDs to enable metadata linking in xeoKit.
+- Extraction of the element tree structure from the IFC model and export as a scene graph, preserving GUIDs to enable metadata linking in xeokit.
 
 - Conversion of IFC geometric representations to points, polylines, triangle meshes, and text labels for GPU rendering.
 
