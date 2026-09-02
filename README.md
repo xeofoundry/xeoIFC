@@ -22,7 +22,7 @@ The WASM viewer supports
 
 ## Compatibility
 
-xeoIFC targets XeoKit-compatible glTF/GLB and metadata output. It is designed as the Rust successor to
+xeoIFC targets XeoKit-compatible glTF/GLB and metadata output. It is designed as a successor to
 cxconverter, so existing conversion setups can keep using the familiar command-line flags and
 `cxconverter.json` configuration shape.
 
@@ -53,7 +53,7 @@ https://github.com/xeokit/xeokit-convert
 
 - Support for `.ifc` and `.ifczip` inputs.
 
-- Native Rust command-line application for batch processing.
+- Native command-line application for batch processing.
 
 - Compatibility-focused support for current IFC 4.3 files and older IFC versions such as IFC 2x3.
 
