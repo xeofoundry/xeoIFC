@@ -16,6 +16,7 @@ The WASM viewer supports
 - Loading of any number of files into one scene.
 - Selecting elements in the tree view or 3D view, show element properties and property sets/quantities.
 - Search for GUIDs, names, types etc.
+- Load terrain from public GIS databases around georeferenced IFC models.
 - Export of selected elements to a new IFC file (split).
 - Export of several loaded files to a new IFC file (merge).
 
