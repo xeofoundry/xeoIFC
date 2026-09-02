@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 52" role="img" aria-label="XeoFoundry">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 52" role="img" aria-label="xeoFoundry">
   <rect x="2" y="10" width="32" height="32" rx="8" fill="#081a29"/>
   <rect x="10" y="17" width="3.4" height="18" rx="1.7" fill="#58aee9"/>
   <rect x="16.3" y="17" width="3.4" height="18" rx="1.7" fill="#d36f3d"/>
   <rect x="22.6" y="17" width="3.4" height="18" rx="1.7" fill="#58aee9"/>
-  <text x="48" y="33" fill="#0c1d2e" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">Xeo</text>
+  <text x="48" y="33" fill="#0c1d2e" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">xeo</text>
   <text x="87" y="33" fill="#2e6db4" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">Foundry</text>
 </svg>
