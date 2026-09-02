@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeofoundry-icon.svg" />
-    <script type="module" crossorigin src="./assets/index-DT0Kcck3.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BOi4b8W-.css">
+    <script type="module" crossorigin src="./assets/index-D-_RExuI.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DlCk5j4e.css">
   </head>
   <body>
     <div id="app">
@@ -40,6 +40,13 @@
               </svg>
               <span>Open</span>
             </button>
+            <button id="add-button" type="button" title="Append a model to the current scene">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5v14" />
+                <path d="M5 12h14" />
+              </svg>
+              <span>Add</span>
+            </button>
             <button id="export-button" type="button" disabled title="Export selected elements (or all loaded models if nothing is selected) to a new IFC file">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 4v10" />
@@ -48,7 +55,6 @@
               </svg>
               <span>Export</span>
             </button>
-            <button id="model-details-link" type="button" aria-expanded="false" aria-controls="viewer-status-bar">Model details &gt;&gt;</button>
           </footer>
         </aside>
         <div id="main-resizer" title="Drag to resize"></div>
@@ -88,15 +94,18 @@
             <button id="selection-transparent" type="button" role="menuitem">Set transparent</button>
             <button id="selection-show-all" type="button" role="menuitem">Show all</button>
           </div>
-          <div id="viewer-status-bar" aria-live="polite" hidden>
-            <span id="status">Ready</span>
-            <span id="cursor-world-point">World —</span>
-            <span id="mesh-count">Meshes — / unique —</span>
-            <span id="element-count">Elements —</span>
-            <span id="triangle-count">Triangles —</span>
-            <span id="draw-calls">Draws —</span>
-            <span id="memory-used">Memory —</span>
-            <span id="fps">FPS —</span>
+          <div id="model-details-dock">
+            <button id="model-details-link" type="button" aria-expanded="false" aria-controls="viewer-status-bar">Model details &gt;&gt;</button>
+            <div id="viewer-status-bar" aria-live="polite" hidden>
+              <span id="status">Ready</span>
+              <span id="cursor-world-point">World —</span>
+              <span id="mesh-count">Meshes — / unique —</span>
+              <span id="element-count">Elements —</span>
+              <span id="triangle-count">Triangles —</span>
+              <span id="draw-calls">Draws —</span>
+              <span id="memory-used">Memory —</span>
+              <span id="fps">FPS —</span>
+            </div>
           </div>
           <div id="settings-panel" role="dialog" aria-labelledby="settings-title" hidden>
             <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
@@ -142,6 +151,7 @@
             <div id="terrain-status" aria-live="polite"></div>
             <div class="terrain-attribution">Elevation: Mapzen/AWS Terrain Tiles    Map (c) OpenStreetMap contributors</div>
           </div>
+          <div id="welcome-drop-zone">Drop .ifc/.ifczip files here</div>
           <div id="welcome-panel">
             <h1 class="brand-title" aria-label="XeoIFC">
               <svg class="brand-icon" viewBox="0 0 36 36" aria-hidden="true">
@@ -154,7 +164,7 @@
             </h1>
             <hr />
             <button id="welcome-open" type="button">Open .ifc/.ifczip file</button>
-            <div class="hint">or drag &amp; drop anywhere</div>
+            <div class="hint">or drop files above</div>
             <button id="welcome-about" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About XeoIFC</button>
           </div>
           <div id="about-panel" role="dialog" aria-labelledby="about-title" hidden>
