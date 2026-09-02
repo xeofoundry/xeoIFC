@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeofoundry-icon.svg" />
-    <script type="module" crossorigin src="./assets/index-so-YOBtd.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-ni4wWAD6.css">
+    <script type="module" crossorigin src="./assets/index-DT0Kcck3.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BOi4b8W-.css">
   </head>
   <body>
     <div id="app">
@@ -64,10 +64,15 @@
               </svg>
             </button>
             <button id="area-select-button" class="tool-icon" type="button" title="Area selection" aria-label="Area selection" aria-pressed="false">
-              <img src="./icons/rubberbandSelection32.png" alt="" aria-hidden="true" />
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M1.5 1.5h21M22.5 1.5v21M22.5 22.5h-21M1.5 22.5v-21" stroke-dasharray="3 2" />
+              </svg>
             </button>
             <button id="settings-button" class="tool-icon" type="button" title="Settings" aria-label="Settings" aria-haspopup="dialog" aria-expanded="false" aria-controls="settings-panel">
-              <img src="./icons/settings32.png" alt="" aria-hidden="true" />
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10.51 1.5h2.98l.7 2.51 1.91.8 2.27-1.29 2.11 2.11-1.29 2.27.8 1.91 2.51.7v2.98l-2.51.7-.8 1.91 1.29 2.27-2.11 2.11-2.27-1.29-1.91.8-.7 2.51h-2.98l-.7-2.51-1.91-.8-2.27 1.29-2.11-2.11 1.29-2.27-.8-1.91-2.51-.7v-2.98l2.51-.7.8-1.91-1.29-2.27 2.11-2.11L7.9 4.81l1.91-.8z" />
+                <circle cx="12" cy="12" r="4.2" />
+              </svg>
             </button>
             <button id="terrain-button" class="tool-icon" type="button" title="Terrain" aria-label="Terrain" aria-haspopup="dialog" aria-expanded="false" aria-controls="terrain-panel">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -97,7 +102,11 @@
             <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
             <h2 id="settings-title">Settings</h2>
             <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
-            <label><span>Viewer background</span><input id="setting-background-color" type="color" /></label>
+            <div class="settings-background-row">
+              <label for="setting-background-color">Viewer background</label>
+              <input id="setting-background-color" type="color" />
+              <button id="setting-background-default" class="panel-secondary settings-default-button" type="button">Restore default</button>
+            </div>
             <label><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
             <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
           </div>
