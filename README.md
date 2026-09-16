@@ -29,6 +29,19 @@ cxconverter, so existing conversion setups can keep using the familiar command-l
 For xeokit conversion tooling, see:
 https://github.com/xeokit/xeokit-convert
 
+## Architecture
+
+The same Rust crates serve the browser viewer, the command-line converter and native Qt applications; each host goes
+through one document API (JSON ops in, JSON results out) and the shared geometry engine.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="architecture/integration-map-dark.svg">
+  <img src="architecture/integration-map-light.svg" alt="How the xeoIFC crates are used by the WASM viewer, the CLI and a Qt application" width="1200">
+</picture>
+
+Full integration map with the viewer load path, per-host code samples and a comparison table:
+[architecture/integration-map.md](architecture/integration-map.md)
+
 ## Features include:
 
 - Extraction of the element tree structure from the IFC model and export as a scene graph, preserving GUIDs to enable metadata linking in xeokit.

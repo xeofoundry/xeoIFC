@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
-    <link rel="icon" type="image/png" href="./xeokit-icon.png" />
-    <script type="module" crossorigin src="./assets/index-raCZ1jJh.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BBcK1ZNq.css">
+    <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
+    <script type="module" crossorigin src="./assets/index-DVZeYV9T.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BYiae0zk.css">
   </head>
   <body>
     <div id="app">
@@ -180,19 +180,7 @@
           <div id="welcome-drop-zone">Drop .ifc/.ifczip/.stp/.jt/.glb files here</div>
           <div id="welcome-panel">
             <h1 class="brand-title" aria-label="xeoIFC">
-              <svg class="brand-icon" viewBox="0 0 405 288" aria-hidden="true">
-                <g fill="currentColor">
-                  <path fill-rule="evenodd" d="M0 1 88 52 147 55 202 27 298 84 342 68 346 73 395 148 327 184 296 243 194 287ZM33 34 114 187 171 196 200 266 287 229 315 171 374 143 338 88 296 102 202 46 155 70 88 68Z" />
-                  <polygon points="53 56 156 122 119 178" />
-                  <polygon points="197 57 192 113 162 76" />
-                  <polygon points="205 58 285 106 241 121 200 119" />
-                  <polygon points="101 77 154 79 186 118 163 117" />
-                  <polygon points="332 98 336 98 363 140 312 164 251 127" />
-                  <polygon points="163 126 231 129 172 188 127 182" />
-                  <polygon points="239 133 279 224 204 255 178 193" />
-                  <polygon points="251 136 306 170 285 215" />
-                </g>
-              </svg>
+              <img class="brand-icon" src="./xeokit-icon.svg?v=2" alt="" aria-hidden="true" />
               <span>xeo</span><span>IFC</span>
             </h1>
             <hr />
@@ -203,19 +191,7 @@
           <div id="about-panel" role="dialog" aria-labelledby="about-title" hidden>
             <button id="about-close" class="panel-close" type="button" aria-label="Close about"></button>
             <div class="brand-title" role="img" aria-label="xeoIFC">
-              <svg class="brand-icon" viewBox="0 0 405 288" aria-hidden="true">
-                <g fill="currentColor">
-                  <path fill-rule="evenodd" d="M0 1 88 52 147 55 202 27 298 84 342 68 346 73 395 148 327 184 296 243 194 287ZM33 34 114 187 171 196 200 266 287 229 315 171 374 143 338 88 296 102 202 46 155 70 88 68Z" />
-                  <polygon points="53 56 156 122 119 178" />
-                  <polygon points="197 57 192 113 162 76" />
-                  <polygon points="205 58 285 106 241 121 200 119" />
-                  <polygon points="101 77 154 79 186 118 163 117" />
-                  <polygon points="332 98 336 98 363 140 312 164 251 127" />
-                  <polygon points="163 126 231 129 172 188 127 182" />
-                  <polygon points="239 133 279 224 204 255 178 193" />
-                  <polygon points="251 136 306 170 285 215" />
-                </g>
-              </svg>
+              <img class="brand-icon" src="./xeokit-icon.svg?v=2" alt="" aria-hidden="true" />
               <span>xeo</span><span>IFC</span>
             </div>
             <hr />
@@ -224,7 +200,7 @@
             <p>No IFC model information is uploaded or stored server side by this viewer. All IFC data is processed in the client web browser.</p>
             <p>This demo viewer has restrictions regarding the file size, because it runs in WebAssembly.</p>
 
-            <p>XeoIFC as native converter application does not have such restrictions, and converts any IFC file: IFC2X3, IFC4 or newer.</p>
+            <p>XeoIFC as native converter application/API library does not have such restrictions, and converts any IFC file: IFC2X3, IFC4 or newer.</p>
             <p><b>Federated models: </b>With drag&drop, several files can be loaded and appended to previously loaded models.</p>
 
             <p><b>Merge feature: </b>Several loaded models can be merged into a new IFC file using the "Export" button.</p>

@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img"
+     aria-label="Three host applications (browser wasm viewer, CLI, Qt app) each go through a thin binding into the ifc-session document API, which drives the shared engine crates; renderers and the converter pipeline take the engine directly."
+     font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#182029"/>
+    </marker>
+    <marker id="arrow-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0E7C7B"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1200" height="800" fill="#F6F7F4"/>
+
+  <!-- row labels -->
+  <g font-size="11" fill="#66707A" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace" letter-spacing="1">
+    <text x="40" y="38">HOSTS</text>
+    <text x="40" y="220">BINDINGS</text>
+    <text x="40" y="368">DOCUMENT API</text>
+    <text x="40" y="580">ENGINE CRATES</text>
+  </g>
+
+  <!-- HOSTS -->
+  <g>
+    <rect x="40" y="44" width="360" height="130" rx="6" fill="#EDF1EC" stroke="#C9CFD3"/>
+    <text x="58" y="70" font-size="16" font-weight="600" fill="#182029">Browser: WASM viewer</text>
+    <text x="58" y="88" font-size="12" fill="#66707A" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">web/  TypeScript + WebGPU</text>
+    <rect x="58" y="102" width="150" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="68" y="122" font-size="12" font-weight="500" fill="#182029">Main thread</text>
+    <text x="68" y="138" font-size="11.5" fill="#66707A">Viewer: camera, pick,</text>
+    <text x="68" y="151" font-size="11.5" fill="#66707A">pack upload to GPU</text>
+    <rect x="222" y="102" width="160" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="232" y="122" font-size="12" font-weight="500" fill="#182029">Web Worker</text>
+    <text x="232" y="138" font-size="11.5" fill="#66707A">IfcSession: parse, ops,</text>
+    <text x="232" y="151" font-size="11.5" fill="#66707A">tessellate, export</text>
+
+    <rect x="420" y="44" width="360" height="130" rx="6" fill="#EDF1EC" stroke="#C9CFD3"/>
+    <text x="438" y="70" font-size="16" font-weight="600" fill="#182029">CLI: xeoifc.exe</text>
+    <text x="438" y="88" font-size="12" fill="#66707A" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">src/main.rs  scripts, CI, AI agents</text>
+    <rect x="438" y="102" width="104" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="448" y="122" font-size="12" font-weight="500" fill="#182029">-i in -o out</text>
+    <text x="448" y="138" font-size="11.5" fill="#66707A">IFC to GLB,</text>
+    <text x="448" y="151" font-size="11.5" fill="#66707A">-m meta.ifc</text>
+    <rect x="552" y="102" width="104" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="562" y="122" font-size="12" font-weight="500" fill="#182029">subcommands</text>
+    <text x="562" y="138" font-size="11.5" fill="#66707A">run query split</text>
+    <text x="562" y="151" font-size="11.5" fill="#66707A">merge diff info</text>
+    <rect x="666" y="102" width="96" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="676" y="122" font-size="12" font-weight="500" fill="#182029">serve --mcp</text>
+    <text x="676" y="138" font-size="11.5" fill="#66707A">16 ifc_* tools</text>
+    <text x="676" y="151" font-size="11.5" fill="#66707A">for AI agents</text>
+
+    <rect x="800" y="44" width="360" height="130" rx="6" fill="#EDF1EC" stroke="#C9CFD3"/>
+    <text x="818" y="70" font-size="16" font-weight="600" fill="#182029">Native: Qt application</text>
+    <text x="818" y="88" font-size="12" fill="#66707A" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">crates/viewer/qt  QML + wgpu surface</text>
+    <rect x="818" y="102" width="156" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="828" y="122" font-size="12" font-weight="500" fill="#182029">Rust in-process</text>
+    <text x="828" y="138" font-size="11.5" fill="#66707A">cxx-qt bridge, loader</text>
+    <text x="828" y="151" font-size="11.5" fill="#66707A">thread, tree, viewport</text>
+    <rect x="986" y="102" width="156" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="996" y="122" font-size="12" font-weight="500" fill="#182029">C++ / C# out-of-tree</text>
+    <text x="996" y="138" font-size="11.5" fill="#66707A">xeoifc_api.dll, C ABI,</text>
+    <text x="996" y="151" font-size="11.5" fill="#66707A">same JSON wire</text>
+  </g>
+
+  <!-- host -> binding arrows -->
+  <g stroke="#182029" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+    <line x1="220" y1="174" x2="220" y2="224"/>
+    <line x1="600" y1="174" x2="600" y2="224"/>
+    <line x1="980" y1="174" x2="980" y2="224"/>
+  </g>
+  <g font-size="11" fill="#66707A">
+    <text x="230" y="203">IFC bytes in, pack out (transferable)</text>
+    <text x="610" y="203">files in; GLB, IFC, JSON out</text>
+    <text x="990" y="203">path or bytes in; pack + JSON out</text>
+  </g>
+
+  <!-- BINDINGS -->
+  <g>
+    <rect x="40" y="226" width="360" height="86" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="58" y="250" font-size="14" font-weight="600" fill="#182029">wasm-bindgen classes</text>
+    <text x="58" y="270" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">IfcSession  crates/wasm/ifc-session</text>
+    <text x="58" y="287" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">Viewer      crates/viewer/wasm</text>
+    <text x="58" y="304" font-size="11.5" fill="#66707A">call(json) + openBytes / takeBytes side channels</text>
+
+    <rect x="420" y="226" width="360" height="86" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="438" y="250" font-size="14" font-weight="600" fill="#182029">Rust API and stdio</text>
+    <text x="438" y="270" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">ifc_session::Session   linked directly</text>
+    <text x="438" y="287" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">src/mcp.rs   MCP / JSON-RPC 2.0 over stdio</text>
+    <text x="438" y="304" font-size="11.5" fill="#66707A">stdout stays JSON; permissions limit paths to --root dirs</text>
+
+    <rect x="800" y="226" width="360" height="86" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="818" y="250" font-size="14" font-weight="600" fill="#182029">Rust crates or C ABI</text>
+    <text x="818" y="270" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">cxx-qt bridge   crates/viewer/qt</text>
+    <text x="818" y="287" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">xeoifc_call()   crates/ifc-session-c</text>
+    <text x="818" y="304" font-size="11.5" fill="#66707A">opaque session handle, JSON strings, byte buffers</text>
+  </g>
+
+  <!-- binding -> session arrows -->
+  <g stroke="#0E7C7B" stroke-width="2" fill="none" marker-end="url(#arrow-acc)">
+    <line x1="220" y1="312" x2="220" y2="372"/>
+    <line x1="600" y1="312" x2="600" y2="372"/>
+    <line x1="980" y1="312" x2="980" y2="372"/>
+  </g>
+  <g font-size="11" fill="#0E7C7B" font-weight="500">
+    <text x="230" y="346">JSON op in, JSON result out</text>
+    <text x="610" y="346">JSON op in, JSON result out</text>
+    <text x="990" y="346">JSON op in, JSON result out</text>
+  </g>
+
+  <!-- DOCUMENT API -->
+  <g>
+    <rect x="40" y="374" width="1120" height="150" rx="6" fill="#D9EEEC" stroke="#0E7C7B" stroke-width="1.5"/>
+    <text x="58" y="400" font-size="16" font-weight="600" fill="#182029">ifc-session: the document API</text>
+    <text x="330" y="400" font-size="12.5" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">call({ op, args, doc, txn, dryRun })  ->  { ok, result, changes, warnings, meta }</text>
+    <text x="58" y="422" font-size="12" fill="#66707A">Session holds Documents (immutable base store + overlay journal); every host uses the same op catalogue and the same error codes.</text>
+    <g font-size="11.5" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace" fill="#182029">
+      <rect x="58" y="438" width="118" height="26" rx="13" fill="#FFFFFF" stroke="#C9CFD3"/><text x="117" y="455" text-anchor="middle">document.*</text>
+      <rect x="184" y="438" width="100" height="26" rx="13" fill="#FFFFFF" stroke="#C9CFD3"/><text x="234" y="455" text-anchor="middle">entity.*</text>
+      <rect x="292" y="438" width="100" height="26" rx="13" fill="#FFFFFF" stroke="#C9CFD3"/><text x="342" y="455" text-anchor="middle">query.*</text>
+      <rect x="400" y="438" width="130" height="26" rx="13" fill="#FFFFFF" stroke="#C9CFD3"/><text x="465" y="455" text-anchor="middle">spatial / pset</text>
+      <rect x="538" y="438" width="150" height="26" rx="13" fill="#FFFFFF" stroke="#C9CFD3"/><text x="613" y="455" text-anchor="middle">material / style</text>
+      <rect x="696" y="438" width="120" height="26" rx="13" fill="#FFFFFF" stroke="#C9CFD3"/><text x="756" y="455" text-anchor="middle">geometry.*</text>
+      <rect x="824" y="438" width="130" height="26" rx="13" fill="#FFFFFF" stroke="#C9CFD3"/><text x="889" y="455" text-anchor="middle">transaction.*</text>
+      <rect x="962" y="438" width="180" height="26" rx="13" fill="#FFFFFF" stroke="#C9CFD3"/><text x="1052" y="455" text-anchor="middle">import / merge / diff</text>
+    </g>
+    <text x="58" y="490" font-size="12" fill="#66707A">Document::from_file adopts a host-parsed store without a copy; geometry.tessellate({ prune: true }) builds the scene on the base store,</text>
+    <text x="58" y="507" font-size="12" fill="#66707A">prunes it to metadata before packing, and leaves the ids intact for every later query. Jobs, permissions, limits and undo live here too.</text>
+  </g>
+
+  <!-- session -> engine arrow -->
+  <g stroke="#182029" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+    <line x1="600" y1="524" x2="600" y2="584"/>
+  </g>
+  <text x="610" y="576" font-size="11" fill="#66707A">lends the store to Model::build, SceneBuilder and pack; writes IFC through export.rs</text>
+
+  <!-- ENGINE -->
+  <g font-size="12">
+    <rect x="40" y="586" width="150" height="96" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="50" y="606" font-weight="600" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">step-core</text>
+    <text x="50" y="626" font-size="11.5" fill="#66707A">compact STEP store,</text>
+    <text x="50" y="640" font-size="11.5" fill="#66707A">streamed chunk parse,</text>
+    <text x="50" y="654" font-size="11.5" fill="#66707A">ifczip, retain</text>
+
+    <rect x="202" y="586" width="150" height="96" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="212" y="606" font-weight="600" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">ifc-schema</text>
+    <text x="212" y="626" font-size="11.5" fill="#66707A">generated EXPRESS</text>
+    <text x="212" y="640" font-size="11.5" fill="#66707A">tables IFC2X3, IFC4,</text>
+    <text x="212" y="654" font-size="11.5" fill="#66707A">IFC4X3; describe</text>
+
+    <rect x="364" y="586" width="150" height="96" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="374" y="606" font-weight="600" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">ifc-model</text>
+    <text x="374" y="626" font-size="11.5" fill="#66707A">Model, spatial tree,</text>
+    <text x="374" y="640" font-size="11.5" fill="#66707A">prune, export.rs,</text>
+    <text x="374" y="654" font-size="11.5" fill="#66707A">GlobalId index</text>
+
+    <rect x="526" y="586" width="150" height="96" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="536" y="606" font-weight="600" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">ifc-geom</text>
+    <text x="536" y="626" font-size="11.5" fill="#66707A">SceneBuilder, CSG</text>
+    <text x="536" y="640" font-size="11.5" fill="#66707A">kernels, lines, pack</text>
+    <text x="536" y="654" font-size="11.5" fill="#66707A">(streamed PackSink)</text>
+
+    <rect x="688" y="586" width="150" height="96" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="698" y="606" font-weight="600" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">viewer-render</text>
+    <text x="698" y="626" font-size="11.5" fill="#66707A">wgpu renderer:</text>
+    <text x="698" y="640" font-size="11.5" fill="#66707A">WebGPU in browser,</text>
+    <text x="698" y="654" font-size="11.5" fill="#66707A">Vulkan/DX12 native</text>
+
+    <rect x="850" y="586" width="150" height="96" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="860" y="606" font-weight="600" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">xeo-gltf, xeo-meta</text>
+    <text x="860" y="626" font-size="11.5" fill="#66707A">GLB writer,</text>
+    <text x="860" y="640" font-size="11.5" fill="#66707A">metamodel JSON,</text>
+    <text x="860" y="654" font-size="11.5" fill="#66707A">metadata IFC</text>
+
+    <rect x="1012" y="586" width="148" height="96" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
+    <text x="1022" y="606" font-weight="600" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">jt-reader, step-cad</text>
+    <text x="1022" y="626" font-size="11.5" fill="#66707A">other formats,</text>
+    <text x="1022" y="640" font-size="11.5" fill="#66707A">separate lazy wasm</text>
+    <text x="1022" y="654" font-size="11.5" fill="#66707A">modules</text>
+  </g>
+
+  <!-- direct engine paths (dashed) -->
+  <g stroke="#182029" stroke-width="1.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow)">
+    <path d="M763,586 L763,548 L1180,548 L1180,20 L133,20 L133,42"/>
+    <path d="M790,586 L790,560 L1170,560 L1170,30 L896,30 L896,42"/>
+    <path d="M490,174 L490,214 L20,214 L20,700 L601,700 L601,684"/>
+  </g>
+  <g font-size="11" fill="#66707A">
+    <text x="1188" y="300" transform="rotate(90 1188 300)">packed scene buffer to the renderer (Viewer main thread, Qt viewport)</text>
+    <text x="30" y="716">converter pipeline (src/pipeline.rs): StepFile, Model, SceneBuilder, GLB writer, no session in between</text>
+  </g>
+
+  <g font-size="11" fill="#66707A">
+    <text x="40" y="760">Rust workspace: one Cargo build produces the wasm modules, the CLI, the Qt app and xeoifc_api.dll from the same crates.</text>
+  </g>
+</svg>

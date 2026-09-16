@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 250" width="1200" height="250" role="img"
+     aria-label="Viewer load sequence: stream chunks into a StepFile, adopt it with open_file, tessellate with prune, transfer the pack to the renderer; later queries and exports go through ops on the pruned store."
+     font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#E6EDF3"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1200" height="250" fill="#0D1117"/>
+  <g font-size="12">
+    <rect x="20" y="30" width="200" height="80" rx="6" fill="#1C232C" stroke="#30363D"/>
+    <text x="32" y="52" font-weight="600" fill="#E6EDF3">1  Stream the file</text>
+    <text x="32" y="72" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">load-chunk x N</text>
+    <text x="32" y="88" font-size="11.5" fill="#8B949E">step-core re-encodes chunks;</text>
+    <text x="32" y="102" font-size="11.5" fill="#8B949E">raw text never whole in memory</text>
+
+    <rect x="262" y="30" width="200" height="80" rx="6" fill="#1C232C" stroke="#30363D"/>
+    <text x="274" y="52" font-weight="600" fill="#E6EDF3">2  Adopt the store</text>
+    <text x="274" y="72" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">open_file(StepFile)</text>
+    <text x="274" y="88" font-size="11.5" fill="#8B949E">no copy, no re-parse; GlobalId</text>
+    <text x="274" y="102" font-size="11.5" fill="#8B949E">index built on first lookup</text>
+
+    <rect x="504" y="30" width="200" height="80" rx="6" fill="#163A39" stroke="#4FD1C5"/>
+    <text x="516" y="52" font-weight="600" fill="#E6EDF3">3  Tessellate and prune</text>
+    <text x="516" y="72" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">tessellate({ prune: true })</text>
+    <text x="516" y="88" font-size="11.5" fill="#8B949E">Model on the base store;</text>
+    <text x="516" y="102" font-size="11.5" fill="#8B949E">scene, then prune, then pack</text>
+
+    <rect x="746" y="30" width="200" height="80" rx="6" fill="#1C232C" stroke="#30363D"/>
+    <text x="758" y="52" font-weight="600" fill="#E6EDF3">4  Hand over the pack</text>
+    <text x="758" y="72" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">takeBytes() / PackSink</text>
+    <text x="758" y="88" font-size="11.5" fill="#8B949E">transferable buffer to main</text>
+    <text x="758" y="102" font-size="11.5" fill="#8B949E">thread, or a Vec for Qt</text>
+
+    <rect x="988" y="30" width="192" height="80" rx="6" fill="#1C232C" stroke="#30363D"/>
+    <text x="1000" y="52" font-weight="600" fill="#E6EDF3">5  Render</text>
+    <text x="1000" y="72" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">Viewer.upload(pack)</text>
+    <text x="1000" y="88" font-size="11.5" fill="#8B949E">viewer-render draws, picks,</text>
+    <text x="1000" y="102" font-size="11.5" fill="#8B949E">snaps; ids map to #n refs</text>
+  </g>
+  <g stroke="#E6EDF3" stroke-width="1.5" fill="none" marker-end="url(#arrow2)">
+    <line x1="220" y1="70" x2="260" y2="70"/>
+    <line x1="462" y1="70" x2="502" y2="70"/>
+    <line x1="704" y1="70" x2="744" y2="70"/>
+    <line x1="946" y1="70" x2="986" y2="70"/>
+  </g>
+  <g stroke="#E6EDF3" stroke-width="1.5" fill="none" marker-end="url(#arrow2)">
+    <path d="M604,110 L604,150"/>
+  </g>
+  <rect x="262" y="152" width="684" height="72" rx="6" fill="#161B22" stroke="#30363D"/>
+  <text x="274" y="174" font-size="12" font-weight="600" fill="#E6EDF3">After the load: the pruned store answers every non-geometry op with the original ids</text>
+  <text x="274" y="194" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">spatial.tree  pset.list  query.select("is IfcWall and within(#210)")  entity.get  exportSubset</text>
+  <text x="274" y="212" font-size="11.5" fill="#8B949E">Editing needs retain "full": reopen, edit in transactions, save; edited documents tessellate a snapshot.</text>
+</svg>
