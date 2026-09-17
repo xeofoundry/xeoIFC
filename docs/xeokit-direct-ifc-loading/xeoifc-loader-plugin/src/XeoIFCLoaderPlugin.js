@@ -13,6 +13,10 @@ const FLAG_VISIBLE = 1;
 // The "Evaluation version" text the engine adds to every scene; it has no type and passes the type filters
 const WATERMARK_ENTITY_ID = 0xFFFFFFFF;
 
+// Default of the maxReusedGeometries load parameter. Measured on a 670 k instance / 76 M triangle stadium (7177 reused
+// geometries, RTX 4070 Laptop, frame time with edges): all shared 194 ms, 2000 -> 66 ms, 500 -> 50 ms, 150 -> 44 ms,
+// none shared 250 ms (126 M instead of 26 M vertices). 500 keeps 91% of the vertices that sharing can save.
+const MAX_REUSED_GEOMETRIES = 500;
 const SLICE_MS = 40; // Main-thread time per slice of the scene build
 
 // The engine is Z-up like IFC; xeokit is Y-up
@@ -76,6 +80,10 @@ class XeoIFCLoaderPlugin extends Plugin {
      * @param {String[]} [params.includeTypes] Only load objects with these types, eg. ````["IfcWall", "IfcSlab"]````.
      * @param {String[]} [params.excludeTypes] Never load objects with these types, eg. ````["IfcSpace"]````.
      * @param {Boolean} [params.globalizeObjectIds=false] Prefix every object ID with the model ID, to load the same file twice.
+     * @param {Boolean} [params.reuseGeometries=true] When false, no geometry is shared between meshes (like the XKTLoaderPlugin
+     * option of the same name): fewest draw calls, most memory.
+     * @param {Number} [params.maxReusedGeometries=500] xeokit spends one draw call per render pass on every shared geometry, so
+     * only this many geometries - those whose sharing saves the most vertices - stay shared; the rest is batched.
      * @param {Number} [params.circleSegments=18] Number of segments the engine uses to tessellate a full circle (4..64).
      * @param {Function} [params.onProgress] Called with ````(phase, done, total)````, phases "read" (in MB; total 0 when
      * unknown), "parse", "geom", "pack", "edges" and "scene" (building the SceneModel, in time slices on the main thread).
@@ -253,6 +261,26 @@ class XeoIFCLoaderPlugin extends Plugin {
             useCounts[u32[instancesAt + i * INSTANCE_WORDS + 20]]++;
         }
 
+        // xeokit draws every shared geometry with a draw call of its own in each render pass, so thousands of them
+        // make the frame rate draw-call bound. Only the geometries that save the most vertices stay shared.
+        const numVerticesOf = (mesh) => {
+            const span = spansAt + mesh * SPAN_WORDS;
+            return (mesh + 1 < meshCount ? u32[span + SPAN_WORDS] : vertexFloats / 6) - u32[span];
+        };
+        const instanced = new Uint8Array(meshCount);
+        const maxInstanced = params.reuseGeometries === false ? 0 : (params.maxReusedGeometries ?? MAX_REUSED_GEOMETRIES);
+        const reused = [];
+        for (let mesh = 0; mesh < meshCount; mesh++) {
+            if (useCounts[mesh] > 1) {
+                reused.push(mesh);
+            }
+        }
+        const verticesSaved = (mesh) => (useCounts[mesh] - 1) * numVerticesOf(mesh);
+        reused.sort((a, b) => verticesSaved(b) - verticesSaved(a));
+        for (const mesh of reused.slice(0, maxInstanced)) {
+            instanced[mesh] = 1;
+        }
+
         // Positions of a mesh, transformed by `matrix` when given. Batched meshes get their matrix baked in here, not
         // passed to createMesh(): xeokit re-centers (RTC) the raw positions BEFORE applying a mesh matrix, which throws
         // meshes with large local coordinates (mm files carry their 0.001 scale in the matrix) kilometers away.
@@ -322,7 +350,7 @@ class XeoIFCLoaderPlugin extends Plugin {
                 color: f32.subarray(instance + 16, instance + 19),
                 opacity: f32[instance + 19]
             };
-            if (useCounts[mesh] > 1) {
+            if (instanced[mesh]) {
                 if (!geometryCreated[mesh]) {
                     geometryCreated[mesh] = 1;
                     sceneModel.createGeometry({id: `${modelId}.geometry.${mesh}`, ...meshGeometry(mesh)});
