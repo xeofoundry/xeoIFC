@@ -10,6 +10,9 @@ const INSTANCE_WORDS = 96 / 4;
 const ELEMENT_WORDS = 32 / 4;
 const FLAG_VISIBLE = 1;
 
+// The "Evaluation version" text the engine adds to every scene; it has no type and passes the type filters
+const WATERMARK_ENTITY_ID = 0xFFFFFFFF;
+
 const SLICE_MS = 40; // Main-thread time per slice of the scene build
 
 // The engine is Z-up like IFC; xeokit is Y-up
@@ -286,7 +289,8 @@ class XeoIFCLoaderPlugin extends Plugin {
 
         const elementLoads = new Uint8Array(elementCount);
         for (let i = 0; i < elementCount; i++) {
-            elementLoads[i] = typeLoads(types[u32[elementsAt + i * ELEMENT_WORDS]]) ? 1 : 0;
+            const entityId = u32[elementsAt + i * ELEMENT_WORDS];
+            elementLoads[i] = (entityId === WATERMARK_ENTITY_ID || typeLoads(types[entityId])) ? 1 : 0;
         }
 
         const geometryCreated = new Uint8Array(meshCount);
