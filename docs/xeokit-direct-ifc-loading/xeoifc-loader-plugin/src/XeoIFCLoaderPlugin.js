@@ -252,13 +252,20 @@ class XeoIFCLoaderPlugin extends Plugin {
             useCounts[u32[instancesAt + i * INSTANCE_WORDS + 20]]++;
         }
 
-        const meshGeometry = (mesh) => {
+        // Positions of a mesh, transformed by `matrix` when given. Batched meshes get their matrix baked in here, not
+        // passed to createMesh(): xeokit re-centers (RTC) the raw positions BEFORE applying a mesh matrix, which throws
+        // meshes with large local coordinates (mm files carry their 0.001 scale in the matrix) kilometers away.
+        const meshGeometry = (mesh, matrix) => {
             const span = spansAt + mesh * SPAN_WORDS;
             const baseVertex = u32[span];
             const numVertices = (mesh + 1 < meshCount ? u32[span + SPAN_WORDS] : vertexFloats / 6) - baseVertex;
             const positions = new Float32Array(numVertices * 3);
+            const m = matrix || math.identityMat4();
             for (let v = 0, src = verticesAt + baseVertex * 6; v < numVertices; v++, src += 6) {
-                positions.set(f32.subarray(src, src + 3), v * 3);
+                const x = f32[src], y = f32[src + 1], z = f32[src + 2];
+                positions[v * 3] = m[0] * x + m[4] * y + m[8] * z + m[12];
+                positions[v * 3 + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
+                positions[v * 3 + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
             }
             const firstIndex = indicesAt + u32[span + 1];
             return {primitive: "triangles", positions, indices: u32.slice(firstIndex, firstIndex + u32[span + 2])};
@@ -280,10 +287,10 @@ class XeoIFCLoaderPlugin extends Plugin {
             if (!elementLoads[element] || u32[spansAt + mesh * SPAN_WORDS + 2] === 0) {
                 continue;
             }
+            const matrix = math.mulMat4(Z_UP_TO_Y_UP, f32.subarray(instance, instance + 16), math.mat4());
             const meshCfg = {
                 id: `${modelId}.mesh.${i}`,
                 origin,
-                matrix: math.mulMat4(Z_UP_TO_Y_UP, f32.subarray(instance, instance + 16), math.mat4()),
                 color: f32.subarray(instance + 16, instance + 19),
                 opacity: f32[instance + 19]
             };
@@ -293,8 +300,9 @@ class XeoIFCLoaderPlugin extends Plugin {
                     sceneModel.createGeometry({id: `${modelId}.geometry.${mesh}`, ...meshGeometry(mesh)});
                 }
                 meshCfg.geometryId = `${modelId}.geometry.${mesh}`;
+                meshCfg.matrix = matrix;
             } else {
-                Object.assign(meshCfg, meshGeometry(mesh));
+                Object.assign(meshCfg, meshGeometry(mesh, matrix));
             }
             sceneModel.createMesh(meshCfg);
             entityMeshIds[element].push(meshCfg.id);

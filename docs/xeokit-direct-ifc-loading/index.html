@@ -195,6 +195,7 @@
 <div id="treeViewContainer"></div>
 <div id="fileControls">
     <button id="loadIfc">Duplex.ifc</button>
+    <button id="fitView">Zoom to bounds</button>
     <input type="file" id="fileInput" accept=".ifc,.ifczip,.stp,.step"/>
     <div>or drop an .ifc, .ifczip, .stp or .step file</div>
     <div id="status">Loading JavaScript modules...</div>
@@ -325,6 +326,9 @@
     //------------------------------------------------------------------------------------------------------------------
 
     document.getElementById("loadIfc").onclick = () => load({src: "../Duplex.ifc"});
+    document.getElementById("fitView").onclick = () => {
+        viewer.cameraFlight.flyTo({aabb: viewer.scene.getAABB(viewer.scene.visibleObjectIds)}); // Bounds of what is visible
+    };
     document.getElementById("fileInput").onchange = (event) => event.target.files[0] && load({file: event.target.files[0]});
     document.body.ondragover = (event) => event.preventDefault();
     document.body.ondrop = (event) => {
