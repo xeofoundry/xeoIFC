@@ -12,13 +12,21 @@ https://xeofoundry.github.io/xeoIFC/
 
 The demo runs locally in the browser. Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
 
-The WASM viewer supports 
+The WASM viewer supports
 - Loading of any number of files into one scene.
 - Selecting elements in the tree view or 3D view, show element properties and property sets/quantities.
 - Search for GUIDs, names, types etc.
 - Load terrain from public GIS databases around georeferenced IFC models.
 - Export of selected elements to a new IFC file (split).
 - Export of several loaded files to a new IFC file (merge).
+
+## Demo for direct IFC loading in xeokit
+
+The same WebAssembly module can feed a [xeokit](https://github.com/xeokit/xeokit-sdk) viewer directly, without a conversion step:
+https://xeofoundry.github.io/xeoIFC/xeokit-direct-ifc-loading/
+
+The page runs xeoIFC in a Web Worker, unpacks its geometry buffer into a xeokit `SceneModel`, builds the `MetaModel` from the object
+tree and queries property sets from the loaded model. Drag&Drop `.ifc`, `.ifczip`, `.stp` or `.step` files (no upload of any data).
 
 ## Compatibility
 

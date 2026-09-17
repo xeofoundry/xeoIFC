@@ -30,11 +30,11 @@
     <text x="758" y="52" font-weight="600" fill="#E6EDF3">4  Hand over the pack</text>
     <text x="758" y="72" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">takeBytes() / PackSink</text>
     <text x="758" y="88" font-size="11.5" fill="#8B949E">transferable buffer to main</text>
-    <text x="758" y="102" font-size="11.5" fill="#8B949E">thread, or a Vec for Qt</text>
+    <text x="758" y="102" font-size="11.5" fill="#8B949E">thread, or xeoifc_job_take_pack</text>
 
     <rect x="988" y="30" width="192" height="80" rx="6" fill="#1C232C" stroke="#30363D"/>
     <text x="1000" y="52" font-weight="600" fill="#E6EDF3">5  Render</text>
-    <text x="1000" y="72" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">Viewer.upload(pack)</text>
+    <text x="1000" y="72" font-size="11.5" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">Viewer.upload / set_scene</text>
     <text x="1000" y="88" font-size="11.5" fill="#8B949E">viewer-render draws, picks,</text>
     <text x="1000" y="102" font-size="11.5" fill="#8B949E">snaps; ids map to #n refs</text>
   </g>

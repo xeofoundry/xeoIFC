@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img"
-     aria-label="Three host applications (browser wasm viewer, CLI, Qt app) each go through a thin binding into the ifc-session document API, which drives the shared engine crates; renderers and the converter pipeline take the engine directly."
+     aria-label="Three hosts (browser wasm viewer, CLI, native programs on the xeoifc.dll C ABI) each go through a thin binding into the ifc-session document API, which drives the shared engine crates; renderers and the converter pipeline take the engine directly."
      font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
@@ -50,16 +50,20 @@
     <text x="676" y="151" font-size="11.5" fill="#8B949E">for AI agents</text>
 
     <rect x="800" y="44" width="360" height="130" rx="6" fill="#1C232C" stroke="#30363D"/>
-    <text x="818" y="70" font-size="16" font-weight="600" fill="#E6EDF3">Native: Qt application</text>
-    <text x="818" y="88" font-size="12" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">crates/viewer/qt  QML + wgpu surface</text>
-    <rect x="818" y="102" width="156" height="54" rx="4" fill="#161B22" stroke="#30363D"/>
-    <text x="828" y="122" font-size="12" font-weight="500" fill="#E6EDF3">Rust in-process</text>
-    <text x="828" y="138" font-size="11.5" fill="#8B949E">cxx-qt bridge, loader</text>
-    <text x="828" y="151" font-size="11.5" fill="#8B949E">thread, tree, viewport</text>
-    <rect x="986" y="102" width="156" height="54" rx="4" fill="#161B22" stroke="#30363D"/>
-    <text x="996" y="122" font-size="12" font-weight="500" fill="#E6EDF3">C++ / C# out-of-tree</text>
-    <text x="996" y="138" font-size="11.5" fill="#8B949E">xeoifc_api.dll, C ABI,</text>
-    <text x="996" y="151" font-size="11.5" fill="#8B949E">same JSON wire</text>
+    <text x="818" y="70" font-size="16" font-weight="600" fill="#E6EDF3">Native: xeoifc.dll library</text>
+    <text x="818" y="88" font-size="12" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">xeoifc.h  C, C++, C#, Python, Qt hosts</text>
+    <rect x="818" y="102" width="104" height="54" rx="4" fill="#161B22" stroke="#30363D"/>
+    <text x="828" y="122" font-size="12" font-weight="500" fill="#E6EDF3">Session</text>
+    <text x="828" y="138" font-size="11.5" fill="#8B949E">xeoifc_call wire,</text>
+    <text x="828" y="151" font-size="11.5" fill="#8B949E">open, save, export</text>
+    <rect x="928" y="102" width="104" height="54" rx="4" fill="#161B22" stroke="#30363D"/>
+    <text x="938" y="122" font-size="12" font-weight="500" fill="#E6EDF3">Load jobs</text>
+    <text x="938" y="138" font-size="11.5" fill="#8B949E">progress/snapshot</text>
+    <text x="938" y="151" font-size="11.5" fill="#8B949E">callbacks, pack out</text>
+    <rect x="1038" y="102" width="104" height="54" rx="4" fill="#161B22" stroke="#30363D"/>
+    <text x="1048" y="122" font-size="12" font-weight="500" fill="#E6EDF3">Renderer</text>
+    <text x="1048" y="138" font-size="11.5" fill="#8B949E">xeoifc_viewer_*:</text>
+    <text x="1048" y="151" font-size="11.5" fill="#8B949E">scenes, camera, pick</text>
   </g>
 
   <!-- host -> binding arrows -->
@@ -71,7 +75,7 @@
   <g font-size="11" fill="#8B949E">
     <text x="230" y="203">IFC bytes in, pack out (transferable)</text>
     <text x="610" y="203">files in; GLB, IFC, JSON out</text>
-    <text x="990" y="203">path or bytes in; pack + JSON out</text>
+    <text x="990" y="203">path or bytes in; pack, JSON, IFC out</text>
   </g>
 
   <!-- BINDINGS -->
@@ -89,10 +93,10 @@
     <text x="438" y="304" font-size="11.5" fill="#8B949E">stdout stays JSON; permissions limit paths to --root dirs</text>
 
     <rect x="800" y="226" width="360" height="86" rx="6" fill="#161B22" stroke="#30363D"/>
-    <text x="818" y="250" font-size="14" font-weight="600" fill="#E6EDF3">Rust crates or C ABI</text>
-    <text x="818" y="270" font-size="12" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">cxx-qt bridge   crates/viewer/qt</text>
-    <text x="818" y="287" font-size="12" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">xeoifc_call()   crates/ifc-session-c</text>
-    <text x="818" y="304" font-size="11.5" fill="#8B949E">opaque session handle, JSON strings, byte buffers</text>
+    <text x="818" y="250" font-size="14" font-weight="600" fill="#E6EDF3">C ABI: xeoifc.dll / libxeoifc.so</text>
+    <text x="818" y="270" font-size="12" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">xeoifc_call()   crates/xeoifc-c, xeoifc.h</text>
+    <text x="818" y="287" font-size="12" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">xeoifc_load_start / xeoifc_viewer_create</text>
+    <text x="818" y="304" font-size="11.5" fill="#8B949E">opaque handles, JSON strings, byte buffers; Rust links crates</text>
   </g>
 
   <!-- binding -> session arrows -->
@@ -185,11 +189,11 @@
     <path d="M490,174 L490,214 L20,214 L20,700 L601,700 L601,684"/>
   </g>
   <g font-size="11" fill="#8B949E">
-    <text x="1188" y="300" transform="rotate(90 1188 300)">packed scene buffer to the renderer (Viewer main thread, Qt viewport)</text>
+    <text x="1188" y="300" transform="rotate(90 1188 300)">packed scene buffer to the renderer (Viewer main thread, xeoifc_viewer_set_scene)</text>
     <text x="30" y="716">converter pipeline (src/pipeline.rs): StepFile, Model, SceneBuilder, GLB writer, no session in between</text>
   </g>
 
   <g font-size="11" fill="#8B949E">
-    <text x="40" y="760">Rust workspace: one Cargo build produces the wasm modules, the CLI, the Qt app and xeoifc_api.dll from the same crates.</text>
+    <text x="40" y="760">Rust workspace: one Cargo build produces the wasm modules, the CLI and xeoifc.dll from the same crates; native applications such as apps/xeoifc-qt (C++ Qt Widgets) link the DLL.</text>
   </g>
 </svg>

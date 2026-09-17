@@ -1,11 +1,12 @@
 # One library, three hosts
 
-The xeoIFC crates form one Rust stack. A browser viewer, the command-line converter and a native Qt application all
-sit on the same document API and the same geometry engine; only the thin binding layer in the middle differs per host.
+The xeoIFC crates form one Rust stack. A browser viewer, the command-line converter and a native shared library
+(`xeoifc.dll` / `libxeoifc.so`, a C ABI for any C, C++, C#, Python or Qt program) all sit on the same document API and
+the same geometry engine; only the thin binding layer in the middle differs per host.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="integration-map-dark.svg">
-  <img src="integration-map-light.svg" alt="Three host applications (browser wasm viewer, CLI, Qt app) each go through a thin binding into the ifc-session document API, which drives the shared engine crates; renderers and the converter pipeline take the engine directly." width="1200">
+  <img src="integration-map-light.svg" alt="Three hosts (browser wasm viewer, CLI, native programs on the xeoifc.dll C ABI) each go through a thin binding into the ifc-session document API, which drives the shared engine crates; renderers and the converter pipeline take the engine directly." width="1200">
 </picture>
 
 Reading the arrows: the teal arrows are the JSON wire (control only, never bulk data), the solid black arrows are Rust
@@ -20,8 +21,9 @@ still drives the engine without a session.
 > are tested. The browser viewer's worker runs on session documents: the streamed store is adopted without a copy,
 > the scene is built and the store pruned through the document, and the tree, property and georeference queries read
 > the document's kept engine indexes. Its IFC export runs the split-and-merge writer over session documents, so the
-> output is unchanged. The Qt application's load thread does the same on a full-retain document and exposes the wire
-> to QML as `apiCall`.
+> output is unchanged. The C ABI exposes the same wire plus background load jobs (progress and preview callbacks),
+> the native renderer and the export; `apps/xeoifc-qt`, a C++ Qt Widgets application, is its reference host and
+> uses nothing but the DLL.
 
 ## Load path in a viewer host
 
@@ -76,46 +78,68 @@ xeoifc serve --mcp --root E:/work/ifcFiles
 - One executable, no runtime dependencies.
 - Paths are sandboxed to the `--root` directories.
 
-### Qt application (C++ or Rust)
+### Native library: xeoifc.dll (C ABI, any language)
 
-Link the crates directly through the cxx-qt bridge, or load `xeoifc_api.dll` from any C++ or C# code base and speak
-the same wire.
+`crates/xeoifc-c` builds `xeoifc.dll` (`libxeoifc.so`, `libxeoifc.dylib`) with one plain C header, `xeoifc.h`. Any
+program that can call C loads it: C++, C# (P/Invoke), Python (ctypes), Delphi, Java (JNA), Qt or not. Every function
+is thread-compatible and never throws; strings are UTF-8 JSON owned by the caller until the matching `xeoifc_free_*`.
+The header has five groups:
+
+| Group | Functions | What crosses the boundary |
+|---|---|---|
+| Library | `xeoifc_version`, `xeoifc_free_string/bytes/floats/u32` | version JSON; frees for every buffer the DLL hands out |
+| Session | `xeoifc_session_new/free/set_roots`, `xeoifc_call`, `xeoifc_open_bytes`, `xeoifc_save_bytes`, `xeoifc_take_bytes`, `xeoifc_take_events`, `xeoifc_last_error` | the JSON op wire, IFC bytes in and out, observe events |
+| Export | `xeoifc_export` | `[{docId, selection}]` in, one merged IFC out (the split-and-merge writer) |
+| Load jobs | `xeoifc_load_start`, `xeoifc_job_poll`, `xeoifc_job_take_pack/lines/edges`, `xeoifc_element_query`, `xeoifc_job_cancel/free` | a background parse + tessellate with progress and preview callbacks; packed scene, drafting lines and sharp edges as buffers; tree, properties and georeference as JSON |
+| Renderer | `xeoifc_viewer_create/free/resize/frame`, `set_scene/preview/clear`, camera (`orbit`, `pan_start/to/end`, `anchor_pick`, `zoom`, `fit_*`, `camera_state`), `pick/pick_area/hover`, `set_selection/visible/transparent`, line layers, sharp edges, background, stats | wgpu drawing into a host window handle (HWND, X11 window, NSView); elements addressed as `(scene, entity)` pairs |
+
+A host can use any subset: the session alone for a headless query or edit service, session + jobs + its own
+renderer, or all five for a complete viewer.
 
 ```c
-#include "xeoifc_api.h"
+#include <xeoifc.h>
 
 XeoIfcSession* s = xeoifc_session_new();
 xeoifc_session_set_roots(s, "[\"E:/projects\"]");
+
+/* the wire: same ops and error codes as the wasm and CLI hosts */
 char* out = xeoifc_call(s,
-  "{\"op\":\"document.open\","
-  "\"args\":{\"path\":\"E:/projects/a.ifc\"}}");
+  "{\"op\":\"query.select\",\"doc\":\"d1\","
+  "\"args\":{\"where\":\"is IfcWall and within(#210)\"}}");
 xeoifc_free_string(out);
-out = xeoifc_call(s,
-  "{\"op\":\"geometry.tessellate\","
-  "\"args\":{\"prune\":true}}");
+
+/* a load job: parse + tessellate on a DLL thread, callbacks report progress */
+XeoIfcJob* job = xeoifc_load_start(s, "E:/projects/a.ifc", NULL, NULL);
+while (xeoifc_job_poll(s, job, NULL) == 0) { /* pump the GUI, ~30 ms */ }
 uint8_t* pack; size_t n;
-if (xeoifc_take_bytes(s, &pack, &n) == 0) {
-  viewport.upload(pack, n);   /* viewer-render, wgpu */
-  xeoifc_free_bytes(pack, n);
-}
-xeoifc_free_string(out);
-xeoifc_session_free(s);
+xeoifc_job_take_pack(job, &pack, &n);
+
+/* the renderer: draw into a native child window, then xeoifc_viewer_frame on a ~16 ms timer */
+XeoIfcViewer* v = xeoifc_viewer_create(hwnd, NULL, w, h, NULL);
+xeoifc_viewer_set_scene(v, pack, n, 0, NULL);
+xeoifc_free_bytes(pack, n);
+xeoifc_job_free(job);
 ```
 
-- Header `xeoifc_api.h`, generated from the Rust extern functions.
-- The in-tree Qt viewer keeps its Rust loader thread; the same calls apply there without the C layer.
+- `apps/xeoifc-qt` is the reference host: a C++ Qt Widgets application in which the DLL parses, tessellates and
+  renders into a native child window while the Qt side owns the ribbon, tree, properties and dialogs. It uses no
+  Rust and no engine crate directly, so it doubles as the compatibility test of the header.
+- Rust hosts do not need the C layer: they link `ifc-session`, `ifc-geom` and `viewer-render` directly and make the
+  same calls (the in-tree `crates/viewer/qt` cxx-qt viewer does).
+- The DLL carries the whole engine, so a native host has no wasm 4 GiB cap and no prune requirement; `retainFull`
+  keeps documents editable.
 
 ## What stays shared, what differs
 
-| Concern | WASM viewer | CLI | Qt app |
+| Concern | WASM viewer | CLI | Native library (xeoifc.dll) |
 |---|---|---|---|
-| Parse and store | step-core, streamed chunks in the worker | step-core, whole file | step-core, loader thread |
-| Document API | IfcSession (wasm-bindgen) | ifc_session::Session in-process, MCP over stdio | Rust crates or xeoifc_api.dll |
-| Geometry | ifc-geom via geometry.tessellate, pack transferred | ifc-geom via the converter pipeline (GLB) or the session (jobs) | ifc-geom, pack kept in memory |
-| Rendering | viewer-render on WebGPU | none (files out) | viewer-render on Vulkan / DX12 through a Qt window handle |
-| Memory model | prune after tessellation, 4 GiB wasm cap | process memory, no prune needed | process memory; prune optional |
+| Parse and store | step-core, streamed chunks in the worker | step-core, whole file | step-core on the job thread, or bytes via xeoifc_open_bytes |
+| Document API | IfcSession (wasm-bindgen) | ifc_session::Session in-process, MCP over stdio | xeoifc_call over the C ABI, from any language |
+| Geometry | ifc-geom via geometry.tessellate, pack transferred | ifc-geom via the converter pipeline (GLB) or the session (jobs) | ifc-geom in the load job; pack handed to the host or to the DLL's renderer |
+| Rendering | viewer-render on WebGPU | none (files out) | viewer-render on Vulkan / DX12 / Metal into a host window handle (HWND, X11, NSView) |
+| Memory model | prune after tessellation, 4 GiB wasm cap | process memory, no prune needed | process memory; retainFull or prune per document |
 | Clock and randomness | installed from JS (Date.now, Math.random) | std | std |
-| Security | bytes in, bytes out; no filesystem | filesystem roots, permissions | filesystem roots, permissions |
+| Security | bytes in, bytes out; no filesystem | filesystem roots, permissions | filesystem roots, permissions; bytes-only use needs no roots |
 
 ---
 

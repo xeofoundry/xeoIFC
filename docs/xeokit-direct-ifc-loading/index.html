@@ -1,0 +1,454 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeokit + xeoIFC: direct IFC and STEP loading</title>
+    <link rel="icon" href="../xeokit-icon.svg"/>
+    <style>
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 15px;
+            color: black;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        #myCanvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: lightblue;
+            background-image: linear-gradient(lightblue, white);
+        }
+
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 340px;
+            z-index: 200000;
+            font-size: 13px;
+        }
+
+        #info h1 {
+            font-size: 16px;
+            margin: 0 0 4px 0;
+        }
+
+        #info p {
+            margin: 0 0 4px 0;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* File controls + properties */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        #fileControls {
+            position: absolute;
+            top: 20px;
+            left: 380px;
+            z-index: 200000;
+        }
+
+        #fileControls button {
+            margin-right: 6px;
+        }
+
+        #status {
+            margin-top: 8px;
+        }
+
+        #properties {
+            position: absolute;
+            top: 80px;
+            right: 10px;
+            width: 360px;
+            max-height: 50%;
+            overflow-y: auto;
+            z-index: 200000;
+            background-color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            padding: 6px;
+            display: none;
+        }
+
+        #properties th {
+            text-align: left;
+            padding-top: 6px;
+        }
+
+        #properties td {
+            padding-right: 10px;
+            vertical-align: top;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* NavCubePlugin */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        #myNavCubeCanvas {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            bottom: 50px;
+            right: 10px;
+            z-index: 200000;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* TreeViewPlugin */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        #treeViewContainer {
+            pointer-events: all;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.2);
+            top: 150px;
+            bottom: 0;
+            z-index: 200000;
+            left: 0;
+            padding-left: 10px;
+            user-select: none;
+            width: 350px;
+        }
+
+        #treeViewContainer ul {
+            list-style: none;
+            padding-left: 1.75em;
+            pointer-events: none;
+        }
+
+        #treeViewContainer ul li {
+            position: relative;
+            width: 500px;
+            pointer-events: none;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            vertical-align: middle;
+        }
+
+        #treeViewContainer ul li a {
+            background-color: #eee;
+            border-radius: 50%;
+            color: #000;
+            display: inline-block;
+            height: 1.5em;
+            left: -1.5em;
+            position: absolute;
+            text-align: center;
+            text-decoration: none;
+            width: 1.5em;
+            pointer-events: all;
+        }
+
+        #treeViewContainer ul li a.plus {
+            background-color: #ded;
+        }
+
+        #treeViewContainer ul li a:active {
+            top: 1px;
+        }
+
+        #treeViewContainer ul li span:hover {
+            color: white;
+            cursor: pointer;
+            background: black;
+        }
+
+        #treeViewContainer ul li span {
+            display: inline-block;
+            width: calc(100% - 50px);
+            padding-left: 2px;
+            pointer-events: all;
+            height: 23px;
+        }
+
+        #treeViewContainer .highlighted-node { /* Appearance of node highlighted with TreeViewPlugin#showNode() */
+            border: black solid 1px;
+            background: yellow;
+            color: black;
+            padding-left: 1px;
+            padding-right: 5px;
+        }
+
+    </style>
+</head>
+<body>
+<canvas id="myCanvas"></canvas>
+<canvas id="myNavCubeCanvas"></canvas>
+<div id="info">
+    <h1>xeokit + xeoIFC WebAssembly</h1>
+    <p>The <a href="https://github.com/xeofoundry/xeoIfc" target="_other">xeoIFC</a> engine runs as a WebAssembly module in a
+        Web Worker, parses and tessellates the IFC or STEP CAD file and hands one packed geometry buffer plus an object tree
+        to a <a href="https://github.com/xeokit/xeokit-sdk" target="_other">xeokit</a> SceneModel and MetaModel. No conversion
+        step, no server, no upload.</p>
+    <p>Click an object for its property sets. See also the <a href="../">xeoIFC WebGPU viewer</a>.</p>
+</div>
+<div id="treeViewContainer"></div>
+<div id="fileControls">
+    <button id="loadIfc">Duplex.ifc</button>
+    <input type="file" id="fileInput" accept=".ifc,.ifczip,.stp,.step"/>
+    <div>or drop an .ifc, .ifczip, .stp or .step file</div>
+    <div id="status">Loading JavaScript modules...</div>
+</div>
+<div id="properties"></div>
+</body>
+
+<script type="module">
+
+    import {Viewer, SceneModel, NavCubePlugin, TreeViewPlugin, math} from "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.min.es.js";
+
+    const MODEL_ID = "myModel";
+
+    const viewer = new Viewer({
+        canvasId: "myCanvas",
+        transparent: true
+    });
+
+    new NavCubePlugin(viewer, {
+        canvasId: "myNavCubeCanvas",
+        visible: true,
+        size: 250,
+        alignment: "bottomRight",
+        bottomMargin: 100,
+        rightMargin: 10
+    });
+
+    new TreeViewPlugin(viewer, {
+        containerElement: document.getElementById("treeViewContainer"),
+        autoExpandDepth: 3
+    });
+
+    const statusElement = document.getElementById("status");
+    const propertiesElement = document.getElementById("properties");
+
+    //------------------------------------------------------------------------------------------------------------------
+    // The xeoIFC wasm modules live in a worker: parsing and tessellation block, the page stays responsive
+    //------------------------------------------------------------------------------------------------------------------
+
+    const worker = new Worker("./xeoifc.worker.js", {type: "module"});
+
+    let sourceId = 0;        // Identifies the loaded file inside the wasm module
+    let objects = {};        // xeokit object ID -> STEP entity id of the file
+    let selectedEntity = null;
+    let t0 = 0;
+
+    worker.onmessage = ({data: msg}) => {
+        switch (msg.type) {
+            case "progress":
+                statusElement.innerText = msg.total > 1 ? `${msg.phase} ${msg.done} / ${msg.total}` : `${msg.phase}...`;
+                break;
+            case "loaded":
+                sourceId = msg.sourceId;
+                const sceneModel = buildModel(msg.packed, msg.tree ? JSON.parse(msg.tree) : null);
+                viewer.cameraFlight.jumpTo(sceneModel);
+                statusElement.innerHTML = "Model loaded in " + Math.floor(performance.now() - t0) / 1000.0 + " seconds<br>Objects: " + sceneModel.numEntities;
+                break;
+            case "properties":
+                showProperties(msg.objectId, msg.json ? JSON.parse(msg.json) : []);
+                break;
+            case "error":
+                statusElement.innerText = msg.message;
+                break;
+        }
+    };
+
+    function load(name, data) {
+        t0 = performance.now();
+        statusElement.innerText = "Loading " + name + "...";
+        propertiesElement.style.display = "none";
+        selectedEntity = null;
+        if (viewer.scene.models[MODEL_ID]) {
+            viewer.scene.models[MODEL_ID].destroy();
+            viewer.metaScene.destroyMetaModel(MODEL_ID);
+        }
+        worker.postMessage({type: "load", name, data}, [data]);
+    }
+
+    async function loadUrl(src) {
+        const response = await fetch(src);
+        load(src.split("/").pop(), await response.arrayBuffer());
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Packed buffer -> SceneModel, object tree -> MetaModel
+    //
+    // Pack layout (little endian): header 112 B | mesh spans 36 B | instances 96 B | elements 32 B |
+    // vertices (f32 position + normal, 6 per vertex) | indices (u32, mesh-local)
+    //------------------------------------------------------------------------------------------------------------------
+
+    // The engine is Z-up like IFC; xeokit is Y-up
+    const Z_UP_TO_Y_UP = math.mat4([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
+
+    function buildModel(packed, tree) {
+
+        const u32 = new Uint32Array(packed);
+        const f32 = new Float32Array(packed);
+        if (u32[8] !== 0x50434649 || u32[9] !== 1) {
+            throw "Not an IFCP version 1 buffer";
+        }
+        const center = new Float64Array(packed, 0, 3); // Geometry is rebased around this point (meters)
+        const [meshCount, instanceCount, elementCount, vertexFloats, indexCount] = u32.subarray(10, 15);
+        const spansAt = 112 / 4;
+        const instancesAt = spansAt + meshCount * 9;
+        const elementsAt = instancesAt + instanceCount * 24;
+        const verticesAt = elementsAt + elementCount * 8;
+        const indicesAt = verticesAt + vertexFloats;
+
+        // Object IDs and metadata from the tree; IFC objects get their GlobalId like in other xeokit loaders
+
+        const metaObjects = [];
+        const objectIds = {}; // entity id -> object ID
+        objects = {};
+        const visit = (item, parent) => {
+            const id = item.global_id || `${MODEL_ID}#${item.entity_id}`;
+            objectIds[item.entity_id] = id;
+            objects[id] = item.entity_id;
+            metaObjects.push({id, name: item.name || item.type, type: item.type, parent});
+            (item.children || []).forEach(child => visit(child, id));
+            (item.elements || []).forEach(element => visit(element, id));
+        };
+        if (tree) {
+            visit(tree, null);
+        }
+
+        const sceneModel = new SceneModel(viewer.scene, {
+            id: MODEL_ID,
+            isModel: true,
+            origin: [center[0], center[2], -center[1]],
+            edges: true
+        });
+
+        // A mesh that is instanced more than once becomes a shared geometry, the others are batched
+
+        const useCounts = new Uint32Array(meshCount);
+        for (let i = 0; i < instanceCount; i++) {
+            useCounts[u32[instancesAt + i * 24 + 20]]++;
+        }
+
+        const meshGeometry = (mesh) => {
+            const span = spansAt + mesh * 9;
+            const baseVertex = u32[span];
+            const numVertices = (mesh + 1 < meshCount ? u32[span + 9] : vertexFloats / 6) - baseVertex;
+            const positions = new Float32Array(numVertices * 3);
+            for (let v = 0, src = verticesAt + baseVertex * 6; v < numVertices; v++, src += 6) {
+                positions.set(f32.subarray(src, src + 3), v * 3);
+            }
+            const firstIndex = indicesAt + u32[span + 1];
+            return {primitive: "triangles", positions, indices: u32.slice(firstIndex, firstIndex + u32[span + 2])};
+        };
+
+        const geometryCreated = new Uint8Array(meshCount);
+        const entityMeshIds = Array.from({length: elementCount}, () => []);
+
+        for (let i = 0; i < instanceCount; i++) {
+            const instance = instancesAt + i * 24;
+            const mesh = u32[instance + 20];
+            const visible = u32[instance + 22] & 1; // IfcSpaces are flagged hidden
+            if (!visible || u32[spansAt + mesh * 9 + 2] === 0) {
+                continue;
+            }
+            const meshCfg = {
+                id: `${MODEL_ID}.mesh.${i}`,
+                matrix: math.mulMat4(Z_UP_TO_Y_UP, f32.subarray(instance, instance + 16), math.mat4()),
+                color: f32.subarray(instance + 16, instance + 19),
+                opacity: f32[instance + 19]
+            };
+            if (useCounts[mesh] > 1) {
+                if (!geometryCreated[mesh]) {
+                    geometryCreated[mesh] = 1;
+                    sceneModel.createGeometry({id: `${MODEL_ID}.geometry.${mesh}`, ...meshGeometry(mesh)});
+                }
+                meshCfg.geometryId = `${MODEL_ID}.geometry.${mesh}`;
+            } else {
+                Object.assign(meshCfg, meshGeometry(mesh));
+            }
+            sceneModel.createMesh(meshCfg);
+            entityMeshIds[u32[instance + 21]].push(meshCfg.id);
+        }
+
+        for (let i = 0; i < elementCount; i++) {
+            if (entityMeshIds[i].length > 0) {
+                const entityId = u32[elementsAt + i * 8];
+                const id = objectIds[entityId] || `${MODEL_ID}#${entityId}`;
+                objects[id] = entityId;
+                sceneModel.createEntity({id, meshIds: entityMeshIds[i], isObject: true});
+            }
+        }
+
+        sceneModel.finalize();
+
+        viewer.metaScene.createMetaModel(MODEL_ID, {metaObjects});
+        viewer.scene.fire("modelLoaded", MODEL_ID); // Builds the TreeViewPlugin nodes
+
+        return sceneModel;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Click an object -> property sets from the model inside the wasm module
+    //------------------------------------------------------------------------------------------------------------------
+
+    viewer.cameraControl.on("picked", (pickResult) => {
+        const entity = pickResult.entity;
+        if (!entity || objects[entity.id] === undefined) {
+            return;
+        }
+        if (selectedEntity) {
+            selectedEntity.selected = false;
+        }
+        selectedEntity = entity;
+        entity.selected = true;
+        worker.postMessage({type: "properties", objectId: entity.id, sourceId, entityId: objects[entity.id]});
+    });
+
+    function showProperties(objectId, propertySets) {
+        const metaObject = viewer.metaScene.metaObjects[objectId];
+        const table = document.createElement("table");
+        const addRow = (tag, cells) => {
+            const row = table.insertRow();
+            for (const text of cells) {
+                const cell = document.createElement(tag);
+                cell.innerText = text ?? "";
+                if (cells.length === 1) {
+                    cell.colSpan = 3;
+                }
+                row.append(cell);
+            }
+        };
+        addRow("th", [metaObject ? `${metaObject.type}: ${metaObject.name}` : objectId]);
+        for (const propertySet of propertySets) {
+            addRow("th", [propertySet.pset]);
+            for (const prop of propertySet.props) {
+                addRow("td", [prop.name, prop.value, prop.unit]);
+            }
+        }
+        propertiesElement.replaceChildren(table);
+        propertiesElement.style.display = "block";
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // File controls
+    //------------------------------------------------------------------------------------------------------------------
+
+    async function loadFile(file) {
+        if (file) {
+            load(file.name, await file.arrayBuffer());
+        }
+    }
+
+    document.getElementById("loadIfc").onclick = () => loadUrl("../Duplex.ifc");
+    document.getElementById("fileInput").onchange = (event) => loadFile(event.target.files[0]);
+    document.body.ondragover = (event) => event.preventDefault();
+    document.body.ondrop = (event) => {
+        event.preventDefault();
+        loadFile(event.dataTransfer.files[0]);
+    };
+
+    loadUrl("../Duplex.ifc");
+
+</script>
+</html>
