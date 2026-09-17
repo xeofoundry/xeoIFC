@@ -10,6 +10,8 @@ const INSTANCE_WORDS = 96 / 4;
 const ELEMENT_WORDS = 32 / 4;
 const FLAG_VISIBLE = 1;
 
+const SLICE_MS = 40; // Main-thread time per slice of the scene build
+
 // The engine is Z-up like IFC; xeokit is Y-up
 const Z_UP_TO_Y_UP = math.mat4([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
 
@@ -73,7 +75,7 @@ class XeoIFCLoaderPlugin extends Plugin {
      * @param {Boolean} [params.globalizeObjectIds=false] Prefix every object ID with the model ID, to load the same file twice.
      * @param {Number} [params.circleSegments=18] Number of segments the engine uses to tessellate a full circle (4..64).
      * @param {Function} [params.onProgress] Called with ````(phase, done, total)````, phases "read" (in MB; total 0 when
-     * unknown), "parse", "geom" and "pack".
+     * unknown), "parse", "geom", "pack", "edges" and "scene" (building the SceneModel, in time slices on the main thread).
      * @returns {SceneModel} The model; fires "loaded" when ready and "error" when loading failed.
      */
     load(params = {}) {
@@ -101,11 +103,7 @@ class XeoIFCLoaderPlugin extends Plugin {
         const circleSegments = params.circleSegments || 18;
 
         this._request({type: "load", source, name, circleSegments}, [], params.onProgress)
-            .then((result) => {
-                if (!sceneModel.destroyed) {
-                    this._buildModel(sceneModel, params, result);
-                }
-            })
+            .then((result) => sceneModel.destroyed ? null : this._buildModel(sceneModel, params, result))
             .catch((e) => {
                 this.error(e);
                 sceneModel.fire("error", e);
@@ -196,7 +194,7 @@ class XeoIFCLoaderPlugin extends Plugin {
         }
     }
 
-    _buildModel(sceneModel, params, result) {
+    async _buildModel(sceneModel, params, result) {
 
         const modelId = sceneModel.id;
         const includeTypes = params.includeTypes || this._includeTypes;
@@ -268,8 +266,23 @@ class XeoIFCLoaderPlugin extends Plugin {
                 positions[v * 3 + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
             }
             const firstIndex = indicesAt + u32[span + 1];
-            return {primitive: "triangles", positions, indices: u32.slice(firstIndex, firstIndex + u32[span + 2])};
+            return {
+                primitive: "triangles",
+                positions,
+                indices: u32.slice(firstIndex, firstIndex + u32[span + 2]),
+                // From the worker: xeokit's own edge generation was two thirds of the build time of a large model
+                edgeIndices: result.edges.indices.slice(result.edges.offsets[mesh], result.edges.offsets[mesh + 1])
+            };
         };
+
+        // The build runs in time slices, so the page stays responsive and progress gets painted. MessageChannel, not
+        // setTimeout: timers are throttled to one per second in a background tab.
+        const channel = new MessageChannel();
+        const nextTask = () => new Promise((resolve) => {
+            channel.port1.onmessage = resolve;
+            channel.port2.postMessage(0);
+        });
+        let sliceStart = performance.now();
 
         const elementLoads = new Uint8Array(elementCount);
         for (let i = 0; i < elementCount; i++) {
@@ -281,6 +294,17 @@ class XeoIFCLoaderPlugin extends Plugin {
         const entityVisible = new Uint8Array(elementCount);
 
         for (let i = 0; i < instanceCount; i++) {
+            if ((i & 63) === 0 && performance.now() - sliceStart > SLICE_MS) {
+                if (params.onProgress) {
+                    params.onProgress("scene", i, instanceCount);
+                }
+                await nextTask();
+                if (sceneModel.destroyed) {
+                    channel.port1.close();
+                    return;
+                }
+                sliceStart = performance.now();
+            }
             const instance = instancesAt + i * INSTANCE_WORDS;
             const mesh = u32[instance + 20];
             const element = u32[instance + 21];
@@ -308,6 +332,8 @@ class XeoIFCLoaderPlugin extends Plugin {
             entityMeshIds[element].push(meshCfg.id);
             entityVisible[element] |= u32[instance + 22] & FLAG_VISIBLE; // IfcSpaces arrive flagged hidden
         }
+
+        channel.port1.close();
 
         for (let i = 0; i < elementCount; i++) {
             if (entityMeshIds[i].length > 0) {

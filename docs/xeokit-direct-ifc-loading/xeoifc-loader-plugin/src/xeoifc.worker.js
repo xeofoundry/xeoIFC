@@ -7,13 +7,14 @@
 // Requests carry an `id` that every response echoes:
 //   {id, type: "load", source, name, circleSegments}   source = absolute URL | Blob | ArrayBuffer
 //                                                    -> {id, type: "progress", phase, done, total}*
-//                                                       {id, type: "loaded", packed, tree, sourceId, isStep}
+//                                                       {id, type: "loaded", packed, edges, tree, sourceId, isStep}
 //   {id, type: "properties", sourceId, entityId, isStep} -> {id, type: "properties", json}
 //   {type: "clear"}                                    (no response)
 //   any failure                                      -> {id, type: "error", message}
 
 import initIfc, {worker_load_begin, worker_load_chunk, worker_load_finish, worker_properties, worker_clear_models} from "../wasm/viewer_wasm.js";
 import initStep, {step_load, step_properties, step_clear_models} from "../wasm/viewer_wasm_step.js";
+import {buildPackEdges} from "./packEdges.js";
 
 const SNIFF_BYTES = 65536;
 const MB = 1024 * 1024;
@@ -111,7 +112,10 @@ async function handle(msg) {
             const onProgress = (phase, done, total) => postMessage({id, type: "progress", phase, done, total});
             const {isStep, result} = await load(msg, onProgress);
             const packed = result.packed.buffer;
-            postMessage({id, type: "loaded", packed, tree: result.tree, sourceId: result.sourceId, isStep}, [packed]);
+            onProgress("edges", 0, 1);
+            const edges = buildPackEdges(packed);
+            postMessage({id, type: "loaded", packed, edges, tree: result.tree, sourceId: result.sourceId, isStep},
+                [packed, edges.indices.buffer, edges.offsets.buffer]);
         } else if (msg.type === "properties") {
             const query = msg.isStep ? step_properties : worker_properties;
             postMessage({id, type: "properties", json: query(msg.sourceId, msg.entityId)});
