@@ -72,7 +72,8 @@ class XeoIFCLoaderPlugin extends Plugin {
      * @param {String[]} [params.excludeTypes] Never load objects with these types, eg. ````["IfcSpace"]````.
      * @param {Boolean} [params.globalizeObjectIds=false] Prefix every object ID with the model ID, to load the same file twice.
      * @param {Number} [params.circleSegments=18] Number of segments the engine uses to tessellate a full circle (4..64).
-     * @param {Function} [params.onProgress] Called with ````(phase, done, total)````, phases "parse", "geom" and "pack".
+     * @param {Function} [params.onProgress] Called with ````(phase, done, total)````, phases "read" (in MB; total 0 when
+     * unknown), "parse", "geom" and "pack".
      * @returns {SceneModel} The model; fires "loaded" when ready and "error" when loading failed.
      */
     load(params = {}) {
@@ -93,13 +94,13 @@ class XeoIFCLoaderPlugin extends Plugin {
         spinner.processes++;
         this._loadsInFlight++;
 
-        this._getData(params)
-            .then((data) => {
-                const name = params.name || (params.file && params.file.name) || (params.src ? params.src.split(/[\\/]/).pop() : sceneModel.id);
-                const circleSegments = params.circleSegments || 18;
-                const transfer = params.data ? [] : [data]; // Never detach a buffer that belongs to the caller
-                return this._request({type: "load", data, name, circleSegments}, transfer, params.onProgress);
-            })
+        // The worker reads the file itself, as a stream (a File is passed by reference, a URL is fetched there), so
+        // files too large for one ArrayBuffer still load. A caller's ArrayBuffer is copied, never detached.
+        const source = params.data || params.file || new URL(params.src, document.baseURI).href;
+        const name = params.name || (params.file && params.file.name) || (params.src ? params.src.split(/[\\/]/).pop() : sceneModel.id);
+        const circleSegments = params.circleSegments || 18;
+
+        this._request({type: "load", source, name, circleSegments}, [], params.onProgress)
             .then((result) => {
                 if (!sceneModel.destroyed) {
                     this._buildModel(sceneModel, params, result);
@@ -146,21 +147,6 @@ class XeoIFCLoaderPlugin extends Plugin {
         }
         this._failRequests("XeoIFCLoaderPlugin destroyed");
         super.destroy();
-    }
-
-    _getData(params) {
-        if (params.data) {
-            return Promise.resolve(params.data);
-        }
-        if (params.file) {
-            return params.file.arrayBuffer();
-        }
-        return fetch(params.src).then((response) => {
-            if (!response.ok) {
-                throw `Failed to fetch ${params.src}: ${response.status} ${response.statusText}`;
-            }
-            return response.arrayBuffer();
-        });
     }
 
     _request(msg, transfer = [], onProgress) {
