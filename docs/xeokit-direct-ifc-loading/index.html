@@ -23,22 +23,26 @@
             background-image: linear-gradient(lightblue, white);
         }
 
-        #info {
+        #info { /* Welcome panel, removed on the first click */
             position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 340px;
-            z-index: 200000;
-            font-size: 13px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 460px;
+            max-width: calc(100% - 60px);
+            z-index: 300000;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            padding: 18px 22px;
         }
 
         #info h1 {
-            font-size: 16px;
-            margin: 0 0 4px 0;
+            font-size: 20px;
+            margin: 0 0 8px 0;
         }
 
         #info p {
-            margin: 0 0 4px 0;
+            margin: 0 0 8px 0;
         }
 
         /* ----------------------------------------------------------------------------------------------------------*/
@@ -107,7 +111,7 @@
             overflow-x: hidden;
             position: absolute;
             background-color: rgba(255, 255, 255, 0.2);
-            top: 150px;
+            top: 10px;
             bottom: 0;
             z-index: 200000;
             left: 0;
@@ -198,11 +202,19 @@
 <div id="properties"></div>
 </body>
 
+<script type="importmap">
+    {
+        "imports": {
+            "@xeokit/xeokit-sdk": "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.min.es.js"
+        }
+    }
+</script>
+
 <script type="module">
 
-    import {Viewer, SceneModel, NavCubePlugin, TreeViewPlugin, math} from "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.min.es.js";
-
-    const MODEL_ID = "myModel";
+    import {Viewer, NavCubePlugin, TreeViewPlugin} from "@xeokit/xeokit-sdk";
+    // npm package @xeofoundry/xeoifc-loader-plugin, copied next to this page by web/scripts/sync-xeokit-demo.mjs
+    import {XeoIFCLoaderPlugin} from "./xeoifc-loader-plugin/src/index.js";
 
     const viewer = new Viewer({
         canvasId: "myCanvas",
@@ -223,178 +235,56 @@
         autoExpandDepth: 3
     });
 
+    const xeoIFCLoader = new XeoIFCLoaderPlugin(viewer);
+
+    // "click", not "pointerdown": a link inside the panel must still receive its click
+    window.addEventListener("click", () => document.getElementById("info").remove(), {once: true, capture: true});
+
     const statusElement = document.getElementById("status");
     const propertiesElement = document.getElementById("properties");
 
     //------------------------------------------------------------------------------------------------------------------
-    // The xeoIFC wasm modules live in a worker: parsing and tessellation block, the page stays responsive
+    // Load an IFC or STEP file; source is {src: url} or {file: File}
     //------------------------------------------------------------------------------------------------------------------
 
-    const worker = new Worker("./xeoifc.worker.js", {type: "module"});
-
-    let sourceId = 0;        // Identifies the loaded file inside the wasm module
-    let objects = {};        // xeokit object ID -> STEP entity id of the file
+    let sceneModel = null;
     let selectedEntity = null;
-    let t0 = 0;
 
-    worker.onmessage = ({data: msg}) => {
-        switch (msg.type) {
-            case "progress":
-                statusElement.innerText = msg.total > 1 ? `${msg.phase} ${msg.done} / ${msg.total}` : `${msg.phase}...`;
-                break;
-            case "loaded":
-                sourceId = msg.sourceId;
-                const sceneModel = buildModel(msg.packed, msg.tree ? JSON.parse(msg.tree) : null);
-                viewer.cameraFlight.jumpTo(sceneModel);
-                statusElement.innerHTML = "Model loaded in " + Math.floor(performance.now() - t0) / 1000.0 + " seconds<br>Objects: " + sceneModel.numEntities;
-                break;
-            case "properties":
-                showProperties(msg.objectId, msg.json ? JSON.parse(msg.json) : []);
-                break;
-            case "error":
-                statusElement.innerText = msg.message;
-                break;
+    function load(source) {
+        if (sceneModel) {
+            sceneModel.destroy();
         }
-    };
-
-    function load(name, data) {
-        t0 = performance.now();
-        statusElement.innerText = "Loading " + name + "...";
-        propertiesElement.style.display = "none";
         selectedEntity = null;
-        if (viewer.scene.models[MODEL_ID]) {
-            viewer.scene.models[MODEL_ID].destroy();
-            viewer.metaScene.destroyMetaModel(MODEL_ID);
-        }
-        worker.postMessage({type: "load", name, data}, [data]);
-    }
+        propertiesElement.style.display = "none";
+        statusElement.innerText = "Loading...";
+        const t0 = performance.now();
 
-    async function loadUrl(src) {
-        const response = await fetch(src);
-        load(src.split("/").pop(), await response.arrayBuffer());
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Packed buffer -> SceneModel, object tree -> MetaModel
-    //
-    // Pack layout (little endian): header 112 B | mesh spans 36 B | instances 96 B | elements 32 B |
-    // vertices (f32 position + normal, 6 per vertex) | indices (u32, mesh-local)
-    //------------------------------------------------------------------------------------------------------------------
-
-    // The engine is Z-up like IFC; xeokit is Y-up
-    const Z_UP_TO_Y_UP = math.mat4([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]);
-
-    function buildModel(packed, tree) {
-
-        const u32 = new Uint32Array(packed);
-        const f32 = new Float32Array(packed);
-        if (u32[8] !== 0x50434649 || u32[9] !== 1) {
-            throw "Not an IFCP version 1 buffer";
-        }
-        const center = new Float64Array(packed, 0, 3); // Geometry is rebased around this point (meters)
-        const [meshCount, instanceCount, elementCount, vertexFloats, indexCount] = u32.subarray(10, 15);
-        const spansAt = 112 / 4;
-        const instancesAt = spansAt + meshCount * 9;
-        const elementsAt = instancesAt + instanceCount * 24;
-        const verticesAt = elementsAt + elementCount * 8;
-        const indicesAt = verticesAt + vertexFloats;
-
-        // Object IDs and metadata from the tree; IFC objects get their GlobalId like in other xeokit loaders
-
-        const metaObjects = [];
-        const objectIds = {}; // entity id -> object ID
-        objects = {};
-        const visit = (item, parent) => {
-            const id = item.global_id || `${MODEL_ID}#${item.entity_id}`;
-            objectIds[item.entity_id] = id;
-            objects[id] = item.entity_id;
-            metaObjects.push({id, name: item.name || item.type, type: item.type, parent});
-            (item.children || []).forEach(child => visit(child, id));
-            (item.elements || []).forEach(element => visit(element, id));
-        };
-        if (tree) {
-            visit(tree, null);
-        }
-
-        const sceneModel = new SceneModel(viewer.scene, {
-            id: MODEL_ID,
-            isModel: true,
-            origin: [center[0], center[2], -center[1]],
-            edges: true
+        const model = sceneModel = xeoIFCLoader.load({
+            ...source,
+            id: "myModel",
+            edges: true,
+            onProgress: (phase, done, total) => {
+                statusElement.innerText = total > 1 ? `${phase} ${done} / ${total}` : `${phase}...`;
+            }
         });
 
-        // A mesh that is instanced more than once becomes a shared geometry, the others are batched
+        model.on("loaded", () => {
+            viewer.cameraFlight.jumpTo(model);
+            statusElement.innerHTML = "Model loaded in " + Math.floor(performance.now() - t0) / 1000.0 + " seconds<br>Objects: " + model.numEntities;
+        });
 
-        const useCounts = new Uint32Array(meshCount);
-        for (let i = 0; i < instanceCount; i++) {
-            useCounts[u32[instancesAt + i * 24 + 20]]++;
-        }
-
-        const meshGeometry = (mesh) => {
-            const span = spansAt + mesh * 9;
-            const baseVertex = u32[span];
-            const numVertices = (mesh + 1 < meshCount ? u32[span + 9] : vertexFloats / 6) - baseVertex;
-            const positions = new Float32Array(numVertices * 3);
-            for (let v = 0, src = verticesAt + baseVertex * 6; v < numVertices; v++, src += 6) {
-                positions.set(f32.subarray(src, src + 3), v * 3);
-            }
-            const firstIndex = indicesAt + u32[span + 1];
-            return {primitive: "triangles", positions, indices: u32.slice(firstIndex, firstIndex + u32[span + 2])};
-        };
-
-        const geometryCreated = new Uint8Array(meshCount);
-        const entityMeshIds = Array.from({length: elementCount}, () => []);
-
-        for (let i = 0; i < instanceCount; i++) {
-            const instance = instancesAt + i * 24;
-            const mesh = u32[instance + 20];
-            const visible = u32[instance + 22] & 1; // IfcSpaces are flagged hidden
-            if (!visible || u32[spansAt + mesh * 9 + 2] === 0) {
-                continue;
-            }
-            const meshCfg = {
-                id: `${MODEL_ID}.mesh.${i}`,
-                matrix: math.mulMat4(Z_UP_TO_Y_UP, f32.subarray(instance, instance + 16), math.mat4()),
-                color: f32.subarray(instance + 16, instance + 19),
-                opacity: f32[instance + 19]
-            };
-            if (useCounts[mesh] > 1) {
-                if (!geometryCreated[mesh]) {
-                    geometryCreated[mesh] = 1;
-                    sceneModel.createGeometry({id: `${MODEL_ID}.geometry.${mesh}`, ...meshGeometry(mesh)});
-                }
-                meshCfg.geometryId = `${MODEL_ID}.geometry.${mesh}`;
-            } else {
-                Object.assign(meshCfg, meshGeometry(mesh));
-            }
-            sceneModel.createMesh(meshCfg);
-            entityMeshIds[u32[instance + 21]].push(meshCfg.id);
-        }
-
-        for (let i = 0; i < elementCount; i++) {
-            if (entityMeshIds[i].length > 0) {
-                const entityId = u32[elementsAt + i * 8];
-                const id = objectIds[entityId] || `${MODEL_ID}#${entityId}`;
-                objects[id] = entityId;
-                sceneModel.createEntity({id, meshIds: entityMeshIds[i], isObject: true});
-            }
-        }
-
-        sceneModel.finalize();
-
-        viewer.metaScene.createMetaModel(MODEL_ID, {metaObjects});
-        viewer.scene.fire("modelLoaded", MODEL_ID); // Builds the TreeViewPlugin nodes
-
-        return sceneModel;
+        model.on("error", (message) => {
+            statusElement.innerText = message;
+        });
     }
 
     //------------------------------------------------------------------------------------------------------------------
     // Click an object -> property sets from the model inside the wasm module
     //------------------------------------------------------------------------------------------------------------------
 
-    viewer.cameraControl.on("picked", (pickResult) => {
+    viewer.cameraControl.on("picked", async (pickResult) => {
         const entity = pickResult.entity;
-        if (!entity || objects[entity.id] === undefined) {
+        if (!entity) {
             return;
         }
         if (selectedEntity) {
@@ -402,7 +292,7 @@
         }
         selectedEntity = entity;
         entity.selected = true;
-        worker.postMessage({type: "properties", objectId: entity.id, sourceId, entityId: objects[entity.id]});
+        showProperties(entity.id, await xeoIFCLoader.getProperties(entity.id));
     });
 
     function showProperties(objectId, propertySets) {
@@ -434,21 +324,17 @@
     // File controls
     //------------------------------------------------------------------------------------------------------------------
 
-    async function loadFile(file) {
-        if (file) {
-            load(file.name, await file.arrayBuffer());
-        }
-    }
-
-    document.getElementById("loadIfc").onclick = () => loadUrl("../Duplex.ifc");
-    document.getElementById("fileInput").onchange = (event) => loadFile(event.target.files[0]);
+    document.getElementById("loadIfc").onclick = () => load({src: "../Duplex.ifc"});
+    document.getElementById("fileInput").onchange = (event) => event.target.files[0] && load({file: event.target.files[0]});
     document.body.ondragover = (event) => event.preventDefault();
     document.body.ondrop = (event) => {
         event.preventDefault();
-        loadFile(event.dataTransfer.files[0]);
+        if (event.dataTransfer.files[0]) {
+            load({file: event.dataTransfer.files[0]});
+        }
     };
 
-    loadUrl("../Duplex.ifc");
+    load({src: "../Duplex.ifc"});
 
 </script>
 </html>

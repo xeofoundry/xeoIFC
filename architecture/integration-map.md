@@ -1,8 +1,8 @@
 # One library, three hosts
 
 The xeoIFC crates form one Rust stack. A browser viewer, the command-line converter and a native shared library
-(`xeoifc.dll` / `libxeoifc.so`, a C ABI for any C, C++, C#, Python or Qt program) all sit on the same document API and
-the same geometry engine; only the thin binding layer in the middle differs per host.
+(`xeoifc.dll` / `libxeoifc.so`, a C ABI for any desktop or server application: C, C++, C#, Python, Java, ...) all sit on
+the same document API and the same geometry engine; only the thin binding layer in the middle differs per host.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="integration-map-dark.svg">
@@ -81,9 +81,9 @@ xeoifc serve --mcp --root E:/work/ifcFiles
 ### Native library: xeoifc.dll (C ABI, any language)
 
 `crates/xeoifc-c` builds `xeoifc.dll` (`libxeoifc.so`, `libxeoifc.dylib`) with one plain C header, `xeoifc.h`. Any
-program that can call C loads it: C++, C# (P/Invoke), Python (ctypes), Delphi, Java (JNA), Qt or not. Every function
-is thread-compatible and never throws; strings are UTF-8 JSON owned by the caller until the matching `xeoifc_free_*`.
-The header has five groups:
+program that can call C loads it: C++, C# (P/Invoke), Python (ctypes), Delphi, Java (JNA); desktop GUI applications and
+headless server processes alike. Every function is thread-compatible and never throws; strings are UTF-8 JSON owned by the
+caller until the matching `xeoifc_free_*`. The header has five groups:
 
 | Group | Functions | What crosses the boundary |
 |---|---|---|

@@ -39,12 +39,13 @@ https://github.com/xeokit/xeokit-convert
 
 ## Architecture
 
-The same Rust crates serve the browser viewer, the command-line converter and native Qt applications; each host goes
-through one document API (JSON ops in, JSON results out) and the shared geometry engine.
+The same Rust crates serve the browser viewer, the command-line converter and any desktop or server application (C++, C#,
+Python, Java, ...) that loads the xeoIFC native library; each host goes through one document API (JSON ops in, JSON results
+out) and the shared geometry engine.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="architecture/integration-map-dark.svg">
-  <img src="architecture/integration-map-light.svg" alt="How the xeoIFC crates are used by the WASM viewer, the CLI and a Qt application" width="1200">
+  <img src="architecture/integration-map-light.svg" alt="How the xeoIFC crates are used by the WASM viewer, the CLI and native desktop or server applications" width="1200">
 </picture>
 
 Full integration map with the viewer load path, per-host code samples and a comparison table:

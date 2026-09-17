@@ -51,7 +51,7 @@
 
     <rect x="800" y="44" width="360" height="130" rx="6" fill="#EDF1EC" stroke="#C9CFD3"/>
     <text x="818" y="70" font-size="16" font-weight="600" fill="#182029">Native: xeoifc.dll library</text>
-    <text x="818" y="88" font-size="12" fill="#66707A" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">xeoifc.h  C, C++, C#, Python, Qt hosts</text>
+    <text x="818" y="88" font-size="12" fill="#66707A" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">xeoifc.h  C, C++, C#, Python, Java hosts</text>
     <rect x="818" y="102" width="104" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
     <text x="828" y="122" font-size="12" font-weight="500" fill="#182029">Session</text>
     <text x="828" y="138" font-size="11.5" fill="#66707A">xeoifc_call wire,</text>
@@ -194,6 +194,6 @@
   </g>
 
   <g font-size="11" fill="#66707A">
-    <text x="40" y="760">Rust workspace: one Cargo build produces the wasm modules, the CLI and xeoifc.dll from the same crates; native applications such as apps/xeoifc-qt (C++ Qt Widgets) link the DLL.</text>
+    <text x="40" y="760">Rust workspace: one Cargo build produces the wasm modules, the CLI and xeoifc.dll from the same crates; any desktop or server application links the DLL (reference host: apps/xeoifc-qt).</text>
   </g>
 </svg>
