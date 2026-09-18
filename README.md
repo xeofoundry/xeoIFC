@@ -21,7 +21,9 @@ https://xeofoundry.github.io/xeoIFC/
 
 The demo runs locally in the browser. Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
 
-<img width="900" alt="image" src="https://github.com/user-attachments/assets/5877a724-4554-4be6-8184-9686b5e21de5" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/c5272d82-81b3-41b8-8290-16657814b002" />
+
+<br/>
 <br/>
 
 The WASM viewer supports
