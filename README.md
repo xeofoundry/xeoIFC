@@ -1,9 +1,18 @@
 # xeoIFC
 
-Public repository of the xeoFoundry IFC to glTF conversion tool.
+Public repository of xeoIFC, the xeoFoundry IFC toolkit.
 
-xeoIFC is a native converter application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It writes glTF 2.0 output
-(`.glb`, `.gltf`, or `.html`) plus xeokit-style metadata and manifest JSON, with cxconverter-compatible configuration and output conventions.
+xeoIFC is one Rust engine for reading, querying, tessellating, converting and writing IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3),
+delivered as:
+
+- a [WebAssembly viewer](#demo-for-webassembly-wasm-browser-version) that runs entirely in the browser,
+- a [loader for xeokit](#demo-for-direct-ifc-loading-in-xeokit) that loads IFC directly, without a conversion step,
+- a [command-line converter](converter/README.md) (Windows AMD64, Linux ARM64, Linux AMD64) to glTF/GLB with xeokit metadata, the
+  successor to cxconverter,
+- a [native library](architecture/integration-map.md#native-library-xeoifcdll-c-abi-any-language) (`xeoifc.dll` / `libxeoifc.so`, C ABI)
+  for desktop and server applications in C++, C#, Python, Java, ...
+
+All hosts share one document API (JSON ops in, JSON results out) for query, edit, split and merge.
 
 ## Demo for WebAssembly (WASM) browser version
 
@@ -28,15 +37,6 @@ https://xeofoundry.github.io/xeoIFC/xeokit-direct-ifc-loading/
 The page runs xeoIFC in a Web Worker, unpacks its geometry buffer into a xeokit `SceneModel`, builds the `MetaModel` from the object
 tree and queries property sets from the loaded model. Drag&Drop `.ifc`, `.ifczip`, `.stp` or `.step` files (no upload of any data).
 
-## Compatibility
-
-xeoIFC targets xeokit-compatible glTF/GLB and metadata output. It is designed as a successor to
-cxconverter, so existing conversion setups can keep using the familiar command-line flags and
-`cxconverter.json` configuration shape.
-
-For xeokit conversion tooling, see:
-https://github.com/xeokit/xeokit-convert
-
 ## Architecture
 
 The same Rust crates serve the browser viewer, the command-line converter and any desktop or server application (C++, C#,
@@ -51,54 +51,16 @@ out) and the shared geometry engine.
 Full integration map with the viewer load path, per-host code samples and a comparison table:
 [architecture/integration-map.md](architecture/integration-map.md)
 
-## Features include:
+## Command-line converter
 
-- Extraction of the element tree structure from the IFC model and export as a scene graph, preserving GUIDs to enable metadata linking in xeokit.
-
-- Conversion of IFC geometric representations to points, polylines, triangle meshes, and text labels for GPU rendering.
-
-- Configurable export settings via a JSON configuration file.
-
-- Filtering to exclude elements by type or GUID.
-
-- Filtering to include only specified types or GUIDs.
-
-- Mesh deduplication and element sorting to improve output size.
-
-- File splitting to handle large models efficiently.
-
-- Metadata export for property sets, element quantities, types, units, and related IFC data.
-
-- Extraction of group and zone associations from the IFC model into the metadata JSON file.
-
-- Optional visualization of opening elements in IFC models, which are normally not visible in IFC viewers.
-
-- Support for `.ifc` and `.ifczip` inputs.
-
-- Native command-line application for batch processing.
-
-- Compatibility-focused support for current IFC 4.3 files and older IFC versions such as IFC 2x3.
-
-You can use the converter for testing without a license key. Without a license key, generated metadata
-marks the model root as an evaluation version. Supplying a valid license key removes that marker.
-
-## Run the application
+The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`, or `.html`) plus xeokit-style metadata JSON. It
+keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
 
 ```powershell
 .\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
 ```
 
-Common options:
-
-```text
--i  input .ifc or .ifczip path
--o  output .glb, .gltf, or .html path
--m  metadata JSON output path
--c  configuration JSON path
--k  license key
--v  print version number
--h  print help
-```
+Features, options, compatibility and license key: [converter/README.md](converter/README.md)
 
 ## Third-party software
 
