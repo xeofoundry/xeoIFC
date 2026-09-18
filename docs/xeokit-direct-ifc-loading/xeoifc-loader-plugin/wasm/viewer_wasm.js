@@ -20,11 +20,18 @@ export class Viewer {
     /**
      * Append drafting lines of the last uploaded scene to `layer` (xyz xyz pairs, scene-rebased):
      * 0 axis, 1 footprint, 2 plan, 3 annotation, 4 grid.
+     * `owners` = entity id owning each pair. Lines follow `set_element_offsets` of their owner; owners without
+     * a mesh (annotations, grids) get a viewer handle here, returned as `[entity id, handle, ...]` pairs.
      * @param {number} layer
      * @param {Float32Array} data
+     * @param {Uint32Array} owners
+     * @returns {Uint32Array}
      */
-    add_line_layer(layer, data) {
-        wasm.viewer_add_line_layer(this.__wbg_ptr, layer, data);
+    add_line_layer(layer, data, owners) {
+        const ptr0 = passArray32ToWasm0(owners, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_add_line_layer(this.__wbg_ptr, layer, data, ptr0, len0);
+        return ret;
     }
     /**
      * Add another packed scene to the current render view.
@@ -170,6 +177,26 @@ export class Viewer {
     cursor_world_point(x, y) {
         const ret = wasm.viewer_cursor_world_point(this.__wbg_ptr, x, y);
         return ret;
+    }
+    /**
+     * World-space (metres, not rebased) bounds of each handle's element as they are displayed, JSON
+     * `[[minx,miny,minz,maxx,maxy,maxz] | null, ...]` in handle order.
+     * @param {Uint32Array} handles
+     * @returns {string}
+     */
+    element_bounds(handles) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.viewer_element_bounds(this.__wbg_ptr, ptr0, len0);
+            deferred2_0 = ret[0];
+            deferred2_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
     }
     /**
      * Frame one or more viewer element handles. An empty list frames the whole model.
@@ -385,6 +412,19 @@ export class Viewer {
         return ret !== 0;
     }
     /**
+     * Shift elements to absolute display offsets: `offsets` holds one xyz triple per handle.
+     * Handles without geometry are skipped together with their triple.
+     * @param {Uint32Array} handles
+     * @param {Float32Array} offsets
+     */
+    set_element_offsets(handles, offsets) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArrayF32ToWasm0(offsets, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        wasm.viewer_set_element_offsets(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+    }
+    /**
      * @param {number} layer
      * @param {boolean} visible
      */
@@ -417,11 +457,14 @@ export class Viewer {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
-     * Upload optional sharp-edge overlay line positions, as xyz xyz pairs.
+     * Upload optional sharp-edge overlay line positions, as xyz xyz pairs, with the element index of each pair.
      * @param {Float32Array} data
+     * @param {Uint32Array} elements
      */
-    set_sharp_edges(data) {
-        wasm.viewer_set_sharp_edges(this.__wbg_ptr, data);
+    set_sharp_edges(data, elements) {
+        const ptr0 = passArray32ToWasm0(elements, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.viewer_set_sharp_edges(this.__wbg_ptr, data, ptr0, len0);
     }
     /**
      * @param {boolean} visible
@@ -602,6 +645,44 @@ export function worker_clear_models() {
 }
 
 /**
+ * Feed the next slice of a source file that is being reopened as an editable document.
+ * @param {Uint8Array} chunk
+ */
+export function worker_edit_chunk(chunk) {
+    const ptr0 = passArray8ToWasm0(chunk, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_edit_chunk(ptr0, len0);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
+ * Open the fed bytes as the editable twin of viewer source `source_id` and return its document id
+ * (`"edit<sourceId>"`). The viewer's own document is pruned to metadata and read-only; entity ids match.
+ * @param {number} source_id
+ * @returns {string}
+ */
+export function worker_edit_finish(source_id) {
+    let deferred2_0;
+    let deferred2_1;
+    try {
+        const ret = wasm.worker_edit_finish(source_id);
+        var ptr1 = ret[0];
+        var len1 = ret[1];
+        if (ret[3]) {
+            ptr1 = 0; len1 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred2_0 = ptr1;
+        deferred2_1 = len1;
+        return getStringFromWasm0(ptr1, len1);
+    } finally {
+        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+    }
+}
+
+/**
  * `{"type", "globalId", "name"}` of any IfcRoot entity, JSON.
  * @param {number} source_id
  * @param {number} entity_id
@@ -776,6 +857,15 @@ export function worker_sharp_edges() {
         throw takeFromExternrefTable0(ret[1]);
     }
     return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Bytes produced by the last `worker_call` (`document.save` without a path, packs), once.
+ * @returns {Uint8Array | undefined}
+ */
+export function worker_take_bytes() {
+    const ret = wasm.worker_take_bytes();
+    return ret;
 }
 function __wbg_get_imports() {
     const import0 = {
@@ -1860,17 +1950,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 218, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 223, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 257, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 262, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 218, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 223, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },
@@ -2183,6 +2273,13 @@ function passArray32ToWasm0(arg, malloc) {
 function passArray8ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 1, 1) >>> 0;
     getUint8ArrayMemory0().set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+function passArrayF32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4, 4) >>> 0;
+    getFloat32ArrayMemory0().set(arg, ptr / 4);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
 }

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/index-DRRt9YBJ.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BjjwrMCK.css">
+    <script type="module" crossorigin src="./assets/index-Dq99Q7gB.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BY9hQ6_s.css">
   </head>
   <body>
     <div id="app">
@@ -86,8 +86,27 @@
                 <path d="M3.2 18.4h17.6L14.4 5.6l-4.3 6.5-2.3-2.8z" />
               </svg>
             </button>
+            <button id="storey-shift-button" class="tool-icon" type="button" title="Storey shift" aria-label="Storey shift" aria-haspopup="dialog" aria-expanded="false" aria-controls="storey-shift-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.5 19.5h13v-3h-13zM5.5 13.5h13v-3h-13zM8.5 7.5h13v-3h-13z" />
+              </svg>
+            </button>
+            <button id="minimap-button" class="tool-icon" type="button" title="Mini map of the storey the camera is in" aria-label="Mini map" aria-pressed="false" aria-controls="minimap">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3.5 3.5h17v17h-7M9.5 20.5h-6v-17M3.5 12.5h5M12.5 3.5v6M12.5 13.5v3h8" />
+              </svg>
+            </button>
+            <button id="ai-button" class="tool-icon" type="button" title="AI assistant (beta)" aria-label="AI assistant (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M10 3.5l1.9 5.1 5.1 1.9-5.1 1.9L10 17.5l-1.9-5.1L3 10.5l5.1-1.9zM18 14.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" />
+              </svg>
+            </button>
           </div>
           <canvas id="nav-cube" width="96" height="96" title="Click a face to view, drag to rotate" aria-label="Navigation cube"></canvas>
+          <div id="minimap" hidden>
+            <canvas id="minimap-canvas" title="Click or drag to move the camera" aria-label="Mini map"></canvas>
+            <span id="minimap-storey"></span>
+          </div>
           <div id="area-selection-box" hidden></div>
           <div id="selection-menu" role="menu" hidden>
             <button id="selection-isolate" type="button" role="menuitem">Isolate</button>
@@ -177,6 +196,17 @@
             <div id="terrain-status" aria-live="polite"></div>
             <div class="terrain-attribution">Elevation: Mapzen/AWS Terrain Tiles    Map (c) OpenStreetMap contributors</div>
           </div>
+          <div id="storey-shift-panel" role="dialog" aria-labelledby="storey-shift-title" hidden>
+            <button id="storey-shift-close" class="panel-close" type="button" aria-label="Close storey shift"></button>
+            <h2 id="storey-shift-title">Storey shift</h2>
+            <label><span>X</span><input id="storey-shift-x" type="range" min="-20" max="20" step="0.1" value="0" /><output id="storey-shift-x-value">0.0 m</output></label>
+            <label><span>Y</span><input id="storey-shift-y" type="range" min="-20" max="20" step="0.1" value="0" /><output id="storey-shift-y-value">0.0 m</output></label>
+            <label><span>Z</span><input id="storey-shift-z" type="range" min="-20" max="20" step="0.1" value="0" /><output id="storey-shift-z-value">0.0 m</output></label>
+            <div class="storey-shift-footer">
+              <span id="storey-shift-status">No storeys loaded</span>
+              <button id="storey-shift-reset" class="panel-secondary" type="button">Reset</button>
+            </div>
+          </div>
           <div id="welcome-drop-zone">Drop .ifc/.ifczip/.stp/.jt/.glb files here</div>
           <div id="welcome-panel">
             <h1 class="brand-title" aria-label="xeoIFC">
@@ -212,6 +242,31 @@
             <p><b>Open-source software: </b><a href="./THIRD-PARTY-NOTICES.txt" target="_blank" rel="noreferrer">Third-party notices</a></p>
 
             <p class="powered-by">Powered by xeoFoundry - <a href="https://xeofoundry.com" target="_blank">www.xeofoundry.com</a></p>
+          </div>
+          <div id="ai-panel" role="dialog" aria-labelledby="ai-title" hidden>
+            <div id="ai-header">
+              <span id="ai-title">AI <span class="ai-beta" title="Experimental: check every proposal before applying it">Beta</span></span>
+              <div id="ai-context"></div>
+              <button id="ai-clear" class="ai-link" type="button" title="Forget this conversation">Clear</button>
+              <button id="ai-settings-toggle" class="ai-link" type="button" aria-expanded="false" aria-controls="ai-settings">Settings</button>
+              <button id="ai-close" class="panel-close" type="button" aria-label="Close AI assistant"></button>
+            </div>
+            <div id="ai-settings" hidden>
+              <label><span>Provider</span><select id="ai-provider">
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="openai">OpenAI-compatible server</option>
+              </select></label>
+              <label><span>Endpoint</span><input id="ai-endpoint" type="text" placeholder="http://host:8000/v1" autocomplete="off" spellcheck="false" /></label>
+              <label><span>Model</span><input id="ai-model" type="text" autocomplete="off" spellcheck="false" /></label>
+              <label><span>API key</span><input id="ai-api-key" type="password" autocomplete="off" spellcheck="false" /></label>
+              <span class="ai-note">The key is stored unencrypted in this browser and sent only to the chosen provider, together with your request and facts about the model.</span>
+            </div>
+            <div id="ai-transcript" aria-live="polite"></div>
+            <div id="ai-input-row">
+              <textarea id="ai-input" rows="1" placeholder="Tell the model what to change, or ask about it..." aria-label="Request"></textarea>
+              <button id="ai-send" class="panel-primary" type="button">Send</button>
+            </div>
+            <span id="ai-hint">The selection is sent as context. Edits are previewed before they apply.</span>
           </div>
           <div id="load-overlay" role="group" aria-label="Loading progress" hidden>
             <div id="load-content">
