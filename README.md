@@ -29,7 +29,6 @@ running viewer in place of the screenshot and this model (Viadotto Acerno, IFC 4
 [full viewer](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
 
 <br/>
-<br/>
 
 The WASM viewer supports
 - Loading of any number of files into one scene.
