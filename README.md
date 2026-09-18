@@ -21,6 +21,9 @@ https://xeofoundry.github.io/xeoIFC/
 
 The demo runs locally in the browser. Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
 
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/5877a724-4554-4be6-8184-9686b5e21de5" />
+<br/>
+
 The WASM viewer supports
 - Loading of any number of files into one scene.
 - Selecting elements in the tree view or 3D view, show element properties and property sets/quantities.
