@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeoIFC WebAssembly viewer - live showcase</title>
+    <link rel="icon" href="../xeokit-icon.svg"/>
+    <style>
+        /* Laid out like the README section this page is linked from, with the live viewer where the screenshot is. */
+        :root {
+            color-scheme: light dark;
+            --ground: #ffffff;
+            --ink: #1f2328;
+            --muted: #59636e;
+            --line: #d1d9e0;
+            --link: #0969da;
+            --code: #eff1f3;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ground: #0d1117;
+                --ink: #f0f6fc;
+                --muted: #9198a1;
+                --line: #3d444d;
+                --link: #4493f8;
+                --code: #262c36;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: var(--ground);
+            margin: 0;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 16px 48px;
+        }
+
+        h1 {
+            font-size: 2em;
+            font-weight: 600;
+            margin: 0 0 16px;
+            padding-bottom: .3em;
+            border-bottom: 1px solid var(--line);
+        }
+
+        h2 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 24px 0 16px;
+            padding-bottom: .3em;
+            border-bottom: 1px solid var(--line);
+        }
+
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 85%;
+            background: var(--code);
+            padding: .2em .4em;
+            border-radius: 6px;
+        }
+
+        /* Same footprint as the README screenshot: 900 px wide, about 16:9. */
+        #viewer {
+            display: block;
+            width: 100%;
+            aspect-ratio: 900 / 520;
+            min-height: 320px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: #b8bec2;
+        }
+
+        .under-viewer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 8px 0 16px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line);
+            font-size: 14px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>xeoIFC</h1>
+
+    <h2>WebAssembly viewer</h2>
+
+    <p>This is the viewer itself, not a screenshot: xeoIFC runs as a WebAssembly module in your browser and has loaded the
+        Viadotto Acerno bridge (IFC 4.3). Rotate, zoom and pan with the mouse, click elements to select them.</p>
+
+    <iframe id="viewer" src="../?load=Viadotto-Acerno.ifczip&amp;embed=1" title="xeoIFC WebAssembly viewer with the Viadotto Acerno bridge"
+            allow="fullscreen" allowfullscreen></iframe>
+
+    <div class="under-viewer">
+        <span>Move the pointer to the left edge of the viewer to open the model tree and the properties.</span>
+        <a href="../?load=Viadotto-Acerno.ifczip">Open in the full viewer</a>
+    </div>
+
+    <p>The demo runs locally in the browser. In the <a href="../">full viewer</a>, Drag&amp;Drop <code>.ifc</code> or
+        <code>.ifczip</code> files from your machine to render them locally (no upload of any IFC data).</p>
+
+    <p>The WASM viewer supports</p>
+    <ul>
+        <li>Loading of any number of files into one scene.</li>
+        <li>Selecting elements in the tree view or 3D view, show element properties and property sets/quantities.</li>
+        <li>Search for GUIDs, names, types etc.</li>
+        <li>Load terrain from public GIS databases around georeferenced IFC models.</li>
+        <li>Export of selected elements to a new IFC file (split).</li>
+        <li>Export of several loaded files to a new IFC file (merge).</li>
+    </ul>
+
+    <footer>
+        Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
+        Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
+    </footer>
+</main>
+</body>
+</html>
