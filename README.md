@@ -2,19 +2,18 @@
 
 Public repository of xeoIFC, the xeoFoundry IFC toolkit.
 
-xeoIFC is one Rust engine for reading, querying, tessellating, converting and writing IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3),
-delivered as:
+xeoIFC is one Rust engine for reading, querying, tessellating, converting and writing IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3).
+It is delivered in four forms, each described in its own section below:
 
-- a [WebAssembly viewer](#demo-for-webassembly-wasm-browser-version) that runs entirely in the browser,
-- a [loader for xeokit](#demo-for-direct-ifc-loading-in-xeokit) that loads IFC directly, without a conversion step,
-- a [command-line converter](converter/README.md) (Windows AMD64, Linux ARM64, Linux AMD64) to glTF/GLB with xeokit metadata, the
-  successor to cxconverter,
-- a [native library](architecture/integration-map.md#native-library-xeoifcdll-c-abi-any-language) (`xeoifc.dll` / `libxeoifc.so`, C ABI)
-  for desktop and server applications in C++, C#, Python, Java, ...
+1. **WebAssembly viewer** - runs entirely in the browser.
+2. **Loader for xeokit** - loads IFC directly into a xeokit viewer, without a conversion step.
+3. **Command-line converter** - Windows AMD64, Linux ARM64, Linux AMD64; IFC to glTF/GLB with xeokit metadata, the successor to
+   cxconverter.
+4. **Native library** - `xeoifc.dll` / `libxeoifc.so` with a C ABI, for desktop and server applications in C++, C#, Python, Java, ...
 
-All hosts share one document API (JSON ops in, JSON results out) for query, edit, split and merge.
+All four share one document API (JSON ops in, JSON results out) for query, edit, split and merge; see [Architecture](#architecture).
 
-## Demo for WebAssembly (WASM) browser version
+## 1. WebAssembly viewer
 
 Try the browser demo:
 https://xeofoundry.github.io/xeoIFC/
@@ -34,13 +33,35 @@ The WASM viewer supports
 - Export of selected elements to a new IFC file (split).
 - Export of several loaded files to a new IFC file (merge).
 
-## Demo for direct IFC loading in xeokit
+## 2. Loader for xeokit
 
 The same WebAssembly module can feed a [xeokit](https://github.com/xeokit/xeokit-sdk) viewer directly, without a conversion step:
 https://xeofoundry.github.io/xeoIFC/xeokit-direct-ifc-loading/
 
 The page runs xeoIFC in a Web Worker, unpacks its geometry buffer into a xeokit `SceneModel`, builds the `MetaModel` from the object
 tree and queries property sets from the loaded model. Drag&Drop `.ifc`, `.ifczip`, `.stp` or `.step` files (no upload of any data).
+
+## 3. Command-line converter
+
+The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`), xeokit `.xkt` or a self-contained `.html` viewer, plus
+xeokit-style metadata JSON. It keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
+
+```powershell
+.\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
+```
+
+Features, options, output files and license key: [converter/README.md](converter/README.md) -
+[configuration file](converter/configuration.md) - [metadata JSON format](converter/metadata-format.md)
+
+## 4. Native library
+
+`xeoifc.dll` (`libxeoifc.so`, `libxeoifc.dylib`) exposes the whole engine through one plain C header, `xeoifc.h`. Any program that
+can call C loads it: C++, C# (P/Invoke), Python (ctypes), Delphi, Java (JNA); desktop GUI applications and headless server processes
+alike. A host can use any subset of its function groups: the document API session, the IFC export (split and merge), background
+load jobs with progress callbacks, and the wgpu renderer drawing into a native window handle.
+
+Function groups and a C example:
+[architecture/integration-map.md](architecture/integration-map.md#native-library-xeoifcdll-c-abi-any-language)
 
 ## Architecture
 
@@ -55,18 +76,6 @@ out) and the shared geometry engine.
 
 Full integration map with the viewer load path, per-host code samples and a comparison table:
 [architecture/integration-map.md](architecture/integration-map.md)
-
-## Command-line converter
-
-The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`), xeokit `.xkt` or a self-contained `.html` viewer, plus
-xeokit-style metadata JSON. It keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
-
-```powershell
-.\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
-```
-
-Features, options, output files and license key: [converter/README.md](converter/README.md) -
-[configuration file](converter/configuration.md) - [metadata JSON format](converter/metadata-format.md)
 
 ## Third-party software
 

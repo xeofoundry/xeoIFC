@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/index-Dq99Q7gB.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BY9hQ6_s.css">
+    <script type="module" crossorigin src="./assets/index-RXHLm2MC.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CEclKRmM.css">
   </head>
   <body>
     <div id="app">
@@ -105,7 +105,19 @@
           <canvas id="nav-cube" width="96" height="96" title="Click a face to view, drag to rotate" aria-label="Navigation cube"></canvas>
           <div id="minimap" hidden>
             <canvas id="minimap-canvas" title="Click or drag to move the camera" aria-label="Mini map"></canvas>
-            <span id="minimap-storey"></span>
+            <div id="minimap-grip" title="Drag to resize">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M3 3h2v2h-2zM7 3h2v2h-2zM11 3h2v2h-2zM7 7h2v2h-2zM11 7h2v2h-2zM11 11h2v2h-2z" />
+              </svg>
+            </div>
+            <div id="minimap-footer">
+              <select id="minimap-storey" title="Storey shown in the mini map" aria-label="Mini map storey"></select>
+              <button id="minimap-pin" type="button" title="Pin this storey (do not follow the camera height)" aria-label="Pin storey" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M9 3.5h6l-1 6 3 3.5H7l3-3.5zM12 13v7.5" />
+                </svg>
+              </button>
+            </div>
           </div>
           <div id="area-selection-box" hidden></div>
           <div id="selection-menu" role="menu" hidden>
