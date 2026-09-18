@@ -51,6 +51,14 @@ export class Viewer {
         return takeFromExternrefTable0(ret[0]);
     }
     /**
+     * Append one chunk of point-cloud records to the last uploaded scene: 16 bytes per point,
+     * f32 xyz relative to that scene's pack center + sRGB rgba8. Points are not pickable.
+     * @param {Uint8Array} data
+     */
+    add_points(data) {
+        wasm.viewer_add_points(this.__wbg_ptr, data);
+    }
+    /**
      * Refresh the orbit/zoom anchor from the surface under `(x, y)`
      * (physical px). A miss keeps the last anchor.
      * @param {number} x
@@ -1810,6 +1818,10 @@ function __wbg_get_imports() {
         __wbg_static_accessor_WINDOW_f2829a2234d7819e: function() {
             const ret = typeof window === 'undefined' ? null : window;
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
+        },
+        __wbg_subarray_3ed232c8a6baee09: function(arg0, arg1, arg2) {
+            const ret = arg0.subarray(arg1 >>> 0, arg2 >>> 0);
+            return ret;
         },
         __wbg_submit_1290d44bb76ecef4: function(arg0, arg1) {
             arg0.submit(arg1);

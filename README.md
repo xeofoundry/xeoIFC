@@ -99,3 +99,11 @@ Common options:
 -v  print version number
 -h  print help
 ```
+
+## Third-party software
+
+xeoIFC and the WebAssembly viewer include open-source components (Rust crates under MIT, Apache-2.0,
+ISC, Zlib and similar permissive licences, among them `laz` for LAZ point clouds, `wgpu`, `i_overlay`,
+`earcutr` and `delaunator`), plus code derived from jcadlib and csg.js. The full list with all licence
+texts ships as `THIRD-PARTY-NOTICES.txt` in every release package and with the viewer:
+[THIRD-PARTY-NOTICES.txt](https://xeofoundry.github.io/xeoIFC/THIRD-PARTY-NOTICES.txt)
