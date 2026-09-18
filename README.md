@@ -20,7 +20,11 @@ https://xeofoundry.github.io/xeoIFC/
 
 The demo runs locally in the browser. Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
 
-<img width="900" alt="image" src="https://github.com/user-attachments/assets/c5272d82-81b3-41b8-8290-16657814b002" />
+<a href="https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip">
+  <img width="900" alt="xeoIFC WebAssembly viewer showing the Viadotto Acerno bridge - click to open this model in the live viewer" src="https://github.com/user-attachments/assets/c5272d82-81b3-41b8-8290-16657814b002" />
+</a>
+
+Click the image to open this model (Viadotto Acerno, IFC 4.3) in the live viewer.
 
 <br/>
 <br/>
