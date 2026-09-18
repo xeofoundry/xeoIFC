@@ -1,8 +1,8 @@
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
-writes glTF 2.0 output (`.glb`, `.gltf`, or `.html`) plus xeokit-style metadata and manifest JSON, with cxconverter-compatible
-configuration and output conventions.
+writes glTF 2.0 output (`.glb`, `.gltf`), xeokit `.xkt` or a self-contained `.html` viewer, plus xeokit-style metadata and manifest
+JSON, with cxconverter-compatible configuration and output conventions.
 
 It is one host of the xeoIFC toolkit; see the [repository overview](../README.md) for the browser viewer, the xeokit loader and the
 native library.
@@ -30,8 +30,6 @@ https://github.com/xeokit/xeokit-convert
 
 - Mesh deduplication and element sorting to improve output size.
 
-- File splitting to handle large models efficiently.
-
 - Metadata export for property sets, element quantities, types, units, and related IFC data.
 
 - Extraction of group and zone associations from the IFC model into the metadata JSON file.
@@ -44,26 +42,102 @@ https://github.com/xeokit/xeokit-convert
 
 - Compatibility-focused support for current IFC 4.3 files and older IFC versions such as IFC 2x3.
 
-You can use the converter for testing without a license key. Without a license key, generated metadata
-marks the model root as an evaluation version. Supplying a valid license key removes that marker.
-
 ## Run the application
 
 ```powershell
-.\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
+.\xeoifc.exe -i myModel.ifc -o myModel.glb -m myModel.json
 ```
 
-Common options:
+On Linux the call is the same, without `.exe`.
+
+Options:
 
 ```text
--i  input .ifc or .ifczip path
--o  output .glb, .gltf, or .html path
--m  metadata JSON output path
--c  configuration JSON path
--k  license key
--v  print version number
--h  print help
+-i, --input-path      input .ifc or .ifczip path (required)
+-o, --output-path     output .glb, .gltf, .xkt or .html path (required)
+-m, --metadata-path   metadata output path (.json); no metadata is written when omitted
+-c                    configuration JSON path, see configuration.md
+--license-key <key>   license key (overrides the XEO_IFC_LICENSE_KEY environment variable)
+--accept-terms        accept the GLA and run in evaluation mode without the y/N prompt
+-v                    print version number
+-h, --help            print help
 ```
+
+Input files can be zipped (`.ifczip`), which saves significant disk space. With a license key or `--accept-terms` the converter never
+asks for input, so it can run unattended in scripts and services. The exit code is 0 on success and 1 on any error.
+
+More documentation:
+
+- [configuration.md](configuration.md) - the optional JSON configuration file: filters, geometry and glTF options.
+- [metadata-format.md](metadata-format.md) - the metadata JSON: objects, property sets, element quantities, units.
+
+## Output file types
+
+| Extension | Content |
+|---|---|
+| `.glb` | Binary glTF 2.0 in one file. Recommended: smaller and faster to read than `.gltf`. |
+| `.gltf` | The same content as JSON text, plus a `.bin` file with the binary buffers. |
+| `.xkt` | xeokit's native format, written directly (no separate xeokit-convert step). The metadata is embedded. |
+| `.html` | The complete model in one self-contained HTML document with a 3D viewer and a tree view of the project structure. It can be shared and opened in a web browser without a web server and without installing anything. |
+
+Output paths are used exactly as given; spaces in file names are kept.
+
+## Manifest file
+
+Every conversion also writes a manifest next to the output file, named after it: `myModel.glb` gives `myModel.manifest.json`.
+
+```json
+{
+    "inputFile": "myModel.ifc",
+    "converterApplication": "xeoifc.exe",
+    "converterApplicationVersion": "1.0.11",
+    "conversionDate": "2026-09-18 18:10:20",
+    "gltfOutFiles": [ "myModel.glb" ],
+    "metadataOutFiles": [ "myModel.json" ],
+    "numGltfNodes": 1032,
+    "numGltfAccessors": 360,
+    "numGltfAccessorsIncludingReused": 1428,
+    "numGltfMeshes": 247,
+    "numGltfMeshesIncludingReused": 714,
+    "numGltfVertices": 8565,
+    "numGltfVerticesIncludingReused": 18469,
+    "numGltfTriangles": 8518,
+    "numGltfTrianglesIncludingReused": 27746,
+    "numCreatedMetaObjects": 246,
+    "numExportedPropertySetsOrElementQuantities": 1492,
+    "modelBoundsMin": [ -0.2415, -1.55, -4.3827 ],
+    "modelBoundsMax": [ 9.0415, 9.0, 22.1827 ],
+    "generalMessages": [],
+    "warnings": [],
+    "errors": []
+}
+```
+
+Paths are written the way they were given on the command line. The `...IncludingReused` counters show the size of the model
+without deduplication; the difference is what the re-use of identical geometry saves. `warnings` and `errors` repeat the messages of
+the conversion, so a calling service does not have to parse the console output.
+
+## Units and coordinate system
+
+The coordinates of points, lines and triangles in the output are always in metres, regardless of the project units of the IFC file
+(metre, millimetre, foot, inch, ...).
+
+IFC models are z-up, glTF defines y as the up axis. The converter writes the coordinates unchanged (z-up) and adds a root node
+named `Z_UP` with a rotation of 90 degrees around the x axis, so that viewers show the model upright. The rotation can be changed
+with `gltfRootNodeRotationVector` and `gltfRootNodeRotationInDegrees` in the [configuration file](configuration.md).
+
+## License key
+
+You can use the converter for testing without a license key. It then runs in evaluation mode: it asks you to accept the XeoFoundry
+General License Agreement (`Do you accept the GLA? [y/N]`; pass `--accept-terms` to accept without the prompt), adds
+a visible "Evaluation version" watermark to the 3D output and appends " - evaluation version" to the name of the model root in the
+metadata. Supplying a valid license key removes the prompt, the watermark and the suffix.
+
+The key is taken from `--license-key`, else from the `XEO_IFC_LICENSE_KEY` environment variable, else from `licenseKey` in the
+configuration file. An invalid or expired key stops the conversion with exit code 1; the converter does not silently fall back to
+evaluation mode.
+
+## Document API subcommands
 
 The document API subcommands (`query`, `split`, `merge`, `run`, `serve --mcp`) are shown in the
 [integration map](../architecture/integration-map.md).

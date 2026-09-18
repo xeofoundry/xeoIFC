@@ -53,14 +53,15 @@ Full integration map with the viewer load path, per-host code samples and a comp
 
 ## Command-line converter
 
-The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`, or `.html`) plus xeokit-style metadata JSON. It
-keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
+The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`), xeokit `.xkt` or a self-contained `.html` viewer, plus
+xeokit-style metadata JSON. It keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
 
 ```powershell
 .\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
 ```
 
-Features, options, compatibility and license key: [converter/README.md](converter/README.md)
+Features, options, output files and license key: [converter/README.md](converter/README.md) -
+[configuration file](converter/configuration.md) - [metadata JSON format](converter/metadata-format.md)
 
 ## Third-party software
 
