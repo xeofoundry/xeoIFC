@@ -138,6 +138,9 @@ export class Viewer {
     cancel_view_animation() {
         wasm.viewer_cancel_view_animation(this.__wbg_ptr);
     }
+    clear_element_tints() {
+        wasm.viewer_clear_element_tints(this.__wbg_ptr);
+    }
     /**
      * Drop the hover highlight (pointer left the canvas, drag started).
      */
@@ -179,8 +182,6 @@ export class Viewer {
         return ret;
     }
     /**
-     * World-space (metres, not rebased) bounds of each handle's element as they are displayed, JSON
-     * `[[minx,miny,minz,maxx,maxy,maxz] | null, ...]` in handle order.
      * @param {Uint32Array} handles
      * @returns {string}
      */
@@ -197,6 +198,16 @@ export class Viewer {
         } finally {
             wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
         }
+    }
+    /**
+     * Triangles of one element, nine floats each, in the space of `camera_state` (display offsets included). Read
+     * back from the GPU on demand; empty for an unknown, hidden or very large element.
+     * @param {number} handle
+     * @returns {Promise<any>}
+     */
+    element_triangles(handle) {
+        const ret = wasm.viewer_element_triangles(this.__wbg_ptr, handle);
+        return ret;
     }
     /**
      * Frame one or more viewer element handles. An empty list frames the whole model.
@@ -324,6 +335,17 @@ export class Viewer {
         return ret;
     }
     /**
+     * Element and surface point under `(x, y)` for measuring: `[handle, x, y, z]` in the space of `camera_state`,
+     * or `undefined` for background. Unlike `pick`, it leaves the orbit anchor alone.
+     * @param {number} x
+     * @param {number} y
+     * @returns {Promise<any>}
+     */
+    pick_hit(x, y) {
+        const ret = wasm.viewer_pick_hit(this.__wbg_ptr, x, y);
+        return ret;
+    }
+    /**
      * Replace the temporary append-mode loading preview without registering
      * selectable element handles.
      * @param {Uint8Array} data
@@ -412,6 +434,14 @@ export class Viewer {
         return ret !== 0;
     }
     /**
+     * Section planes, `xyzw` each, in the space of `camera_state`: `dot(xyz, p) + w > 0` is cut away.
+     * At most six are used; an empty array switches clipping off.
+     * @param {Float32Array} planes
+     */
+    set_clip_planes(planes) {
+        wasm.viewer_set_clip_planes(this.__wbg_ptr, planes);
+    }
+    /**
      * Shift elements to absolute display offsets: `offsets` holds one xyz triple per handle.
      * Handles without geometry are skipped together with their triple.
      * @param {Uint32Array} handles
@@ -423,6 +453,19 @@ export class Viewer {
         const ptr1 = passArrayF32ToWasm0(offsets, wasm.__wbindgen_malloc);
         const len1 = WASM_VECTOR_LEN;
         wasm.viewer_set_element_offsets(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+    }
+    /**
+     * World-space (metres, not rebased) bounds of each handle's element as they are displayed, JSON
+     * `[[minx,miny,minz,maxx,maxy,maxz] | null, ...]` in handle order.
+     * Tint elements with a palette colour (model compare): 1 green, 2 red, 3 orange, 4 blue, 5 purple,
+     * 6 faint grey ghost (for elements that are also set transparent); 0 removes it.
+     * @param {Uint32Array} handles
+     * @param {number} tint
+     */
+    set_element_tint(handles, tint) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.viewer_set_element_tint(this.__wbg_ptr, ptr0, len0, tint);
     }
     /**
      * @param {number} layer
@@ -918,6 +961,12 @@ function __wbg_get_imports() {
         __wbg_configure_3d64c677c7d68a15: function() { return handleError(function (arg0, arg1) {
             arg0.configure(arg1);
         }, arguments); },
+        __wbg_copyBufferToBuffer_8bb974c7f9c5f4dc: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+            arg0.copyBufferToBuffer(arg1, arg2, arg3, arg4);
+        }, arguments); },
+        __wbg_copyBufferToBuffer_8fe240a0000c9e22: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5) {
+            arg0.copyBufferToBuffer(arg1, arg2, arg3, arg4, arg5);
+        }, arguments); },
         __wbg_copyTextureToBuffer_4186c16aef1922a5: function() { return handleError(function (arg0, arg1, arg2, arg3) {
             arg0.copyTextureToBuffer(arg1, arg2, arg3);
         }, arguments); },
@@ -1324,6 +1373,10 @@ function __wbg_get_imports() {
             const ret = new Uint8Array(arg0, arg1 >>> 0, arg2 >>> 0);
             return ret;
         },
+        __wbg_new_with_length_112583d83d0cb73c: function(arg0) {
+            const ret = new Float64Array(arg0 >>> 0);
+            return ret;
+        },
         __wbg_new_with_length_e1d8c8061ed4e317: function(arg0) {
             const ret = new Float32Array(arg0 >>> 0);
             return ret;
@@ -1404,6 +1457,9 @@ function __wbg_get_imports() {
         },
         __wbg_set_1e016b6a1b5f7cb3: function(arg0, arg1, arg2) {
             arg0.set(getArrayF32FromWasm0(arg1, arg2));
+        },
+        __wbg_set_29967298e530d279: function(arg0, arg1, arg2) {
+            arg0.set(getArrayF64FromWasm0(arg1, arg2));
         },
         __wbg_set_4d7dd76f3dae2926: function(arg0, arg1, arg2) {
             arg0.set(getArrayU8FromWasm0(arg1, arg2));
@@ -1950,17 +2006,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 223, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 232, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 262, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 271, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 223, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 232, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },

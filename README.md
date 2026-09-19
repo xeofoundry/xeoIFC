@@ -37,6 +37,8 @@ The WASM viewer supports
 - Load terrain from public GIS databases around georeferenced IFC models.
 - Export of selected elements to a new IFC file (split).
 - Export of several loaded files to a new IFC file (merge).
+- BCF, Minimap, storey shift, clip planes, measuring tool, compare revisions tool.
+- File types: .ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.las,.laz
 
 ## 2. Loader for xeokit
 

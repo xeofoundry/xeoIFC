@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/index-DL_rb57V.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CEclKRmM.css">
+    <script type="module" crossorigin src="./assets/index-wcZFZ-x2.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B8yAhePj.css">
   </head>
   <body>
     <div id="app">
@@ -31,7 +31,7 @@
           <div id="sidebar-resizer" title="Drag to resize"></div>
           <div id="properties" class="properties empty">Select an element to inspect properties</div>
           <footer id="status-bar" aria-live="polite">
-            <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb" multiple hidden />
+            <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip" multiple hidden />
             <button id="about-link" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
             <button id="open-button" type="button">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -94,6 +94,30 @@
             <button id="minimap-button" class="tool-icon" type="button" title="Mini map of the storey the camera is in" aria-label="Mini map" aria-pressed="false" aria-controls="minimap">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3.5 3.5h17v17h-7M9.5 20.5h-6v-17M3.5 12.5h5M12.5 3.5v6M12.5 13.5v3h8" />
+              </svg>
+            </button>
+            <button id="measure-button" class="tool-icon" type="button" title="Measure" aria-label="Measure" aria-haspopup="dialog" aria-expanded="false" aria-controls="measure-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.5 16.5l14-14 5 5-14 14zM6 13l2 2M9 10l3 3M12 7l2 2M15 4l3 3" />
+              </svg>
+            </button>
+            <button id="section-button" class="tool-icon" type="button" title="Section planes" aria-label="Section planes" aria-haspopup="dialog" aria-expanded="false" aria-controls="section-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <!-- An L-shaped wall cut by a horizontal section plane: dashed plane, tinted + hatched cut face, the kept part below. -->
+                <path class="section-icon-plane" d="M4.5 12.3.8 10.15 12 3.6l11.2 6.55-3.7 2.15" />
+                <path class="section-icon-cut" d="M12 5.8l7.5 4.3-2.5 1.5-5-2.9-5 2.9-2.5-1.5z" />
+                <path d="M19.5 10.1v8L17 19.6l-5-2.9-5 2.9-2.5-1.5v-8M17 11.6v8M12 8.7v8M7 11.6v8" />
+                <path class="section-icon-hatch" d="M13.1 6.45v2.9M15 7.55v2.9M16.9 8.65v2.9M10.9 6.45v2.9M9 7.55v2.9M7.1 8.65v2.9" />
+              </svg>
+            </button>
+            <button id="compare-button" class="tool-icon" type="button" title="Compare two revisions" aria-label="Compare two revisions" aria-haspopup="dialog" aria-expanded="false" aria-controls="compare-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3.5 7.5l6-3v12l-6 3zM20.5 7.5l-6-3v12l6 3zM12 2.5v19" />
+              </svg>
+            </button>
+            <button id="bcf-button" class="tool-icon" type="button" title="BCF issues" aria-label="BCF issues" aria-haspopup="dialog" aria-expanded="false" aria-controls="bcf-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3.5 4.5h17v12h-9l-4.5 4v-4h-3.5zM12 7.5v4.5M12 14v.2" />
               </svg>
             </button>
             <button id="ai-button" class="tool-icon" type="button" title="AI assistant (beta)" aria-label="AI assistant (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
@@ -218,6 +242,89 @@
               <span id="storey-shift-status">No storeys loaded</span>
               <button id="storey-shift-reset" class="panel-secondary" type="button">Reset</button>
             </div>
+          </div>
+          <svg id="measure-overlay" aria-hidden="true"></svg>
+          <div id="measure-panel" role="dialog" aria-labelledby="measure-title" hidden>
+            <button id="measure-close" class="panel-close" type="button" aria-label="Close measure"></button>
+            <h2 id="measure-title">Measure</h2>
+            <div class="section-row">
+              <button class="panel-secondary" type="button" data-measure-mode="distance" aria-pressed="true" title="Distance between two points; vertices, edge midpoints and edges snap">Distance</button>
+              <button class="panel-secondary" type="button" data-measure-mode="area" aria-pressed="false" title="Area and perimeter of a planar face">Area</button>
+              <button class="panel-secondary" type="button" data-measure-mode="faces" aria-pressed="false" title="Distance between two parallel faces, or the angle between two faces">Face to face</button>
+            </div>
+            <div id="measure-status" class="section-hint" aria-live="polite"></div>
+            <ul id="measure-list"></ul>
+            <div class="section-row">
+              <span class="section-hint">Esc drops the first point.</span>
+              <button id="measure-clear" class="panel-secondary" type="button">Remove all</button>
+            </div>
+          </div>
+          <svg id="section-overlay" aria-hidden="true"></svg>
+          <div id="section-panel" role="dialog" aria-labelledby="section-title" hidden>
+            <button id="section-close" class="panel-close" type="button" aria-label="Close section planes"></button>
+            <h2 id="section-title">Section planes</h2>
+            <div class="section-row">
+              <button id="section-pick" class="panel-primary" type="button" aria-pressed="false" title="Then click a surface of the model: the plane lies on it">On a surface</button>
+              <button class="panel-secondary" type="button" data-section-axis="0" title="Plane across the X axis, through the model centre">X</button>
+              <button class="panel-secondary" type="button" data-section-axis="1" title="Plane across the Y axis, through the model centre">Y</button>
+              <button class="panel-secondary" type="button" data-section-axis="2" title="Horizontal plane through the model centre">Z</button>
+            </div>
+            <ul id="section-list"></ul>
+            <div class="section-row">
+              <span class="section-hint">Drag the round handle of a plane to move it.</span>
+              <button id="section-clear" class="panel-secondary" type="button">Remove all</button>
+            </div>
+          </div>
+          <div id="compare-panel" role="dialog" aria-labelledby="compare-title" hidden>
+            <button id="compare-close" class="panel-close" type="button" aria-label="Close compare"></button>
+            <h2 id="compare-title">Compare revisions</h2>
+            <label class="bcf-header bcf-field"><span>Old</span><select id="compare-old" aria-label="Old revision"></select></label>
+            <label class="bcf-header bcf-field"><span>New</span><select id="compare-new" aria-label="New revision"></select></label>
+            <label class="compare-option"><input id="compare-properties" type="checkbox" /> Compare property sets too (slower)</label>
+            <div class="section-row">
+              <button id="compare-run" class="panel-primary" type="button" disabled>Compare</button>
+              <button id="compare-reset" class="panel-secondary" type="button" disabled>Reset view</button>
+            </div>
+            <div id="compare-status" class="section-hint" aria-live="polite"></div>
+            <div id="compare-categories"></div>
+            <ul id="compare-list"></ul>
+          </div>
+          <div id="bcf-panel" role="dialog" aria-labelledby="bcf-title" hidden>
+            <button id="bcf-close" class="panel-close" type="button" aria-label="Close BCF issues"></button>
+            <h2 id="bcf-title">BCF issues</h2>
+            <div class="bcf-header">
+              <button id="bcf-open" class="panel-primary" type="button">Open .bcf file</button>
+              <button id="bcf-save" class="panel-secondary" type="button" disabled>Save .bcf</button>
+              <input id="bcf-file-input" type="file" accept=".bcf,.bcfzip" hidden />
+            </div>
+            <div class="bcf-header">
+              <input id="bcf-new-title" type="text" placeholder="New topic title" autocomplete="off" aria-label="New topic title" />
+              <button id="bcf-new-topic" class="panel-secondary" type="button" title="New topic with the current view as its viewpoint">New topic</button>
+            </div>
+            <label class="bcf-header"><span>Author</span><input id="bcf-author" type="text" placeholder="Your name or e-mail (for new topics, comments, edits)" autocomplete="email" spellcheck="false" /></label>
+            <datalist id="bcf-statuses">
+              <option value="Open"></option>
+              <option value="In Progress"></option>
+              <option value="Resolved"></option>
+              <option value="Closed"></option>
+              <option value="Reopened"></option>
+            </datalist>
+            <datalist id="bcf-types">
+              <option value="Issue"></option>
+              <option value="Request"></option>
+              <option value="Remark"></option>
+              <option value="Clash"></option>
+              <option value="Fault"></option>
+            </datalist>
+            <datalist id="bcf-priorities">
+              <option value="Low"></option>
+              <option value="Normal"></option>
+              <option value="High"></option>
+              <option value="Critical"></option>
+            </datalist>
+            <span id="bcf-status" aria-live="polite">No BCF file loaded</span>
+            <ul id="bcf-topics"></ul>
+            <div id="bcf-detail"></div>
           </div>
           <div id="welcome-drop-zone">Drop .ifc/.ifczip/.stp/.jt/.glb files here</div>
           <div id="welcome-panel">
