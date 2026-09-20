@@ -84,6 +84,8 @@
             font-size: 1.1em;
         }
 
+        blockquote.followup { font-size: 1em; padding: 6px 16px; margin-bottom: 8px; }
+
         footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
     </style>
 </head>
@@ -91,14 +93,21 @@
 <main>
     <h1>A villa from one picture</h1>
 
-    <p>xeoIFC does not only read IFC, it writes it, and generating an IFC file with it is easy. This is the whole job, given to
+    <p>xeoIFC does not only read IFC, it writes it, and generating an IFC file with it is easy. This is the prompt that was given to
         Claude Code (model Fable 5.1) with the <code>xeoifc</code> command-line tool at hand:</p>
 
     <blockquote class="prompt">"myVilla.png" take the picture of this villa and create an IFC model, including terrain around, high details,
         including furniture etc. Use xeoIFC API</blockquote>
 
-    <p>Claude read the API with <code>xeoifc describe</code>, wrote <a href="villa.js">one JavaScript file</a> and ran it. The
-        result is the furnished villa below, with pool, garden and terrain. No CAD system was involved, nobody wrote a line of IFC.</p>
+    <p>Claude read the API with <code>xeoifc describe</code>, wrote <a href="villa.js">one JavaScript file</a> and ran it. Three short
+        follow-ups refined the result:</p>
+
+    <blockquote class="prompt followup">there should be a small hallway at the top of the stairs, so that all 3 rooms can be accessed from there</blockquote>
+    <blockquote class="prompt followup">add a staircase window on the north wall</blockquote>
+    <blockquote class="prompt followup">make bathroom and kitchen more detailed</blockquote>
+
+    <p>The result is the furnished villa below, with pool, garden and terrain. No CAD system was involved, nobody wrote a line of
+        IFC.</p>
 
     <h2>1. The picture</h2>
 
@@ -121,18 +130,18 @@
     </div>
 
     <table>
-        <tr><th>Input</th><td>1 picture, 1 prompt</td></tr>
-        <tr><th>Generated</th><td>1 script of about 380 lines</td></tr>
-        <tr><th>Output</th><td>IFC4, 291 products, 6330 entities, 0.6 MB, validated without findings</td></tr>
+        <tr><th>Input</th><td>1 picture, 1 prompt, 3 short follow-ups</td></tr>
+        <tr><th>Generated</th><td>1 script of about 440 lines</td></tr>
+        <tr><th>Output</th><td>IFC4, 312 products, 7555 entities, 0.7 MB, validated without findings</td></tr>
         <tr><th>Run time</th><td>below one second</td></tr>
         <tr><th>Content</th><td>3 storeys, walls with cut openings, slabs, stair, glazed fronts, balustrades, pergola with solar glass, solar panels,
-            heat pump, sofas, tables, chairs, beds, kitchen, bathroom, planters, sun loungers, parasol, pool, garden walls, gate, 15 cypresses,
+            heat pump, sofas, tables, chairs, beds, fitted kitchen with appliances, bathroom with sanitary ware, planters, sun loungers, parasol, pool, garden walls, gate, 15 cypresses,
             shrubs and a terrain mesh with a stepped lawn</td></tr>
     </table>
 
     <h2>3. How it is made</h2>
 
-    <p>Why a single prompt is enough: the API is small, self-describing and works on the level of building elements, so the generated
+    <p>Why so few words are enough: the API is small, self-describing and works on the level of building elements, so the generated
         script stays short and readable. The command-line tool runs it. The script is plain JavaScript, <code>xeo</code> is the API. The excerpts below are
         shortened, <a href="villa.js">villa.js</a> is the whole truth.</p>
 
@@ -141,10 +150,14 @@
     <p>A document with site, building and storeys is one call. Lengths are metres, whatever the file unit is.</p>
 
     <pre><code>const doc = await xeo.document.create({
-  schema: 'IFC4', units: { length: 'm' }, project: { name: 'Villa from a picture' },
+  schema: 'IFC4', units: { length: 'm' }, project: { name: 'Villa from a picture' }, stableGuids: 'xeoifc-showcase-villa',
   scaffold: { site: 'Garden', building: 'Villa', storeys: [
     { name: 'Ground floor', elevation: 0 }, { name: 'First floor', elevation: 3.3 }, { name: 'Roof', elevation: 6.5 }] },
 });</code></pre>
+
+    <p><code>stableGuids</code> makes the script re-runnable: GlobalIds are derived from type, name and owner instead of drawn at
+        random, so a later change to the script adds or changes elements without touching the GlobalId of any other (BCF topics, saved
+        selections and <code>xeoifc diff</code> keep working across revisions).</p>
 
     <p>An element is one call as well: entity, containment, placement, geometry, colour and property sets. An opening with its
         window is a second one. xeoIFC cuts the opening when the model is displayed or converted.</p>

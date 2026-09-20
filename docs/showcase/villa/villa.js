@@ -9,11 +9,13 @@ const WOOD = [0.62, 0.44, 0.27], FABRIC = [0.93, 0.9, 0.84], CUSHION = [0.98, 0.
 const GRASS = [0.36, 0.55, 0.2], LEAF = [0.22, 0.42, 0.16], CYPRESS = [0.13, 0.3, 0.13], LAVENDER = [0.55, 0.45, 0.7];
 const BLOSSOM = [0.95, 0.95, 0.9], POT = [0.8, 0.62, 0.42], WATER = [0.2, 0.68, 0.86, 0.8], FLOOR = [0.88, 0.84, 0.78];
 const STEEL = [0.75, 0.76, 0.78], WARM = [1.0, 0.85, 0.55], OAK = [0.75, 0.6, 0.42];
+const ANTHRACITE = [0.2, 0.21, 0.23], FLOORTILE = [0.62, 0.63, 0.65], MIRROR = [0.78, 0.86, 0.9], ORANGE = [0.9, 0.55, 0.15];
 
 // ------------------------------------------------------------------------------------------------ document
 const Z1 = 3.3, Z2 = 6.5, H = 2.9;   // first floor, roof, clear wall height
 const doc = await xeo.document.create({
   schema: 'IFC4', units: { length: 'm' }, project: { name: 'Villa from a picture' },
+  stableGuids: 'xeoifc-showcase-villa',   // GlobalIds derive from type, name and owner: a re-run keeps them
   scaffold: { site: 'Garden', building: 'Villa', storeys: [
     { name: 'Ground floor', elevation: 0 }, { name: 'First floor', elevation: Z1 }, { name: 'Roof', elevation: Z2 }] },
 });
@@ -115,6 +117,27 @@ const bed = (name, c, at, rot, w = 1.8, l = 2.1) => put('IfcFurniture', name, c,
   [box(w / 2 + 0.06, l - 0.55, 0.52, w - 0.12, l - 0.12, 0.66), WHITE]], { predefinedType: 'BED' });
 const cabinet = (name, c, at, rot, w, d, h, body = OAK, top = null) => put('IfcFurniture', name, c, at, rot,
   top ? [[box(0, 0, 0, w, d, h - 0.04), body], [box(-0.02, -0.02, h - 0.04, w + 0.02, d + 0.02, h), top]] : [[box(0, 0, 0, w, d, h), body]]);
+// Fitted units: modules = [width, kind] along +x, fronts towards -y, carcass from z0 to z0 + h.
+// Kinds: door, drawers (3 fronts), open (no front: an appliance goes there).
+function unitParts(modules, d, z0, h, body, front, handles = true) {
+  const w = modules.reduce((sum, m) => sum + m[0], 0), parts = [[box(0, 0.02, z0, w, d, z0 + h), body]];
+  if (z0 > 0 && z0 < 0.3) parts.push([box(0, 0.07, 0, w, d, z0), BLACK]);
+  let x = 0;
+  for (const [mw, kind] of modules) {
+    const rows = kind === 'drawers' ? 3 : kind === 'open' ? 0 : 1;
+    for (let r = 0; r < rows; r++) {
+      const a = z0 + r * h / rows + 0.004, b = z0 + (r + 1) * h / rows - 0.004;
+      parts.push([box(x + 0.004, 0, a, x + mw - 0.004, 0.02, b), front]);
+      if (handles) parts.push([box(x + 0.08, -0.025, b - 0.06, x + mw - 0.08, 0, b - 0.045), STEEL]);
+    }
+    x += mw;
+  }
+  return parts;
+}
+const applianceFront = (x0, x1, z0, z1, color, vertical = false) => [[box(x0 + 0.004, 0, z0 + 0.004, x1 - 0.004, 0.02, z1 - 0.004), color],
+  [vertical ? box(x0 + 0.05, -0.03, z0 + (z1 - z0) * 0.25, x0 + 0.07, 0, z0 + (z1 - z0) * 0.75) : box(x0 + 0.08, -0.03, z1 - 0.08, x1 - 0.08, 0, z1 - 0.06), STEEL]];
+const pendant = (name, c, at, ceiling) => make('IfcLightFixture', name, c, at, [
+  [lathe([[0.3, 1.75], [0.27, 1.95], [0.12, 2.12], [0.03, 2.15]], 12), WARM], [boxMesh(-0.008, -0.008, 2.15, 0.008, 0.008, ceiling), BLACK]], { predefinedType: 'POINTSOURCE' });
 const rug = (name, c, x0, y0, x1, y1, color = LINEN) => solid('IfcFurnishingElement', name, c, box(x0, y0, 0, x1, y1, 0.02), color);
 const curtain = (name, c, x0, y0, x1, y1) => solid('IfcFurnishingElement', name, c, box(x0, y0, 0.03, x1, y1, H - 0.1), WHITE, { objectType: 'Curtain' });
 // Sun lounger (all meshes, so the back rest can be tilted): head towards +y.
@@ -287,7 +310,7 @@ const toMaster = await wall('Wall master bedroom / hallway', S1, [5.9, 2.5], [5.
 await xeo.opening.add({ host: toMaster.ref, offset: 4.05, width: 0.9, height: 2.1, fill: { type: 'IfcDoor', name: 'Master bedroom door', color: OAK } });
 await wall('Wall bathroom / studio', S1, [9.1, 2.5], [9.1, 6.4], WHITE, H, 0.12, 0, false);
 const hallway = await wall('Hallway wall', S1, [5.96, 6.4], [12.7, 6.4], WHITE, H, 0.12, 0, false);
-await xeo.opening.add({ host: hallway.ref, offset: 1.1, width: 0.9, height: 2.1, fill: { type: 'IfcDoor', name: 'Bathroom door', color: OAK } });
+await xeo.opening.add({ host: hallway.ref, offset: 1.7, width: 0.9, height: 2.1, fill: { type: 'IfcDoor', name: 'Bathroom door', color: OAK } });
 await xeo.opening.add({ host: hallway.ref, offset: 4.4, width: 0.9, height: 2.1, fill: { type: 'IfcDoor', name: 'Studio door', color: OAK } });
 await balustrade('Balcony balustrade', S1, box(0.05, -0.36, 0, 17, -0.34, 1.05));
 await balustrade('Balcony balustrade west', S1, box(0.05, -0.34, 0, 0.07, 1, 1.05));
@@ -324,15 +347,38 @@ await cabinet('Guest nightstand west', S0, [17.5, 2.9, 0], 0, 0.5, 0.4, 0.5);
 await cabinet('Guest nightstand east', S0, [20, 2.9, 0], 0, 0.5, 0.4, 0.5);
 await cabinet('Guest wardrobe', S0, [17.2, 4.3, 0], 0, 2.4, 0.6, 2.3, WHITE);
 for (const [i, x] of [17.25, 20.2].entries()) await curtain('Guest bedroom curtain ' + (i + 1), S0, x, -0.62, x + 0.55, -0.54);
-await cabinet('Kitchen counter', S0, [-6.6, 7.05, 0], 0, 6.4, 0.65, 0.92, TILE, WHITE);
-await cabinet('Kitchen tall units', S0, [-6.6, 4.4, 0], 0, 0.65, 2.6, 2.3, OAK);
-await cabinet('Kitchen island', S0, [-5, 4.3, 0], 0, 3.0, 1.1, 0.92, OAK, WHITE);
-for (let i = 0; i < 4; i++) await put('IfcFurniture', 'Bar stool ' + (i + 1), S0, [-4.6 + i * 0.75, 3.85, 0], 0, [[cyl(0, 0, 0.62, 0.19, 0.06), LINEN], [cyl(0, 0, 0, 0.03, 0.62), BLACK], [cyl(0, 0, 0, 0.17, 0.02), BLACK]], { predefinedType: 'CHAIR' });
+// Kitchen in the annex: base run with sink, dishwasher and hob along the north wall, wall units and hood above, oven tower and
+// fridge at the east end, island with stools and pendant lamps.
+const KX = -6.6, KY = 7.08;   // front left corner of the base run
+await put('IfcFurniture', 'Kitchen base units', S0, [KX, KY, 0], 0, [
+  ...unitParts([[0.6, 'drawers'], [0.6, 'door'], [0.6, 'open'], [0.9, 'door'], [0.6, 'drawers'], [0.9, 'drawers'], [0.6, 'door'], [0.3, 'door']], 0.62, 0.1, 0.78, ANTHRACITE, TILE),
+  [box(-0.01, -0.03, 0.88, 5.1, 0.62, 0.92), WHITE]]);
+await put('IfcElectricAppliance', 'Dishwasher', S0, [KX, KY, 0], 0, applianceFront(1.2, 1.8, 0.1, 0.88, STEEL), { predefinedType: 'DISHWASHER' });
+await make('IfcSanitaryTerminal', 'Kitchen sink', S0, [KX + 1.9, KY + 0.1, 0.92], [[box(0, 0, 0, 0.7, 0.42, 0.006), STEEL], [box(0.03, 0.03, 0.006, 0.42, 0.39, 0.008), ANTHRACITE],
+  [cyl(0.56, 0.37, 0, 0.02, 0.32), STEEL], [box(0.54, 0.14, 0.3, 0.58, 0.37, 0.33), STEEL]], { predefinedType: 'SINK' });
+await make('IfcElectricAppliance', 'Induction hob', S0, [KX + 3.05, KY + 0.08, 0.92], [[box(0, 0, 0, 0.8, 0.5, 0.008), BLACK],
+  ...[[0.2, 0.14], [0.6, 0.14], [0.2, 0.37], [0.6, 0.37]].map(([x, y]) => [cyl(x, y, 0.008, 0.085, 0.002), FLOORTILE])], { predefinedType: 'ELECTRICCOOKER' });
+await make('IfcElectricAppliance', 'Extractor hood', S0, [KX + 3.0, KY + 0.12, 0], [[box(0, 0, 1.62, 0.9, 0.5, 1.7), STEEL], [box(0.3, 0.2, 1.7, 0.6, 0.5, H), STEEL]],
+  { predefinedType: 'USERDEFINED', objectType: 'Extractor hood' });
+await put('IfcFurniture', 'Kitchen wall units west', S0, [KX, 7.35, 0], 0, unitParts([[0.6, 'door'], [0.6, 'door'], [0.6, 'door'], [0.6, 'door'], [0.6, 'door']], 0.35, 1.45, 0.7, OAK, OAK, false));
+await put('IfcFurniture', 'Kitchen wall units east', S0, [KX + 3.9, 7.35, 0], 0, unitParts([[0.6, 'door'], [0.6, 'door']], 0.35, 1.45, 0.7, OAK, OAK, false));
+await solid('IfcCovering', 'Kitchen splashback', S0, box(KX, 7.68, 0.92, KX + 5.1, 7.7, 1.45), LINEN, { predefinedType: 'CLADDING' });
+await put('IfcFurniture', 'Kitchen tall units', S0, [KX + 5.1, KY, 0], 0, [...unitParts([[0.6, 'open'], [0.75, 'open']], 0.62, 0.1, 2.2, OAK, OAK),
+  [box(0.004, 0, 0.104, 0.596, 0.02, 0.85), OAK], [box(0.004, 0, 1.87, 0.596, 0.02, 2.296), OAK]]);
+await put('IfcElectricAppliance', 'Oven', S0, [KX + 5.1, KY, 0], 0, applianceFront(0, 0.6, 0.86, 1.48, BLACK), { predefinedType: 'ELECTRICCOOKER' });
+await put('IfcElectricAppliance', 'Microwave', S0, [KX + 5.1, KY, 0], 0, applianceFront(0, 0.6, 1.49, 1.86, BLACK), { predefinedType: 'MICROWAVE' });
+await put('IfcElectricAppliance', 'Fridge-freezer', S0, [KX + 5.1, KY, 0], 0, [...applianceFront(0.6, 1.35, 0.1, 0.95, STEEL, true), ...applianceFront(0.6, 1.35, 0.96, 2.3, STEEL, true)],
+  { predefinedType: 'FRIDGE_FREEZER' });
+await put('IfcFurniture', 'Kitchen island', S0, [-2, 5.4, 0], 180, [...unitParts([[0.6, 'drawers'], [0.9, 'door'], [0.9, 'door'], [0.6, 'drawers']], 0.85, 0.1, 0.78, OAK, OAK),
+  [box(-0.03, -0.03, 0.88, 3.03, 1.15, 0.92), WHITE]]);
+for (let i = 0; i < 4; i++) await put('IfcFurniture', 'Bar stool ' + (i + 1), S0, [-4.6 + i * 0.75, 4.0, 0], 0, [[cyl(0, 0, 0.62, 0.19, 0.06), LINEN], [cyl(0, 0, 0, 0.03, 0.62), BLACK],
+  [cyl(0, 0, 0, 0.17, 0.02), BLACK], [cyl(0, 0, 0.25, 0.15, 0.015), STEEL]], { predefinedType: 'CHAIR' });
+for (const [i, x] of [-4.5, -3.5, -2.5].entries()) await pendant('Island pendant lamp ' + (i + 1), S0, [x, 4.95, 0], H);
+await make('IfcFurnishingElement', 'Fruit bowl', S0, [-3.5, 4.9, 0.92], [[lathe([[0.06, 0], [0.17, 0.07], [0.18, 0.09]], 12), WHITE], [crown(0, 0, 0.03, 0.11, 0.11), ORANGE]], { objectType: 'Fruit bowl' });
 // Outdoor dining under the pergola, lounge on the terrace
 await table('Outdoor dining table', S0, [-6.4, -2.6, 0], 0, 3.4, 1.1, 0.76, WOOD, WOOD);
 for (let i = 0; i < 5; i++) { await chair('Outdoor chair south ' + (i + 1), S0, [-5.79 + i * 0.66, -2.75, 0], 180, WOOD, LINEN); await chair('Outdoor chair north ' + (i + 1), S0, [-6.25 + i * 0.66, -1.4, 0], 0, WOOD, LINEN); }
-for (const [i, x] of [-5.6, -3.8].entries()) await make('IfcLightFixture', 'Pendant lamp ' + (i + 1), S0, [x, -2.05, 0], [
-  [lathe([[0.3, 1.75], [0.27, 1.95], [0.12, 2.12], [0.03, 2.15]], 12), WARM], [boxMesh(-0.008, -0.008, 2.15, 0.008, 0.008, 2.8), BLACK]], { predefinedType: 'POINTSOURCE' });
+for (const [i, x] of [-5.6, -3.8].entries()) await pendant('Pendant lamp ' + (i + 1), S0, [x, -2.05, 0], 2.8);
 await sofa('Terrace sofa', S0, [6.6, -2.4, 0], 0, 3.4, WOOD, FABRIC);
 await sofa('Terrace sofa, short side', S0, [10.1, -2.5, 0], -90, 2.0, WOOD, FABRIC);
 await table('Terrace coffee table', S0, [7.6, -4.2, 0], 0, 1.5, 0.8, 0.34, WOOD, WOOD);
@@ -352,12 +398,30 @@ await sofa('Studio sofa', S1, [9.6, 5.2, 0], 0, 2.6);
 await table('Studio table', S1, [10.2, 3.9, 0], 0, 1.2, 0.7, 0.36);
 await put('IfcFurniture', 'Studio shelf', S1, [9.6, 2.8, 0], 90, [[box(0, 0, 0, 2.2, 0.4, 2.0), OAK]], { predefinedType: 'SHELF' });
 await rug('Hallway runner', S1, 7.4, 6.7, 11.4, 7.4);
-// Bathroom behind the tiled bay
-await make('IfcSanitaryTerminal', 'Bathtub', S1, [6.05, 2.7, 0], [[box(0, 0, 0, 0.85, 1.8, 0.58), WHITE], [box(0.08, 0.08, 0.58, 0.77, 1.72, 0.585), WATER]], { predefinedType: 'BATH' });
-await make('IfcSanitaryTerminal', 'Double washbasin', S1, [7.4, 2.62, 0], [[box(0, 0, 0.35, 1.5, 0.5, 0.82), OAK], [box(-0.02, 0, 0.82, 1.52, 0.52, 0.86), WHITE],
-  [cyl(0.4, 0.26, 0.86, 0.19, 0.02), STEEL], [cyl(1.1, 0.26, 0.86, 0.19, 0.02), STEEL], [box(0, -0.04, 1.1, 1.5, -0.02, 1.9), GLASS]], { predefinedType: 'WASHHANDBASIN' });
-await make('IfcSanitaryTerminal', 'WC', S1, [8.55, 4.2, 0], [[box(0, 0, 0, 0.45, 0.38, 0.4), WHITE], [box(0.3, 0.02, 0.4, 0.45, 0.36, 0.85), WHITE]], { predefinedType: 'TOILETPAN' });
-await make('IfcSanitaryTerminal', 'Shower', S1, [6.05, 5.2, 0], [[box(0, 0, 0, 1.4, 1.1, 0.04), WHITE], [box(1.4, 0, 0.04, 1.42, 1.1, 2.1), GLASS]], { predefinedType: 'SHOWER' });
+// Bathroom behind the tiled bay (x 5.96..9.04, y 2.55..6.34): tub on the west wall, vanity on the south wall, wall-hung WC and
+// towel radiator on the east wall, walk-in shower in the north-west corner.
+await solid('IfcCovering', 'Bathroom floor tiles', S1, box(5.96, 2.55, 0, 9.04, 6.34, 0.012), FLOORTILE, { predefinedType: 'FLOORING' });
+await make('IfcSanitaryTerminal', 'Bathtub', S1, [6.05, 2.75, 0], [[box(0, 0, 0, 0.85, 1.8, 0.6), WHITE], [box(0.07, 0.07, 0.6, 0.78, 1.73, 0.603), WATER],
+  [box(-0.08, 0.86, 0.74, 0.2, 0.9, 0.77), STEEL], [box(-0.08, 0.8, 0.84, -0.04, 0.96, 0.88), STEEL], [box(0.1, 1.5, 0.603, 0.75, 1.68, 0.68), LINEN]], { predefinedType: 'BATH' });
+await put('IfcSanitaryTerminal', 'Double vanity', S1, [8.9, 3.12, 0], 180, [...unitParts([[0.75, 'drawers'], [0.75, 'drawers']], 0.5, 0.3, 0.5, OAK, OAK),
+  [box(-0.02, -0.02, 0.8, 1.52, 0.5, 0.84), WHITE],
+  ...[0.38, 1.12].flatMap((x) => [[cyl(x, 0.24, 0.84, 0.2, 0.12), WHITE], [cyl(x, 0.24, 0.96, 0.17, 0.003), MIRROR],
+    [cyl(x, 0.46, 0.84, 0.015, 0.3), STEEL], [box(x - 0.012, 0.3, 1.11, x + 0.012, 0.46, 1.135), STEEL]])], { predefinedType: 'WASHHANDBASIN' });
+await make('IfcFurnishingElement', 'Bathroom mirror', S1, [0, 0, 0], [[box(7.45, 2.56, 1.05, 8.85, 2.575, 1.95), MIRROR], [box(7.42, 2.555, 1.02, 8.88, 2.56, 1.98), OAK]], { objectType: 'Mirror' });
+for (const [i, x] of [7.7, 8.4].entries()) await solid('IfcLightFixture', 'Mirror light ' + (i + 1), S1, box(x, 2.56, 2.02, x + 0.2, 2.64, 2.07), WARM, { predefinedType: 'POINTSOURCE' });
+await put('IfcSanitaryTerminal', 'WC', S1, [8.34, 4.7, 0], -90, [[box(-0.05, 0.55, 0, 0.43, 0.7, 1.15), WHITE], [box(0.02, 0.14, 0.12, 0.36, 0.55, 0.42), WHITE], [cyl(0.19, 0.16, 0.12, 0.17, 0.3), WHITE],
+  [cyl(0.19, 0.16, 0.42, 0.175, 0.02), WHITE], [box(0.015, 0.16, 0.42, 0.365, 0.5, 0.44), WHITE], [box(0.11, 0.54, 0.95, 0.27, 0.55, 1.05), STEEL]], { predefinedType: 'TOILETPAN' });
+await make('IfcSanitaryTerminal', 'Walk-in shower', S1, [6.05, 5.2, 0], [[box(0, 0, 0.012, 1.3, 1.1, 0.04), WHITE], [box(0, 0, 0.04, 1.3, 0.015, 2.1), GLASS], [box(1.285, 0.5, 0.04, 1.3, 1.1, 2.1), GLASS],
+  [cyl(0.55, 0.6, 2.15, 0.16, 0.02), STEEL], [box(-0.08, 0.59, 2.17, 0.55, 0.61, 2.19), STEEL], [box(-0.08, 0.5, 1.1, -0.04, 0.7, 1.2), STEEL], [cyl(0.65, 0.55, 0.04, 0.05, 0.003), STEEL]],
+  { predefinedType: 'SHOWER' });
+{
+  const bars = [[box(8.99, 5.1, 0.6, 9.02, 5.13, 1.8), STEEL], [box(8.99, 5.57, 0.6, 9.02, 5.6, 1.8), STEEL]];
+  for (let k = 0; k < 9; k++) bars.push([box(8.995, 5.1, 0.68 + 0.13 * k, 9.015, 5.6, 0.7 + 0.13 * k), STEEL]);
+  bars.push([box(8.96, 5.16, 1.3, 9.03, 5.54, 1.76), LINEN]);
+  await make('IfcSpaceHeater', 'Towel radiator', S1, [0, 0, 0], bars, { predefinedType: 'RADIATOR' });
+}
+await rug('Bath mat', S1, 7.0, 3.4, 7.5, 4.2, WHITE);
+await make('IfcFurnishingElement', 'Laundry basket', S1, [8.75, 3.6, 0.012], [[cyl(0, 0, 0, 0.22, 0.55), LINEN], [cyl(0, 0, 0.55, 0.23, 0.02), OAK]], { objectType: 'Laundry basket' });
 await balustrade('Stair well balustrade', S1, box(7.3, 7.7, 0, 7.32, 8.7, 1.05));
 for (const [i, x] of [9.3, 12.0].entries()) await curtain('Studio curtain ' + (i + 1), S1, x, 2.55, x + 0.6, 2.63);
 for (const [i, [x, y, radius, potH, h]] of [[0.9, 0.5, 0.34, 0.65, 1.3], [2.6, 0.2, 0.3, 0.6, 1.6], [7.4, 0.4, 0.4, 0.75, 1.9], [4.4, 0.6, 0.26, 0.45, 0.9],
