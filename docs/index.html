@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/index-wcZFZ-x2.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-B8yAhePj.css">
+    <script type="module" crossorigin src="./assets/index-fyoda4Vb.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BjRsZB6c.css">
   </head>
   <body>
     <div id="app">
@@ -31,7 +31,7 @@
           <div id="sidebar-resizer" title="Drag to resize"></div>
           <div id="properties" class="properties empty">Select an element to inspect properties</div>
           <footer id="status-bar" aria-live="polite">
-            <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip" multiple hidden />
+            <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.ids" multiple hidden />
             <button id="about-link" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
             <button id="open-button" type="button">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -96,6 +96,12 @@
                 <path d="M3.5 3.5h17v17h-7M9.5 20.5h-6v-17M3.5 12.5h5M12.5 3.5v6M12.5 13.5v3h8" />
               </svg>
             </button>
+            <button id="walk-button" class="tool-icon" type="button" title="Walk mode and saved views" aria-label="Walk mode and saved views" aria-haspopup="dialog" aria-expanded="false" aria-controls="walk-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="13" cy="4.5" r="2" />
+                <path d="M9 21l2.5-6-2-2.5 1-5.5 3.5 1 2 3 3 1M10.5 7l-3.5 2-1 3.5M13.5 13.5l2.5 3 1 4.5" />
+              </svg>
+            </button>
             <button id="measure-button" class="tool-icon" type="button" title="Measure" aria-label="Measure" aria-haspopup="dialog" aria-expanded="false" aria-controls="measure-panel">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M2.5 16.5l14-14 5 5-14 14zM6 13l2 2M9 10l3 3M12 7l2 2M15 4l3 3" />
@@ -110,6 +116,21 @@
                 <path class="section-icon-hatch" d="M13.1 6.45v2.9M15 7.55v2.9M16.9 8.65v2.9M10.9 6.45v2.9M9 7.55v2.9M7.1 8.65v2.9" />
               </svg>
             </button>
+            <button id="data-button" class="tool-icon" type="button" title="Properties as data: filter, colour, quantities" aria-label="Properties as data" aria-haspopup="dialog" aria-expanded="false" aria-controls="data-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3.5 4.5h17v15h-17zM3.5 9.5h17M3.5 14.5h17M9.5 4.5v15" />
+              </svg>
+            </button>
+            <button id="clash-button" class="tool-icon" type="button" title="Clash check" aria-label="Clash check" aria-haspopup="dialog" aria-expanded="false" aria-controls="clash-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3.5 8.5h11v11h-11zM9.5 4.5h11v11h-11zM9.5 8.5v7h5" />
+              </svg>
+            </button>
+            <button id="ids-button" class="tool-icon" type="button" title="IDS validation" aria-label="IDS validation" aria-haspopup="dialog" aria-expanded="false" aria-controls="ids-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5.5 3.5h9l4 4v13h-13zM14.5 3.5v4h4M8.5 13.5l2.5 2.5 4.5-5" />
+              </svg>
+            </button>
             <button id="compare-button" class="tool-icon" type="button" title="Compare two revisions" aria-label="Compare two revisions" aria-haspopup="dialog" aria-expanded="false" aria-controls="compare-panel">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3.5 7.5l6-3v12l-6 3zM20.5 7.5l-6-3v12l6 3zM12 2.5v19" />
@@ -118,6 +139,16 @@
             <button id="bcf-button" class="tool-icon" type="button" title="BCF issues" aria-label="BCF issues" aria-haspopup="dialog" aria-expanded="false" aria-controls="bcf-panel">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3.5 4.5h17v12h-9l-4.5 4v-4h-3.5zM12 7.5v4.5M12 14v.2" />
+              </svg>
+            </button>
+            <button id="lab-button" class="tool-icon" type="button" title="Lab: experimental tools" aria-label="Lab: experimental tools" aria-haspopup="dialog" aria-expanded="false" aria-controls="lab-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 2.5h6M10 2.5v6.5L4.5 19a1.7 1.7 0 0 0 1.5 2.5h12a1.7 1.7 0 0 0 1.5-2.5L14 9V2.5M7.3 14.5h9.4" />
+              </svg>
+            </button>
+            <button id="script-button" class="tool-icon" type="button" title="Script editor (beta)" aria-label="Script editor (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8.5 7.5L4 12l4.5 4.5M15.5 7.5L20 12l-4.5 4.5M13.5 5l-3 14" />
               </svg>
             </button>
             <button id="ai-button" class="tool-icon" type="button" title="AI assistant (beta)" aria-label="AI assistant (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
@@ -243,6 +274,23 @@
               <button id="storey-shift-reset" class="panel-secondary" type="button">Reset</button>
             </div>
           </div>
+          <div id="walk-panel" role="dialog" aria-labelledby="walk-title" hidden>
+            <button id="walk-close" class="panel-close" type="button" aria-label="Close walk mode and views"></button>
+            <h2 id="walk-title">Walk and views</h2>
+            <div class="section-row">
+              <button id="walk-toggle" class="panel-primary" type="button">Start walking</button>
+              <label class="compare-option" title="Stand on floors and stairs; off: Q and E move down and up"><input id="walk-gravity" type="checkbox" checked /> Gravity</label>
+              <label class="compare-option" title="Stop at walls and furniture"><input id="walk-collide" type="checkbox" checked /> Collision</label>
+            </div>
+            <div id="walk-status" class="section-hint" aria-live="polite">Walk through the model at eye height.</div>
+            <h3>Saved views</h3>
+            <div class="section-row">
+              <input id="view-name" type="text" placeholder="Name of the current view" autocomplete="off" aria-label="View name" />
+              <button id="view-save" class="panel-secondary" type="button">Save view</button>
+              <button id="view-link" class="panel-secondary" type="button" title="Copy a link that opens the viewer with this view (and the model, when it was loaded from an address)">Copy link</button>
+            </div>
+            <ul id="view-list"></ul>
+          </div>
           <svg id="measure-overlay" aria-hidden="true"></svg>
           <div id="measure-panel" role="dialog" aria-labelledby="measure-title" hidden>
             <button id="measure-close" class="panel-close" type="button" aria-label="Close measure"></button>
@@ -270,10 +318,132 @@
               <button class="panel-secondary" type="button" data-section-axis="2" title="Horizontal plane through the model centre">Z</button>
             </div>
             <ul id="section-list"></ul>
+            <label class="compare-option" title="Parallel projection: no perspective, true to scale"><input id="section-ortho" type="checkbox" /> Orthographic view</label>
+            <div class="section-row">
+              <span class="section-hint">Drawing of the 2D view</span>
+              <select id="section-drawing-scale" aria-label="Drawing scale">
+                <option value="20">1:20</option>
+                <option value="50">1:50</option>
+                <option value="100" selected>1:100</option>
+                <option value="200">1:200</option>
+                <option value="500">1:500</option>
+              </select>
+            </div>
+            <label class="compare-option"><input id="section-drawing-image" type="checkbox" checked /> Shaded view underneath the cut lines</label>
+            <div class="section-row">
+              <button id="section-drawing-svg" class="panel-secondary" type="button" disabled>Save SVG</button>
+              <button id="section-drawing-print" class="panel-secondary" type="button" disabled>Print / PDF</button>
+              <span id="section-drawing-status" class="section-hint" aria-live="polite"></span>
+            </div>
             <div class="section-row">
               <span class="section-hint">Drag the round handle of a plane to move it.</span>
               <button id="section-clear" class="panel-secondary" type="button">Remove all</button>
             </div>
+          </div>
+          <div id="data-panel" role="dialog" aria-labelledby="data-title" hidden>
+            <button id="data-close" class="panel-close" type="button" aria-label="Close properties as data"></button>
+            <h2 id="data-title">Properties as data</h2>
+            <div class="section-row">
+              <span id="data-status" class="section-hint" aria-live="polite">The property index is built when this panel opens.</span>
+              <button id="data-rebuild" class="panel-secondary" type="button">Rebuild</button>
+            </div>
+            <datalist id="data-columns"></datalist>
+            <h3>Filter</h3>
+            <div id="data-conditions"></div>
+            <div class="section-row">
+              <button id="data-add-condition" class="panel-secondary" type="button">+ Condition</button>
+              <span id="data-match" class="section-hint"></span>
+            </div>
+            <div class="section-row">
+              <button id="data-select" class="panel-primary" type="button">Select</button>
+              <button id="data-isolate" class="panel-secondary" type="button">Isolate</button>
+              <button id="data-show-all" class="panel-secondary" type="button">Show all</button>
+            </div>
+            <h3>Colour by</h3>
+            <div class="section-row">
+              <input id="data-color-column" type="text" list="data-columns" placeholder="Property" aria-label="Colour by property" />
+              <button id="data-color-apply" class="panel-primary" type="button">Apply</button>
+              <button id="data-color-clear" class="panel-secondary" type="button">Clear</button>
+            </div>
+            <div id="data-legend"></div>
+            <h3>Quantities</h3>
+            <div class="section-row">
+              <input id="data-group-column" type="text" list="data-columns" value="Type" placeholder="Group by" aria-label="Group by" title="Group by" />
+              <input id="data-sum-column" type="text" list="data-columns" placeholder="Sum of (optional)" aria-label="Sum of" title="Sum of a numeric property" />
+            </div>
+            <div id="data-table"></div>
+            <div class="section-row">
+              <button id="data-export-table" class="panel-secondary" type="button" title="The table above">Table CSV</button>
+              <button id="data-export-csv" class="panel-secondary" type="button" title="One row per matching element, one column per property">Elements CSV</button>
+              <button id="data-export-xlsx" class="panel-secondary" type="button" title="One row per matching element, one column per property">Elements XLSX</button>
+            </div>
+          </div>
+          <div id="clash-panel" role="dialog" aria-labelledby="clash-title" hidden>
+            <button id="clash-close" class="panel-close" type="button" aria-label="Close clash check"></button>
+            <h2 id="clash-title">Clash check</h2>
+            <div class="clash-set"><span>Set A</span>
+              <select id="clash-a-model" aria-label="Set A model" title="Model"></select>
+              <select id="clash-a-type" aria-label="Set A type" title="Type"></select>
+              <select id="clash-a-storey" aria-label="Set A storey" title="Storey"></select>
+            </div>
+            <div class="clash-set"><span>Set B</span>
+              <select id="clash-b-model" aria-label="Set B model" title="Model"></select>
+              <select id="clash-b-type" aria-label="Set B type" title="Type"></select>
+              <select id="clash-b-storey" aria-label="Set B storey" title="Storey"></select>
+            </div>
+            <label class="compare-option" title="Surfaces that cross each other deeper than the tolerance, or one element inside another. Touching faces do not count.">
+              <input id="clash-hard" type="checkbox" checked /> Hard clashes, tolerance <input id="clash-tolerance" type="number" min="0" max="1000" step="1" value="10" /> mm</label>
+            <label class="compare-option" title="Elements that come closer to each other than this gap">
+              <input id="clash-clearance-on" type="checkbox" /> Clearance below <input id="clash-clearance" type="number" min="0" max="10000" step="5" value="50" /> mm</label>
+            <div class="section-row">
+              <button id="clash-run" class="panel-primary" type="button">Run</button>
+              <button id="clash-bcf" class="panel-secondary" type="button" disabled title="One BCF topic per clash, with a viewpoint and a snapshot">Add to BCF</button>
+            </div>
+            <div id="clash-status" class="section-hint" aria-live="polite">Pick two sets and run.</div>
+            <ul id="clash-list"></ul>
+          </div>
+          <div id="lab-panel" role="dialog" aria-labelledby="lab-title" hidden>
+            <button id="lab-close" class="panel-close" type="button" aria-label="Close lab"></button>
+            <h2 id="lab-title">Lab</h2>
+            <div class="section-hint">Experimental tools - rough models, expect rough numbers.</div>
+            <div class="section-row lab-tool">
+              <span title="Finds the heated volume, emits heat rays from a grid of points in it and lets the building elements collect the heat">Heat flow simulation</span>
+              <button id="lab-heat-toggle" class="panel-primary" type="button">Start</button>
+            </div>
+          </div>
+          <div id="heat-panel" role="region" aria-labelledby="heat-title" hidden>
+            <button id="heat-close" class="panel-close" type="button" aria-label="Stop and close the heat flow simulation"></button>
+            <div id="heat-side">
+              <h2 id="heat-title">Heat flow</h2>
+              <div class="heat-inputs">
+                <label>Inside <input id="heat-inside" type="number" min="-50" max="60" step="1" value="20" /> C</label>
+                <label>Outside <input id="heat-outside" type="number" min="-60" max="60" step="1" value="-5" /> C</label>
+                <select id="heat-mode" aria-label="Colour by" title="Colour by">
+                  <option value="temperature">Collected heat</option>
+                  <option value="flux">Heat loss W/m2</option>
+                </select>
+              </div>
+              <div class="heat-scale"><span id="heat-scale-min"></span><span class="heat-scale-bar"></span><span id="heat-scale-max"></span></div>
+              <dl id="heat-stats"></dl>
+              <div id="heat-status" class="section-hint" aria-live="polite"></div>
+            </div>
+            <div id="heat-plot">
+              <div id="heat-legend"></div>
+              <canvas id="heat-graph" aria-label="Heat flow graph"></canvas>
+            </div>
+          </div>
+          <div id="ids-panel" role="dialog" aria-labelledby="ids-title" hidden>
+            <button id="ids-close" class="panel-close" type="button" aria-label="Close IDS validation"></button>
+            <h2 id="ids-title">IDS validation</h2>
+            <div class="section-row">
+              <button id="ids-open" class="panel-primary" type="button">Open .ids file</button>
+              <button id="ids-run" class="panel-secondary" type="button" disabled>Run again</button>
+              <button id="ids-bcf" class="panel-secondary" type="button" disabled title="One BCF topic per failing specification, with the failing elements selected">Failures to BCF</button>
+              <input id="ids-file-input" type="file" accept=".ids,.xml" hidden />
+            </div>
+            <div id="ids-status" class="section-hint" aria-live="polite">Open an IDS file to check the loaded models against it.</div>
+            <ul id="ids-specifications"></ul>
+            <div id="ids-detail"></div>
           </div>
           <div id="compare-panel" role="dialog" aria-labelledby="compare-title" hidden>
             <button id="compare-close" class="panel-close" type="button" aria-label="Close compare"></button>
@@ -302,6 +472,20 @@
               <button id="bcf-new-topic" class="panel-secondary" type="button" title="New topic with the current view as its viewpoint">New topic</button>
             </div>
             <label class="bcf-header"><span>Author</span><input id="bcf-author" type="text" placeholder="Your name or e-mail (for new topics, comments, edits)" autocomplete="email" spellcheck="false" /></label>
+            <details id="bcf-server">
+              <summary>BCF server</summary>
+              <label class="bcf-header bcf-field"><span>Address</span><input id="bcf-server-url" type="url" placeholder="https://server/... (the part in front of /bcf/2.1)" autocomplete="off" spellcheck="false" /></label>
+              <label class="bcf-header bcf-field"><span>Token</span><input id="bcf-server-token" type="password" placeholder="Access token - kept for this tab only" autocomplete="off" /></label>
+              <div class="bcf-header">
+                <button id="bcf-server-connect" class="panel-secondary" type="button">Connect</button>
+                <select id="bcf-server-project" aria-label="Project" disabled></select>
+              </div>
+              <div class="bcf-header">
+                <button id="bcf-server-pull" class="panel-secondary" type="button" title="Replace the topics of the panel with those of the project" disabled>Pull topics</button>
+                <button id="bcf-server-push" class="panel-secondary" type="button" title="Send new topics, comments, viewpoints and changed fields, then pull again" disabled>Push changes</button>
+              </div>
+              <span id="bcf-server-status" class="section-hint" aria-live="polite"></span>
+            </details>
             <datalist id="bcf-statuses">
               <option value="Open"></option>
               <option value="In Progress"></option>
@@ -366,6 +550,7 @@
             <div id="ai-header">
               <span id="ai-title">AI <span class="ai-beta" title="Experimental: check every proposal before applying it">Beta</span></span>
               <div id="ai-context"></div>
+              <button id="script-toggle" class="ai-link" type="button" aria-expanded="false" aria-controls="ai-script" title="Script editor: what the AI writes, and what you can write yourself">Script</button>
               <button id="ai-clear" class="ai-link" type="button" title="Forget this conversation">Clear</button>
               <button id="ai-settings-toggle" class="ai-link" type="button" aria-expanded="false" aria-controls="ai-settings">Settings</button>
               <button id="ai-close" class="panel-close" type="button" aria-label="Close AI assistant"></button>
@@ -380,12 +565,35 @@
               <label><span>API key</span><input id="ai-api-key" type="password" autocomplete="off" spellcheck="false" /></label>
               <span class="ai-note">The key is stored unencrypted in this browser and sent only to the chosen provider, together with your request and facts about the model.</span>
             </div>
-            <div id="ai-transcript" aria-live="polite"></div>
-            <div id="ai-input-row">
-              <textarea id="ai-input" rows="1" placeholder="Tell the model what to change, or ask about it..." aria-label="Request"></textarea>
-              <button id="ai-send" class="panel-primary" type="button">Send</button>
+            <div id="ai-body">
+              <div id="ai-script" hidden>
+                <div id="script-toolbar">
+                  <button id="script-run" class="panel-primary" type="button" title="Dry run: preview and report, nothing is changed (Ctrl+Enter)">Run</button>
+                  <button id="script-apply" class="panel-primary" type="button" disabled>Apply</button>
+                  <button id="script-discard" class="panel-secondary" type="button" disabled>Discard</button>
+                  <button id="script-undo" class="panel-secondary" type="button" title="Restore the model as it was before the last Apply" disabled>Undo</button>
+                  <select id="script-library" aria-label="Templates and saved scripts"></select>
+                </div>
+                <div id="script-editor"></div>
+                <div id="script-savebar">
+                  <input id="script-name" type="text" placeholder="Script name" aria-label="Script name" autocomplete="off" spellcheck="false" />
+                  <input id="script-params" type="text" placeholder='params JSON, e.g. {"height": 3}' aria-label="Script parameters (xeo.params)" autocomplete="off" spellcheck="false" />
+                  <button id="script-save" class="panel-secondary" type="button" title="Save in this browser (Ctrl+S)">Save</button>
+                  <button id="script-save-tool" class="panel-secondary" type="button" title="Save as a one-click tool">Save as tool</button>
+                  <button id="script-delete" class="ai-link" type="button" title="Delete the saved script with this name">Delete</button>
+                </div>
+                <div id="script-tools" hidden></div>
+                <div id="script-output" aria-live="polite"></div>
+              </div>
+              <div id="ai-chat">
+                <div id="ai-transcript" aria-live="polite"></div>
+                <div id="ai-input-row">
+                  <textarea id="ai-input" rows="1" placeholder="Tell the model what to change, build or find..." aria-label="Request"></textarea>
+                  <button id="ai-send" class="panel-primary" type="button">Send</button>
+                </div>
+                <span id="ai-hint">The selection is sent as context. Edits and scripts are previewed before they apply.</span>
+              </div>
             </div>
-            <span id="ai-hint">The selection is sent as context. Edits are previewed before they apply.</span>
           </div>
           <div id="load-overlay" role="group" aria-label="Loading progress" hidden>
             <div id="load-content">

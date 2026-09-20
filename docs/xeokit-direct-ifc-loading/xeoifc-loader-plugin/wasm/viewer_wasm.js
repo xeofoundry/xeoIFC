@@ -250,6 +250,13 @@ export class Viewer {
         return ret;
     }
     /**
+     * @returns {boolean}
+     */
+    is_orthographic() {
+        const ret = wasm.viewer_is_orthographic(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
      * Re-frame the model from the canonical isometric direction.
      */
     iso_view() {
@@ -357,6 +364,21 @@ export class Viewer {
         }
     }
     /**
+     * Ray into the displayed scene (walk mode collision and gravity): resolves to `[distance, handle]` in metres, or
+     * `undefined` when the ray hits nothing. `origin` is in the space of `camera_state`.
+     * @param {number} ox
+     * @param {number} oy
+     * @param {number} oz
+     * @param {number} dx
+     * @param {number} dy
+     * @param {number} dz
+     * @returns {Promise<any>}
+     */
+    probe(ox, oy, oz, dx, dy, dz) {
+        const ret = wasm.viewer_probe(this.__wbg_ptr, ox, oy, oz, dx, dy, dz);
+        return ret;
+    }
+    /**
      * Request a canvas redraw even when only surrounding DOM changed.
      */
     repaint() {
@@ -442,6 +464,29 @@ export class Viewer {
         wasm.viewer_set_clip_planes(this.__wbg_ptr, planes);
     }
     /**
+     * Walk mode: fade elements - 0 = as they are, 1..9 = tenths of transparency.
+     * @param {Uint32Array} handles
+     * @param {number} level
+     */
+    set_element_fade(handles, level) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.viewer_set_element_fade(this.__wbg_ptr, ptr0, len0, level);
+    }
+    /**
+     * Lab heat flow: colour elements by a heat level instead of their model colour - one level per handle, 0 = model
+     * colour again, 1..254 = cold..hot gradient, 255 = neutral grey. Empty lists clear every level.
+     * @param {Uint32Array} handles
+     * @param {Uint8Array} levels
+     */
+    set_element_heat(handles, levels) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray8ToWasm0(levels, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        wasm.viewer_set_element_heat(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+    }
+    /**
      * Shift elements to absolute display offsets: `offsets` holds one xyz triple per handle.
      * Handles without geometry are skipped together with their triple.
      * @param {Uint32Array} handles
@@ -455,10 +500,25 @@ export class Viewer {
         wasm.viewer_set_element_offsets(this.__wbg_ptr, ptr0, len0, ptr1, len1);
     }
     /**
+     * `set_element_offsets` with a tilt (fall easter egg): `values` holds 8 floats per handle - offset xyz, pivot xyz
+     * (unshifted, in the space of `element_bounds`), heading and angle in radians. The element turns by the angle about
+     * the horizontal axis at the heading through the pivot, then takes the offset; angle 0 clears its tilt.
+     * @param {Uint32Array} handles
+     * @param {Float32Array} values
+     */
+    set_element_tilted_offsets(handles, values) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArrayF32ToWasm0(values, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        wasm.viewer_set_element_tilted_offsets(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+    }
+    /**
      * World-space (metres, not rebased) bounds of each handle's element as they are displayed, JSON
      * `[[minx,miny,minz,maxx,maxy,maxz] | null, ...]` in handle order.
-     * Tint elements with a palette colour (model compare): 1 green, 2 red, 3 orange, 4 blue, 5 purple,
-     * 6 faint grey ghost (for elements that are also set transparent); 0 removes it.
+     * Tint elements with a palette colour (model compare, colour by property): 1 green, 2 red, 3 orange, 4 blue,
+     * 5 purple, 6 faint grey ghost (for elements that are also set transparent), 7..15 more hues (see main.wgsl);
+     * 0 removes it.
      * @param {Uint32Array} handles
      * @param {number} tint
      */
@@ -468,11 +528,26 @@ export class Viewer {
         wasm.viewer_set_element_tint(this.__wbg_ptr, ptr0, len0, tint);
     }
     /**
+     * Vertical field of view of the camera in degrees (45 by default).
+     * @param {number} degrees
+     */
+    set_field_of_view(degrees) {
+        wasm.viewer_set_field_of_view(this.__wbg_ptr, degrees);
+    }
+    /**
      * @param {number} layer
      * @param {boolean} visible
      */
     set_line_layer_visible(layer, visible) {
         wasm.viewer_set_line_layer_visible(this.__wbg_ptr, layer, visible);
+    }
+    /**
+     * Parallel (orthographic) projection on or off. The view height in metres is `2 * distance * tan(22.5 deg)`,
+     * `distance` being `camera_state()[3]`, so zooming and `set_camera_state` keep working.
+     * @param {boolean} ortho
+     */
+    set_orthographic(ortho) {
+        wasm.viewer_set_orthographic(this.__wbg_ptr, ortho);
     }
     /**
      * Upload a packed scene produced by `worker_load` (transferred from the
@@ -498,6 +573,16 @@ export class Viewer {
             throw takeFromExternrefTable0(ret[1]);
         }
         return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * Walk mode: probe rays pass through these elements (doors, windows) - or stop at them again.
+     * @param {Uint32Array} handles
+     * @param {boolean} passable
+     */
+    set_probe_passable(handles, passable) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.viewer_set_probe_passable(this.__wbg_ptr, ptr0, len0, passable);
     }
     /**
      * Upload optional sharp-edge overlay line positions, as xyz xyz pairs, with the element index of each pair.
@@ -2006,17 +2091,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 232, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 241, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 271, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 280, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 232, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 241, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },

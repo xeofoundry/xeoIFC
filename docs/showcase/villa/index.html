@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeoIFC showcase - a villa from one picture</title>
+    <link rel="icon" href="../../xeokit-icon.svg"/>
+    <style>
+        /* Same README look as ../index.html. */
+        :root {
+            color-scheme: light dark;
+            --ground: #ffffff;
+            --ink: #1f2328;
+            --muted: #59636e;
+            --line: #d1d9e0;
+            --link: #0969da;
+            --code: #eff1f3;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ground: #0d1117;
+                --ink: #f0f6fc;
+                --muted: #9198a1;
+                --line: #3d444d;
+                --link: #4493f8;
+                --code: #262c36;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: var(--ground);
+            margin: 0;
+        }
+
+        main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
+
+        h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 24px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 85%;
+            background: var(--code);
+            border-radius: 6px;
+        }
+
+        code { padding: .2em .4em; }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; }
+        pre code { padding: 0; background: none; font-size: 100%; }
+
+        figure { margin: 0 0 16px; }
+        figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+        figcaption, .under-viewer { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+        #viewer {
+            display: block;
+            width: 100%;
+            aspect-ratio: 900 / 600;
+            min-height: 320px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: #b8bec2;
+        }
+
+        .under-viewer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 8px 0 16px; }
+
+        table { border-collapse: collapse; margin: 0 0 16px; }
+        th, td { border: 1px solid var(--line); padding: 6px 13px; text-align: left; }
+
+        blockquote.prompt {
+            margin: 0 0 16px;
+            padding: 12px 16px;
+            border-left: .25em solid var(--link);
+            background: var(--code);
+            border-radius: 0 6px 6px 0;
+            font-size: 1.1em;
+        }
+
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    </style>
+</head>
+<body>
+<main>
+    <h1>A villa from one picture</h1>
+
+    <p>xeoIFC does not only read IFC, it writes it, and generating an IFC file with it is easy. This is the whole job, given to
+        Claude Code (model Fable 5.1) with the <code>xeoifc</code> command-line tool at hand:</p>
+
+    <blockquote class="prompt">"myVilla.png" take the picture of this villa and create an IFC model, including terrain around, high details,
+        including furniture etc. Use xeoIFC API</blockquote>
+
+    <p>Claude read the API with <code>xeoifc describe</code>, wrote <a href="villa.js">one JavaScript file</a> and ran it. The
+        result is the furnished villa below, with pool, garden and terrain. No CAD system was involved, nobody wrote a line of IFC.</p>
+
+    <h2>1. The picture</h2>
+
+    <figure>
+        <img src="villa.jpg" alt="Rendering of a modern two-storey villa with pergola, terrace, pool and garden" width="1200" height="800">
+        <figcaption>The only input: an AI generated rendering. All sizes are estimated from doors, sofas and sun loungers.</figcaption>
+    </figure>
+
+    <h2>2. The IFC model</h2>
+
+    <p>This is the live xeoIFC WebAssembly viewer with the generated <code>villa.ifc</code>. Rotate, zoom and pan with the mouse,
+        click the sofa, a cypress or the lawn to see what it is.</p>
+
+    <iframe id="viewer" src="../../?load=showcase/villa/villa.ifc&amp;embed=1" title="xeoIFC WebAssembly viewer with the generated villa"
+            allow="fullscreen" allowfullscreen></iframe>
+
+    <div class="under-viewer">
+        <span>Move the pointer to the left edge of the viewer to open the model tree and the properties.</span>
+        <a href="../../?load=showcase/villa/villa.ifc">Open in the full viewer</a>
+    </div>
+
+    <table>
+        <tr><th>Input</th><td>1 picture, 1 prompt</td></tr>
+        <tr><th>Generated</th><td>1 script of about 370 lines</td></tr>
+        <tr><th>Output</th><td>IFC4, 276 products, 6050 entities, 0.6 MB, validated without findings</td></tr>
+        <tr><th>Run time</th><td>below one second</td></tr>
+        <tr><th>Content</th><td>3 storeys, walls with cut openings, slabs, stair, glazed fronts, balustrades, pergola with solar glass, solar panels,
+            heat pump, sofas, tables, chairs, beds, kitchen, planters, sun loungers, parasol, pool, garden walls, gate, 15 cypresses,
+            shrubs and a terrain mesh with a stepped lawn</td></tr>
+    </table>
+
+    <h2>3. How it is made</h2>
+
+    <p>Why a single prompt is enough: the API is small, self-describing and works on the level of building elements, so the generated
+        script stays short and readable. The command-line tool runs it. The script is plain JavaScript, <code>xeo</code> is the API. The excerpts below are
+        shortened, <a href="villa.js">villa.js</a> is the whole truth.</p>
+
+    <pre><code>xeoifc run villa.js --root .</code></pre>
+
+    <p>A document with site, building and storeys is one call. Lengths are metres, whatever the file unit is.</p>
+
+    <pre><code>const doc = await xeo.document.create({
+  schema: 'IFC4', units: { length: 'm' }, project: { name: 'Villa from a picture' },
+  scaffold: { site: 'Garden', building: 'Villa', storeys: [
+    { name: 'Ground floor', elevation: 0 }, { name: 'First floor', elevation: 3.3 }, { name: 'Roof', elevation: 6.5 }] },
+});</code></pre>
+
+    <p>An element is one call as well: entity, containment, placement, geometry, colour and property sets. An opening with its
+        window is a second one. xeoIFC cuts the opening when the model is displayed or converted.</p>
+
+    <pre><code>const north = await xeo.element.add({ type: 'IfcWall', name: 'North wall', container: groundFloor,
+  geometry: { kind: 'wall', start: [21, 8.85], end: [0, 8.85], height: 2.9, thickness: 0.3 },
+  color: [0.96, 0.95, 0.92], psets: { Pset_WallCommon: { IsExternal: true } } });
+await xeo.opening.add({ host: north.ref, offset: 2, width: 1.8, height: 1.3, sill: 1.0, fill: { type: 'IfcWindow' } });</code></pre>
+
+    <p>Furniture is a small library of functions inside the script. A piece is built once from coloured boxes and then placed and
+        rotated as often as needed.</p>
+
+    <pre><code>await sofa('Terrace sofa', groundFloor, [6.6, -2.4, 0], 0, 3.4, WOOD, FABRIC);
+await bed('Master bed', firstFloor, [2, 4.6, 0], 0, 2.0);
+for (let i = 0; i &lt; 4; i++) await lounger('Pool lounger ' + (i + 1), site, [13.2 + 0.25 * i, -12.4 - 1.75 * i, -0.85], -68);</code></pre>
+
+    <p>Free forms are meshes. The cypresses and the pots are lathe-turned profiles, the lawn is a height function on a grid that
+        leaves out the house, the paving and the pool.</p>
+
+    <pre><code>function ground(x, y) {
+  const south = smooth(-7, -9.5, y), east = smooth(22, 24.5, x) * (1 - smooth(6, 11, y));
+  return -0.05 - 0.85 * Math.max(south, east) + 0.03 * Math.max(0, y - 12);
+}
+await xeo.element.add({ type: 'IfcGeographicElement', predefinedType: 'TERRAIN', name: 'Lawn terrain', container: site,
+  geometry: { kind: 'mesh', positions, indices }, color: GRASS });</code></pre>
+
+    <p>The API checks every call against the IFC schema and answers with a hint, which is what makes it usable by people and by AI
+        assistants alike. The first run of this script stopped here:</p>
+
+    <pre><code>schema_violation: RETAININGWALL is not a value of IfcWallTypeEnum
+  (hint: allowed: MOVABLE, PARAPET, PARTITIONING, PLUMBINGWALL, SHEAR, SOLIDWALL, STANDARD, ...)</code></pre>
+
+    <p>At the end the script validates the document and saves it.</p>
+
+    <pre><code>const check = await xeo.document.validate({ rules: ['schema', 'references', 'spatial', 'guid'] });
+await xeo.document.save({ path: 'villa.ifc', overwrite: true });</code></pre>
+
+    <p>Files: <a href="villa.js">villa.js</a> (the script), <a href="villa.ifc">villa.ifc</a> (the result),
+        <a href="villa.jpg">villa.jpg</a> (the picture). <code>xeoifc describe</code> prints the whole API as TypeScript declarations.</p>
+
+    <footer>
+        More: <a href="../">viewer showcase</a> -
+        Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
+        Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
+    </footer>
+</main>
+</body>
+</html>
