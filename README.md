@@ -85,8 +85,8 @@ done with one prompt. This one was given to Claude Code (model Fable 5.1) with t
 </a>
 
 Click the image for the [live model](https://xeofoundry.github.io/xeoIFC/showcase/villa/) with the picture it was made from and
-an explanation of the script. Claude read the API with `xeoifc describe`, wrote [villa.js](docs/showcase/villa/villa.js) (about 370
-lines) and ran it; the result is [villa.ifc](docs/showcase/villa/villa.ifc): IFC4, 276 products, validated without findings,
+an explanation of the script. Claude read the API with `xeoifc describe`, wrote [villa.js](docs/showcase/villa/villa.js) (about 380
+lines) and ran it; the result is [villa.ifc](docs/showcase/villa/villa.ifc): IFC4, 291 products, validated without findings,
 generated in less than a second.
 
 ```powershell

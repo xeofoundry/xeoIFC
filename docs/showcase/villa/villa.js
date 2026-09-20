@@ -226,7 +226,7 @@ await wall('Guest bedroom west cheek', S0, [17.15, -1], [17.15, 0], TILE, 3.6);
 const east = await wall('East wall', S0, [20.85, -1], [20.85, 9], WHITE, 3.6);
 await xeo.opening.add({ host: east.ref, offset: 5.5, width: 1.6, height: 1.4, sill: 0.9, fill: { type: 'IfcWindow', name: 'Guest bathroom window', color: GLASS } });
 const north = await wall('North wall', S0, [21, 8.85], [0, 8.85]);
-for (const [i, offset] of [2, 6.5, 11, 15.5].entries())
+for (const [i, offset] of [2, 6.5, 8.6, 15.5].entries())   // the third one sits under the upper part of the stair
   await xeo.opening.add({ host: north.ref, offset, width: 1.8, height: 1.3, sill: 1.0, fill: { type: 'IfcWindow', name: 'North window ' + (i + 1), color: GLASS } });
 await wall('West wall, upper part', S0, [0.15, 8], [0.15, 9]);
 await wall('West wall, front part', S0, [0.15, 0.45], [0.15, 1]);
@@ -240,12 +240,13 @@ const guest = await wall('Wall wing lounge / guest bedroom', S0, [17, 0], [17, 8
 await xeo.opening.add({ host: guest.ref, offset: 3.5, width: 0.9, height: 2.1, fill: { type: 'IfcDoor', name: 'Guest bedroom door', color: OAK } });
 await wall('Guest bathroom wall', S0, [17, 5], [20.7, 5], WHITE, H, 0.12, 0, false);
 const flight = [];
-for (let i = 0; i < 19; i++) flight.push(boxMesh(7 + 0.28 * i, 7.7, Math.max(0, Z1 / 19 * (i - 1)), 7.28 + 0.28 * i, 8.7, Z1 / 19 * (i + 1)));
+for (let i = 0; i < 19; i++) flight.push(boxMesh(6.2 + 0.28 * i, 7.7, Math.max(0, Z1 / 19 * (i - 1)), 6.48 + 0.28 * i, 8.7, Z1 / 19 * (i + 1)));
 await solid('IfcStairFlight', 'Stair to the first floor', S0, merge(...flight), OAK);
-await balustrade('Stair balustrade', S0, box(7, 7.66, 0, 12.3, 7.7, Z1 + 1));
+await balustrade('Stair balustrade', S0, box(6.2, 7.66, 0, 11.55, 7.7, Z1 + 1.05));
 
-// First-floor slab: balcony along the front, terrace over the wing, a notch for the stair. Roof slabs over annex and end block.
-await slab('First floor slab with balcony', S0, [[0, -0.4], [17, -0.4], [17, 9], [12.4, 9], [12.4, 7.7], [7.3, 7.7], [7.3, 9], [0, 9]], H, Z1 - H, WHITE);
+// First-floor slab: balcony along the front, terrace over the wing, a notch for the stair (the landing x 11.55..12.7 stays). Roof slabs over annex and end block.
+await slab('First floor slab with balcony', S0, [[0, -0.4], [17, -0.4], [17, 9], [11.55, 9], [11.55, 7.7], [7.3, 7.7], [7.3, 9], [0, 9]], H, Z1 - H, WHITE);
+await solid('IfcWall', 'North wall band at the stair well', S0, box(7.3, 8.7, H, 11.55, 9, Z1), WHITE);   // closes the slab notch outside
 await slab('Guest block roof', S1, rect(17, -1, 21, 9), 3.6 - Z1, 0.3, WHITE, 'ROOF');
 await slab('Annex roof', S0, rect(-7, 1, 0, 8), H, 0.35, WHITE, 'ROOF');
 await solid('IfcCovering', 'Annex roof gravel', S0, box(-6.7, 1.3, H + 0.35, -0.1, 7.7, H + 0.4), GRAVEL, { predefinedType: 'ROOFING' });
@@ -274,14 +275,20 @@ await solid('IfcCovering', 'Guest block roof gravel', S0, box(17.3, -0.7, 3.9, 2
 // ------------------------------------------------------------------------------------------------ first floor: shell
 // White frame x 0..13; the glazing is set back 2.4 m behind the balcony edge, the roof sails 1.4 m over the balcony.
 await wall('First floor west wall', S1, [0.15, 1], [0.15, 9]);
-await wall('First floor north wall', S1, [13, 8.85], [0, 8.85]);
+const north1 = await wall('First floor north wall', S1, [13, 8.85], [0, 8.85]);
+await xeo.opening.add({ host: north1.ref, offset: 2, width: 3.2, height: 2.3, sill: 0.3, fill: { type: 'IfcWindow', name: 'Staircase window', color: GLASS } });
 const e1 = await wall('First floor east wall', S1, [12.85, 1], [12.85, 9]);
 await xeo.opening.add({ host: e1.ref, offset: 2.2, width: 2.4, height: 2.3, fill: { type: 'IfcDoor', name: 'Door to the roof terrace', color: GLASS } });
 await glazing('Master bedroom glazing', S1, [0.3, 2.4], [5.8, 2.4], 3, H, true);
 await tiled('Tiled bay', S1, box(5.8, 1.5, 0, 9.2, 2.55, H));
 await glazing('Studio glazing', S1, [9.2, 2.4], [12.7, 2.4], 2, H, true);
-await wall('Wall master bedroom / hall', S1, [5.9, 2.5], [5.9, 7.6], WHITE, H, 0.12, 0, false);
-await wall('Wall hall / studio', S1, [9.1, 2.5], [9.1, 7.6], WHITE, H, 0.12, 0, false);
+// Hallway at the top of the stair (y 6.4..7.7, landing at the east end): doors to the master bedroom, the bathroom and the studio.
+const toMaster = await wall('Wall master bedroom / hallway', S1, [5.9, 2.5], [5.9, 8.7], WHITE, H, 0.12, 0, false);
+await xeo.opening.add({ host: toMaster.ref, offset: 4.05, width: 0.9, height: 2.1, fill: { type: 'IfcDoor', name: 'Master bedroom door', color: OAK } });
+await wall('Wall bathroom / studio', S1, [9.1, 2.5], [9.1, 6.4], WHITE, H, 0.12, 0, false);
+const hallway = await wall('Hallway wall', S1, [5.96, 6.4], [12.7, 6.4], WHITE, H, 0.12, 0, false);
+await xeo.opening.add({ host: hallway.ref, offset: 1.1, width: 0.9, height: 2.1, fill: { type: 'IfcDoor', name: 'Bathroom door', color: OAK } });
+await xeo.opening.add({ host: hallway.ref, offset: 4.4, width: 0.9, height: 2.1, fill: { type: 'IfcDoor', name: 'Studio door', color: OAK } });
 await balustrade('Balcony balustrade', S1, box(0.05, -0.36, 0, 17, -0.34, 1.05));
 await balustrade('Balcony balustrade west', S1, box(0.05, -0.34, 0, 0.07, 1, 1.05));
 await balustrade('Roof terrace balustrade north', S1, box(13, 8.9, 0, 17, 8.92, 1.05));
@@ -343,7 +350,14 @@ await sofa('Bedroom bench', S1, [2.2, 3.3, 0], 0, 1.6);
 for (const [i, x] of [0.4, 5.15].entries()) await curtain('Master bedroom curtain ' + (i + 1), S1, x, 2.55, x + 0.6, 2.63);
 await sofa('Studio sofa', S1, [9.6, 5.2, 0], 0, 2.6);
 await table('Studio table', S1, [10.2, 3.9, 0], 0, 1.2, 0.7, 0.36);
-await put('IfcFurniture', 'Studio shelf', S1, [9.3, 6.9, 0], 0, [[box(0, 0, 0, 3.2, 0.4, 2.0), OAK]], { predefinedType: 'SHELF' });
+await put('IfcFurniture', 'Studio shelf', S1, [9.6, 2.8, 0], 90, [[box(0, 0, 0, 2.2, 0.4, 2.0), OAK]], { predefinedType: 'SHELF' });
+await rug('Hallway runner', S1, 7.4, 6.7, 11.4, 7.4);
+// Bathroom behind the tiled bay
+await make('IfcSanitaryTerminal', 'Bathtub', S1, [6.05, 2.7, 0], [[box(0, 0, 0, 0.85, 1.8, 0.58), WHITE], [box(0.08, 0.08, 0.58, 0.77, 1.72, 0.585), WATER]], { predefinedType: 'BATH' });
+await make('IfcSanitaryTerminal', 'Double washbasin', S1, [7.4, 2.62, 0], [[box(0, 0, 0.35, 1.5, 0.5, 0.82), OAK], [box(-0.02, 0, 0.82, 1.52, 0.52, 0.86), WHITE],
+  [cyl(0.4, 0.26, 0.86, 0.19, 0.02), STEEL], [cyl(1.1, 0.26, 0.86, 0.19, 0.02), STEEL], [box(0, -0.04, 1.1, 1.5, -0.02, 1.9), GLASS]], { predefinedType: 'WASHHANDBASIN' });
+await make('IfcSanitaryTerminal', 'WC', S1, [8.55, 4.2, 0], [[box(0, 0, 0, 0.45, 0.38, 0.4), WHITE], [box(0.3, 0.02, 0.4, 0.45, 0.36, 0.85), WHITE]], { predefinedType: 'TOILETPAN' });
+await make('IfcSanitaryTerminal', 'Shower', S1, [6.05, 5.2, 0], [[box(0, 0, 0, 1.4, 1.1, 0.04), WHITE], [box(1.4, 0, 0.04, 1.42, 1.1, 2.1), GLASS]], { predefinedType: 'SHOWER' });
 await balustrade('Stair well balustrade', S1, box(7.3, 7.7, 0, 7.32, 8.7, 1.05));
 for (const [i, x] of [9.3, 12.0].entries()) await curtain('Studio curtain ' + (i + 1), S1, x, 2.55, x + 0.6, 2.63);
 for (const [i, [x, y, radius, potH, h]] of [[0.9, 0.5, 0.34, 0.65, 1.3], [2.6, 0.2, 0.3, 0.6, 1.6], [7.4, 0.4, 0.4, 0.75, 1.9], [4.4, 0.6, 0.26, 0.45, 0.9],
