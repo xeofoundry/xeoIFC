@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IFC Viewer — WebGPU / Rust WASM</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/index-CSPYaI6m.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BjRsZB6c.css">
+    <script type="module" crossorigin src="./assets/index-s0imx-4T.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-7MO256O5.css">
   </head>
   <body>
     <div id="app">
@@ -81,9 +81,10 @@
                 <circle cx="12" cy="12" r="4.2" />
               </svg>
             </button>
-            <button id="terrain-button" class="tool-icon" type="button" title="Terrain" aria-label="Terrain" aria-haspopup="dialog" aria-expanded="false" aria-controls="terrain-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3.2 18.4h17.6L14.4 5.6l-4.3 6.5-2.3-2.8z" />
+            <button id="measure-button" class="tool-icon" type="button" title="Measure" aria-label="Measure" aria-haspopup="dialog" aria-expanded="false" aria-controls="measure-panel">
+              <svg viewBox="0 0 24 14" aria-hidden="true">
+                <rect x="1.5" y="3.5" width="21" height="7" rx="1.5" />
+                <path d="M5 3.5v3M8.5 3.5v2M12 3.5v3M15.5 3.5v2M19 3.5v3" />
               </svg>
             </button>
             <button id="storey-shift-button" class="tool-icon" type="button" title="Storey shift" aria-label="Storey shift" aria-haspopup="dialog" aria-expanded="false" aria-controls="storey-shift-panel">
@@ -102,9 +103,9 @@
                 <path d="M9 21l2.5-6-2-2.5 1-5.5 3.5 1 2 3 3 1M10.5 7l-3.5 2-1 3.5M13.5 13.5l2.5 3 1 4.5" />
               </svg>
             </button>
-            <button id="measure-button" class="tool-icon" type="button" title="Measure" aria-label="Measure" aria-haspopup="dialog" aria-expanded="false" aria-controls="measure-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M2.5 16.5l14-14 5 5-14 14zM6 13l2 2M9 10l3 3M12 7l2 2M15 4l3 3" />
+            <button id="terrain-button" class="tool-icon" type="button" title="Terrain" aria-label="Terrain" aria-haspopup="dialog" aria-expanded="false" aria-controls="terrain-panel">
+              <svg viewBox="0 0 24 20" aria-hidden="true">
+                <path d="M3.2 17h17.6L14.4 3l-4.3 7.1-2.3-3.05z" />
               </svg>
             </button>
             <button id="section-button" class="tool-icon" type="button" title="Section planes" aria-label="Section planes" aria-haspopup="dialog" aria-expanded="false" aria-controls="section-panel">
@@ -118,7 +119,8 @@
             </button>
             <button id="data-button" class="tool-icon" type="button" title="Properties as data: filter, colour, quantities" aria-label="Properties as data" aria-haspopup="dialog" aria-expanded="false" aria-controls="data-panel">
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3.5 4.5h17v15h-17zM3.5 9.5h17M3.5 14.5h17M9.5 4.5v15" />
+                <path d="M3.5 4.5h17v15h-17z" />
+                <path class="data-icon-grid" d="M3.5 9.5h17M3.5 14.5h17M9.5 4.5v15" />
               </svg>
             </button>
             <button id="clash-button" class="tool-icon" type="button" title="Clash check" aria-label="Clash check" aria-haspopup="dialog" aria-expanded="false" aria-controls="clash-panel">
@@ -127,8 +129,8 @@
               </svg>
             </button>
             <button id="ids-button" class="tool-icon" type="button" title="IDS validation" aria-label="IDS validation" aria-haspopup="dialog" aria-expanded="false" aria-controls="ids-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5.5 3.5h9l4 4v13h-13zM14.5 3.5v4h4M8.5 13.5l2.5 2.5 4.5-5" />
+              <svg viewBox="0 0 24 14" aria-hidden="true">
+                <path d="M2.5 7.5l3 3.5 5.5-7.5M14.5 3.5l7 7M21.5 3.5l-7 7" />
               </svg>
             </button>
             <button id="compare-button" class="tool-icon" type="button" title="Compare two revisions" aria-label="Compare two revisions" aria-haspopup="dialog" aria-expanded="false" aria-controls="compare-panel">
@@ -141,21 +143,32 @@
                 <path d="M3.5 4.5h17v12h-9l-4.5 4v-4h-3.5zM12 7.5v4.5M12 14v.2" />
               </svg>
             </button>
-            <button id="lab-button" class="tool-icon" type="button" title="Lab: experimental tools" aria-label="Lab: experimental tools" aria-haspopup="dialog" aria-expanded="false" aria-controls="lab-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M9 2.5h6M10 2.5v6.5L4.5 19a1.7 1.7 0 0 0 1.5 2.5h12a1.7 1.7 0 0 0 1.5-2.5L14 9V2.5M7.3 14.5h9.4" />
-              </svg>
-            </button>
-            <button id="script-button" class="tool-icon" type="button" title="Script editor (beta)" aria-label="Script editor (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8.5 7.5L4 12l4.5 4.5M15.5 7.5L20 12l-4.5 4.5M13.5 5l-3 14" />
-              </svg>
-            </button>
-            <button id="ai-button" class="tool-icon" type="button" title="AI assistant (beta)" aria-label="AI assistant (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M10 3.5l1.9 5.1 5.1 1.9-5.1 1.9L10 17.5l-1.9-5.1L3 10.5l5.1-1.9zM18 14.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" />
-              </svg>
-            </button>
+            <div id="lab-group">
+              <button id="lab-button" class="tool-icon" type="button" title="Lab: experimental tools - rough models, expect rough numbers" aria-label="Lab: experimental tools" aria-haspopup="true" aria-expanded="false" aria-controls="lab-flyout">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M9 2.5h6M10 2.5v6.5L4.5 19a1.7 1.7 0 0 0 1.5 2.5h12a1.7 1.7 0 0 0 1.5-2.5L14 9V2.5M7.3 14.5h9.4" />
+                </svg>
+              </button>
+              <div id="lab-flyout" aria-label="Lab tools">
+                <button id="heat-button" class="tool-icon" type="button" title="Heat flow simulation: finds the heated volume, emits heat rays from a grid of points in it and lets the building elements collect the heat" aria-label="Heat flow simulation" aria-expanded="false" aria-controls="heat-panel">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10.3 14.4V5.9a1.7 1.7 0 0 1 3.4 0v8.5" />
+                    <circle cx="12" cy="17.6" r="3.7" />
+                    <path d="M15.8 7.4h2.7M15.8 10.4h2.7" />
+                  </svg>
+                </button>
+                <button id="script-button" class="tool-icon" type="button" title="Script editor (beta)" aria-label="Script editor (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8.5 7.5L4 12l4.5 4.5M15.5 7.5L20 12l-4.5 4.5M13.5 5l-3 14" />
+                  </svg>
+                </button>
+                <button id="ai-button" class="tool-icon" type="button" title="AI assistant (beta)" aria-label="AI assistant (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 3.5l1.9 5.1 5.1 1.9-5.1 1.9L10 17.5l-1.9-5.1L3 10.5l5.1-1.9zM18 14.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
           <canvas id="nav-cube" width="96" height="96" title="Click a face to view, drag to rotate" aria-label="Navigation cube"></canvas>
           <div id="minimap" hidden>
@@ -299,6 +312,8 @@
               <button class="panel-secondary" type="button" data-measure-mode="distance" aria-pressed="true" title="Distance between two points; vertices, edge midpoints and edges snap">Distance</button>
               <button class="panel-secondary" type="button" data-measure-mode="area" aria-pressed="false" title="Area and perimeter of a planar face">Area</button>
               <button class="panel-secondary" type="button" data-measure-mode="faces" aria-pressed="false" title="Distance between two parallel faces, or the angle between two faces">Face to face</button>
+              <button class="panel-secondary" type="button" data-measure-mode="point" aria-pressed="false" title="Model coordinates of a point; vertices, edge midpoints and edges snap">Coordinates</button>
+              <button class="panel-secondary" type="button" data-measure-mode="polygon" aria-pressed="false" title="Perimeter and area of a polygon: click corner after corner, then the first corner again to close it">Polygon</button>
             </div>
             <div id="measure-status" class="section-hint" aria-live="polite"></div>
             <ul id="measure-list"></ul>
@@ -402,20 +417,12 @@
             <div id="clash-status" class="section-hint" aria-live="polite">Pick two sets and run.</div>
             <ul id="clash-list"></ul>
           </div>
-          <div id="lab-panel" role="dialog" aria-labelledby="lab-title" hidden>
-            <button id="lab-close" class="panel-close" type="button" aria-label="Close lab"></button>
-            <h2 id="lab-title">Lab</h2>
-            <div class="section-hint">Experimental tools - rough models, expect rough numbers.</div>
-            <div class="section-row lab-tool">
-              <span title="Finds the heated volume, emits heat rays from a grid of points in it and lets the building elements collect the heat">Heat flow simulation</span>
-              <button id="lab-heat-toggle" class="panel-primary" type="button">Start</button>
-            </div>
-          </div>
           <div id="heat-panel" role="region" aria-labelledby="heat-title" hidden>
             <button id="heat-close" class="panel-close" type="button" aria-label="Stop and close the heat flow simulation"></button>
             <div id="heat-side">
               <h2 id="heat-title">Heat flow</h2>
               <div class="heat-inputs">
+                <button id="heat-toggle" class="panel-primary" type="button">Start simulation</button>
                 <label>Inside <input id="heat-inside" type="number" min="-50" max="60" step="1" value="20" /> C</label>
                 <label>Outside <input id="heat-outside" type="number" min="-60" max="60" step="1" value="-5" /> C</label>
                 <select id="heat-mode" aria-label="Colour by" title="Colour by">
@@ -531,9 +538,9 @@
             <h2 id="about-title">About xeoIFC WebAssembly viewer</h2>
             <p>This demo viewer showcases xeoIFC in the browser. It loads IFC models locally with WebAssembly and renders them with WebGPU.</p>
             <p>No IFC model information is uploaded or stored server side by this viewer. All IFC data is processed in the client web browser.</p>
-            <p>This demo viewer has restrictions regarding the file size, because it runs in WebAssembly.</p>
 
-            <p>XeoIFC as native converter application/API library does not have such restrictions, and converts any IFC file: IFC2X3, IFC4 or newer.</p>
+            <p>XeoIFC converts any IFC file: IFC2X3, IFC4 or newer, same as the native xeoIFC converter application/API library.</p>
+
             <p><b>Federated models: </b>With drag&drop, several files can be loaded and appended to previously loaded models.</p>
 
             <p><b>Merge feature: </b>Several loaded models can be merged into a new IFC file using the "Export" button.</p>
