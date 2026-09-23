@@ -738,8 +738,49 @@ export class Viewer {
 }
 if (Symbol.dispose) Viewer.prototype[Symbol.dispose] = Viewer.prototype.free;
 
+/**
+ * What the About panel shows for a licence key: `{"state":"licensed"|"evaluation"|"invalid"|"expired","expires":<unix>}`.
+ * Loading and viewing never ask for a key; an export without a valid one carries the "Evaluation version" text
+ * (`worker_export_run`). `now_unix`: seconds, from the page's clock.
+ * @param {string} key
+ * @param {number} now_unix
+ * @returns {string}
+ */
+export function licence_status(key, now_unix) {
+    let deferred2_0;
+    let deferred2_1;
+    try {
+        const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.licence_status(ptr0, len0, now_unix);
+        deferred2_0 = ret[0];
+        deferred2_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+    }
+}
+
 export function start() {
     wasm.start();
+}
+
+/**
+ * Library and wire version, the same shape the C API's `xeoifc_version` returns:
+ * `{"apiVersion":..,"engine":..}`.
+ * @returns {string}
+ */
+export function version() {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const ret = wasm.version();
+        deferred1_0 = ret[0];
+        deferred1_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+    }
 }
 
 /**
@@ -862,12 +903,20 @@ export function worker_export_reset() {
 }
 
 /**
- * Run the export over the accumulated documents (byte-identical to the CLI's split and merge). Returns
- * `{ data: Uint8Array, warnings: string[], entities: number }`.
+ * Run the export over the accumulated documents (with a valid `licence_key` byte-identical to the CLI's split and
+ * merge; without, the file carries the "Evaluation version" text next to `bounds` = the world box of the viewed
+ * scene `[min x, y, z, max x, y, z]` in metres). Returns `{ data: Uint8Array, warnings: string[], entities: number }`.
+ * @param {string} licence_key
+ * @param {number} now_unix
+ * @param {Float64Array | null} [bounds]
  * @returns {any}
  */
-export function worker_export_run() {
-    const ret = wasm.worker_export_run();
+export function worker_export_run(licence_key, now_unix, bounds) {
+    const ptr0 = passStringToWasm0(licence_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    var ptr1 = isLikeNone(bounds) ? 0 : passArrayF64ToWasm0(bounds, wasm.__wbindgen_malloc);
+    var len1 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_export_run(ptr0, len0, now_unix, ptr1, len1);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -960,6 +1009,30 @@ export function worker_load_finish(on_progress, on_snapshot) {
 }
 
 /**
+ * Finish the chunked load WITHOUT geometry: complete the parse and keep the file as a metadata-only
+ * document (no tessellation, no CSG), for a host that draws the geometry from another source (XKT,
+ * GLB) and needs the tree and the property queries only. Works on a full IFC and on the metadata IFC
+ * of the converter (`-m x.ifc`). Returns `{ tree: string|undefined, sourceId: number }`.
+ * @returns {any}
+ */
+export function worker_metadata_finish() {
+    const ret = wasm.worker_metadata_finish();
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Number of documents the engine holds (loaded models and their editable twins).
+ * @returns {number}
+ */
+export function worker_model_count() {
+    const ret = wasm.worker_model_count();
+    return ret >>> 0;
+}
+
+/**
  * Lazily decode property sets belonging to one element (or spatial node).
  * @param {number} source_id
  * @param {number} entity_id
@@ -973,6 +1046,15 @@ export function worker_properties(source_id, entity_id) {
         wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
     }
     return v1;
+}
+
+/**
+ * Drop one retained model (its document and editable twin) while the others stay: a host that unloads
+ * models one at a time frees their heap without a full clear. Unknown ids are ignored.
+ * @param {number} source_id
+ */
+export function worker_release_model(source_id) {
+    wasm.worker_release_model(source_id);
 }
 
 /**
@@ -2091,17 +2173,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 242, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 253, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 281, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 292, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 242, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 253, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },
@@ -2421,6 +2503,13 @@ function passArray8ToWasm0(arg, malloc) {
 function passArrayF32ToWasm0(arg, malloc) {
     const ptr = malloc(arg.length * 4, 4) >>> 0;
     getFloat32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+function passArrayF64ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 8, 8) >>> 0;
+    getFloat64ArrayMemory0().set(arg, ptr / 8);
     WASM_VECTOR_LEN = arg.length;
     return ptr;
 }

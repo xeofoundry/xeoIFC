@@ -1,0 +1,77 @@
+<!doctype html>
+<!--
+    Metadata from IFC, geometry from XKT.
+
+    The xeoIFC converter writes both files from one IFC; the metadata IFC is the input without its geometry:
+
+        xeoifc -i Duplex.ifc -o Duplex.xkt -m Duplex.meta.ifczip
+
+    XeoIFCLoaderPlugin.loadMetadata() parses the metadata IFC (a full IFC works too) without building any geometry and
+    returns xeokit metamodel JSON for XKTLoaderPlugin. Property sets are then read on demand with getProperties().
+
+    Serve the package folder (src/ and wasm/ next to each other) and adjust the two sample URLs below.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>xeoIFC metadata + XKT geometry</title>
+    <style>
+        html, body {height: 100%; margin: 0; font: 13px sans-serif;}
+        #myCanvas {position: absolute; left: 350px; width: calc(100% - 350px); height: 100%;}
+        #treeViewContainer {position: absolute; width: 350px; height: 100%; overflow: auto; background: #f4f4f4;}
+        #properties {position: absolute; right: 10px; top: 10px; width: 340px; max-height: 90%; overflow: auto; background: rgba(255, 255, 255, .9); padding: 8px;}
+        #properties td {padding: 1px 6px 1px 0; vertical-align: top;}
+    </style>
+    <script type="importmap">
+        {"imports": {"@xeokit/xeokit-sdk": "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.min.es.js"}}
+    </script>
+</head>
+<body>
+<div id="treeViewContainer"></div>
+<canvas id="myCanvas"></canvas>
+<div id="properties">Click an object</div>
+<script type="module">
+    import {Viewer, XKTLoaderPlugin, TreeViewPlugin} from "@xeokit/xeokit-sdk";
+    import {XeoIFCLoaderPlugin} from "../src/index.js";
+
+    const samples = new URL("../../samples/", import.meta.url);
+
+    const viewer = new Viewer({canvasId: "myCanvas", transparent: true});
+    viewer.camera.eye = [-20, 15, 25];
+    viewer.camera.look = [4, 3, -9];
+    new TreeViewPlugin(viewer, {containerElement: document.getElementById("treeViewContainer"), autoExpandDepth: 3});
+
+    const xktLoader = new XKTLoaderPlugin(viewer);
+    const xeoIFCLoader = new XeoIFCLoaderPlugin(viewer);
+
+    // 1. Metadata: parsed by the xeoIFC engine, no geometry, no CSG
+    const metaModelJSON = await xeoIFCLoader.loadMetadata({
+        id: "duplex",
+        src: new URL("Duplex.meta.ifczip", samples).href,
+        excludeTypes: ["IfcSpace"]
+    });
+
+    // 2. Geometry: the XKT of the same conversion; its objects carry the same IFC GlobalIds
+    const sceneModel = xktLoader.load({
+        id: "duplex",
+        src: new URL("Duplex.xkt", samples).href,
+        metaModelJSON,
+        excludeTypes: ["IfcSpace"],
+        edges: true
+    });
+    sceneModel.on("loaded", () => viewer.cameraFlight.jumpTo(sceneModel));
+
+    // 3. Properties: on demand from the IFC retained inside the engine
+    viewer.cameraControl.on("picked", async (pickResult) => {
+        const objectId = pickResult.entity.id;
+        const metaObject = viewer.metaScene.metaObjects[objectId];
+        const propertySets = await xeoIFCLoader.getProperties(objectId);
+        const rows = propertySets.map(({pset, props}) => `<tr><th colspan="2" align="left">${pset}</th></tr>`
+            + props.map(({name, value, unit}) => `<tr><td>${name}</td><td>${value ?? ""} ${unit ?? ""}</td></tr>`).join("")).join("");
+        document.getElementById("properties").innerHTML = `<b>${metaObject ? metaObject.name : objectId}</b> ${metaObject ? metaObject.type : ""}<table>${rows}</table>`;
+    });
+
+    window.viewer = viewer;
+</script>
+</body>
+</html>

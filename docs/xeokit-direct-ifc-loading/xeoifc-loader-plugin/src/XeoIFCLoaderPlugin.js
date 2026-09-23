@@ -114,7 +114,7 @@ class XeoIFCLoaderPlugin extends Plugin {
         const circleSegments = params.circleSegments || 18;
 
         this._request({type: "load", source, name, circleSegments}, [], params.onProgress)
-            .then((result) => sceneModel.destroyed ? null : this._buildModel(sceneModel, params, result))
+            .then((result) => sceneModel.destroyed ? this._releaseSource(result.sourceId, result.isStep) : this._buildModel(sceneModel, params, result))
             .catch((e) => {
                 this.error(e);
                 sceneModel.fire("error", e);
@@ -126,6 +126,79 @@ class XeoIFCLoaderPlugin extends Plugin {
             });
 
         return sceneModel;
+    }
+
+    /**
+     * Loads only the metadata of an IFC file: the engine parses the file, builds no geometry and runs no CSG. The
+     * geometry comes from another loader (XKT, glTF), which gets the result as its ````metaModelJSON````. The file is a full
+     * IFC or the much smaller metadata IFC the xeoIFC converter writes with ````-m model.ifc````; the converter names the
+     * objects of its XKT / GLB output by IFC GlobalId, like the returned metaObjects.
+     *
+     * ````javascript
+     * const metaModelJSON = await xeoIFCLoader.loadMetadata({id: "myModel", src: "model.meta.ifc"});
+     * const sceneModel = xktLoader.load({id: "myModel", src: "model.xkt", metaModelJSON});
+     * const propertySets = await xeoIFCLoader.getProperties(objectId);
+     * ````
+     *
+     * The engine keeps the parsed file for {@link XeoIFCLoaderPlugin#getProperties} until the model with this ID is
+     * destroyed or {@link XeoIFCLoaderPlugin#unloadMetadata} is called, then frees it.
+     *
+     * @param {Object} params Loading parameters.
+     * @param {String} params.id ID of the model the metadata belongs to: the ````id```` given to the geometry loader.
+     * @param {String} [params.src] URL of the file, as an alternative to ````file```` and ````data````.
+     * @param {Blob} [params.file] A File (file input, drag and drop) or Blob.
+     * @param {ArrayBuffer} [params.data] The file content.
+     * @param {String[]} [params.includeTypes] Only keep objects with these types.
+     * @param {String[]} [params.excludeTypes] Drop objects with these types.
+     * @param {Boolean} [params.globalizeObjectIds=false] Prefix every object ID with the model ID; set it on the geometry loader too.
+     * @param {Function} [params.onProgress] Called with ````(phase, done, total)````, phases "read" (in MB) and "parse".
+     * @returns {Promise<{metaObjects: {id: String, name: String, type: String, parent: String}[]}>} xeokit metamodel JSON.
+     */
+    loadMetadata(params = {}) {
+        const modelId = params.id;
+        if (!modelId) {
+            return Promise.reject("loadMetadata() param expected: id");
+        }
+        if (!params.src && !params.file && !params.data) {
+            return Promise.reject("loadMetadata() param expected: src, file or data");
+        }
+        const scene = this.viewer.scene;
+        const spinner = scene.canvas.spinner;
+        spinner.processes++;
+        this._loadsInFlight++;
+        const source = params.data || params.file || new URL(params.src, document.baseURI).href;
+        return this._request({type: "metadata", source}, [], params.onProgress)
+            .then((result) => {
+                const {globalize, typeLoads} = this._filters(params);
+                const {metaObjects, entityIds} = this._metaObjectsFromTree(result.tree, modelId, globalize, typeLoads);
+                this.unloadMetadata(modelId);
+                const onModelUnloaded = scene.on("modelUnloaded", (id) => {
+                    if (id === modelId) {
+                        this.unloadMetadata(modelId);
+                    }
+                });
+                this._models[modelId] = {sourceId: result.sourceId, isStep: false, entityIds, onModelUnloaded};
+                return {metaObjects};
+            })
+            .finally(() => {
+                spinner.processes--;
+                this._loadsInFlight--;
+                this._clearWorkerIfUnused();
+            });
+    }
+
+    /**
+     * Forgets the metadata loaded with {@link XeoIFCLoaderPlugin#loadMetadata} and frees its parsed file in the engine;
+     * done automatically when the model with this ID is destroyed.
+     *
+     * @param {String} id The ````id```` given to ````loadMetadata()````.
+     */
+    unloadMetadata(id) {
+        const model = this._models[id];
+        if (model && model.onModelUnloaded !== undefined) {
+            this.viewer.scene.off(model.onModelUnloaded);
+            this._releaseModel(id);
+        }
     }
 
     /**
@@ -198,20 +271,76 @@ class XeoIFCLoaderPlugin extends Plugin {
         this._requests.clear();
     }
 
-    // The engine keeps every loaded file for property queries; free them once no model of this plugin is left
+    // The engine keeps every loaded file for property queries. A model's file is freed when the model goes
+    // (_releaseModel); once no model of this plugin is left the engine is cleared as a whole, load state included.
     _clearWorkerIfUnused() {
         if (this._worker && this._loadsInFlight === 0 && Object.keys(this._models).length === 0) {
             this._worker.postMessage({type: "clear"});
         }
     }
 
+    // Forgets a model this plugin served and frees its file in the engine. Every load has a source of its own, so
+    // releasing one model never touches another's properties.
+    _releaseModel(modelId) {
+        const model = this._models[modelId];
+        if (!model) {
+            return;
+        }
+        delete this._models[modelId];
+        this._releaseSource(model.sourceId, model.isStep);
+    }
+
+    // Frees one parsed file in the engine (also for a load whose model was destroyed before it finished)
+    _releaseSource(sourceId, isStep) {
+        if (this._worker) {
+            this._worker.postMessage({type: "release", sourceId, isStep: !!isStep});
+        }
+        this._clearWorkerIfUnused();
+    }
+
+    // {globalize, typeLoads} of a load / loadMetadata call, with the plugin defaults applied
+    _filters(params) {
+        const includeTypes = params.includeTypes || this._includeTypes;
+        const excludeTypes = params.excludeTypes || this._excludeTypes;
+        return {
+            globalize: (params.globalizeObjectIds !== undefined) ? !!params.globalizeObjectIds : this._globalizeObjectIds,
+            typeLoads: (type) => (!includeTypes || includeTypes.includes(type)) && !(excludeTypes && excludeTypes.includes(type))
+        };
+    }
+
+    // Object IDs and metadata from the engine's tree JSON
+    _metaObjectsFromTree(tree, modelId, globalize, typeLoads) {
+        const metaObjects = [];
+        const objectIds = {}; // entity id -> object ID
+        const types = {}; // entity id -> type
+        const entityIds = {}; // object ID -> entity id
+        const objectId = (entityId, globalId) => {
+            return globalId ? (globalize ? math.globalizeObjectId(modelId, globalId) : globalId) : `${modelId}#${entityId}`;
+        };
+        const visit = (item, parent) => {
+            const isLeaf = !item.children && !item.elements;
+            types[item.entity_id] = item.type;
+            if (isLeaf && !typeLoads(item.type)) {
+                return;
+            }
+            // object_id: the <GlobalId>_<n> name the xeoIFC converter gives a repeated GlobalId in its XKT / GLB output
+            const id = objectId(item.entity_id, item.object_id || item.global_id);
+            objectIds[item.entity_id] = id;
+            entityIds[id] = item.entity_id;
+            metaObjects.push({id, name: item.name || item.type, type: item.type, parent});
+            (item.children || []).forEach(child => visit(child, id));
+            (item.elements || []).forEach(element => visit(element, id));
+        };
+        if (tree) {
+            visit(JSON.parse(tree), null);
+        }
+        return {metaObjects, objectIds, types, entityIds, objectId};
+    }
+
     async _buildModel(sceneModel, params, result) {
 
         const modelId = sceneModel.id;
-        const includeTypes = params.includeTypes || this._includeTypes;
-        const excludeTypes = params.excludeTypes || this._excludeTypes;
-        const globalize = (params.globalizeObjectIds !== undefined) ? !!params.globalizeObjectIds : this._globalizeObjectIds;
-        const typeLoads = (type) => (!includeTypes || includeTypes.includes(type)) && !(excludeTypes && excludeTypes.includes(type));
+        const {globalize, typeLoads} = this._filters(params);
 
         const packed = result.packed;
         const u32 = new Uint32Array(packed);
@@ -228,31 +357,7 @@ class XeoIFCLoaderPlugin extends Plugin {
         const verticesAt = elementsAt + elementCount * ELEMENT_WORDS;
         const indicesAt = verticesAt + vertexFloats;
 
-        // Object IDs and metadata from the tree
-
-        const metaObjects = [];
-        const objectIds = {}; // entity id -> object ID
-        const types = {}; // entity id -> type
-        const entityIds = {}; // object ID -> entity id
-        const objectId = (entityId, globalId) => {
-            return globalId ? (globalize ? math.globalizeObjectId(modelId, globalId) : globalId) : `${modelId}#${entityId}`;
-        };
-        const visit = (item, parent) => {
-            const isLeaf = !item.children && !item.elements;
-            types[item.entity_id] = item.type;
-            if (isLeaf && !typeLoads(item.type)) {
-                return;
-            }
-            const id = objectId(item.entity_id, item.global_id);
-            objectIds[item.entity_id] = id;
-            entityIds[id] = item.entity_id;
-            metaObjects.push({id, name: item.name || item.type, type: item.type, parent});
-            (item.children || []).forEach(child => visit(child, id));
-            (item.elements || []).forEach(element => visit(element, id));
-        };
-        if (result.tree) {
-            visit(JSON.parse(result.tree), null);
-        }
+        const {metaObjects, objectIds, types, entityIds, objectId} = this._metaObjectsFromTree(result.tree, modelId, globalize, typeLoads);
 
         // A mesh that is instanced more than once becomes a shared geometry, the others are batched
 
@@ -382,9 +487,8 @@ class XeoIFCLoaderPlugin extends Plugin {
 
         this._models[modelId] = {sourceId: result.sourceId, isStep: result.isStep, entityIds};
         sceneModel.once("destroyed", () => {
-            delete this._models[modelId];
+            this._releaseModel(modelId);
             this.viewer.metaScene.destroyMetaModel(modelId);
-            this._clearWorkerIfUnused();
         });
 
         sceneModel.scene.once("tick", () => {

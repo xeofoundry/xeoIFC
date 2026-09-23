@@ -58,7 +58,7 @@ Options:
 -m, --metadata-path   metadata output path (.json); no metadata is written when omitted
 -c                    configuration JSON path, see configuration.md
 --license-key <key>   license key (overrides the XEO_IFC_LICENSE_KEY environment variable)
---accept-terms        accept the GLA and run in evaluation mode without the y/N prompt
+--accept-terms        accept the xeoIFC Testing License and run in evaluation mode without the y/N prompt
 -v                    print version number
 -h, --help            print help
 ```
@@ -128,8 +128,9 @@ with `gltfRootNodeRotationVector` and `gltfRootNodeRotationInDegrees` in the [co
 
 ## License key
 
-You can use the converter for testing without a license key. It then runs in evaluation mode: it asks you to accept the XeoFoundry
-General License Agreement (`Do you accept the GLA? [y/N]`; pass `--accept-terms` to accept without the prompt), adds
+You can use the converter for testing without a license key. It then runs in evaluation mode: it asks you to accept the
+[xeoIFC Testing License](https://xeofoundry.github.io/xeoIFC/xeoIFC-Testing-License.txt)
+(`Do you accept the xeoIFC Testing License? [y/N]`; pass `--accept-terms` to accept without the prompt), adds
 a visible "Evaluation version" watermark to the 3D output and appends " - evaluation version" to the name of the model root in the
 metadata. Supplying a valid license key removes the prompt, the watermark and the suffix.
 

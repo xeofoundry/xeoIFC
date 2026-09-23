@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeoIFC showcase - a desktop IFC viewer on xeoifc.dll</title>
+    <link rel="icon" href="../../xeokit-icon.svg"/>
+    <style>
+        /* Same README look as ../index.html. */
+        :root {
+            color-scheme: light dark;
+            --ground: #ffffff;
+            --ink: #1f2328;
+            --muted: #59636e;
+            --line: #d1d9e0;
+            --link: #0969da;
+            --code: #eff1f3;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ground: #0d1117;
+                --ink: #f0f6fc;
+                --muted: #9198a1;
+                --line: #3d444d;
+                --link: #4493f8;
+                --code: #262c36;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: var(--ground);
+            margin: 0;
+        }
+
+        main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
+
+        h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 24px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h3 { font-size: 1.25em; font-weight: 600; margin: 24px 0 16px; }
+
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 85%;
+            background: var(--code);
+            border-radius: 6px;
+        }
+
+        code { padding: .2em .4em; }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; }
+        pre code { padding: 0; background: none; font-size: 100%; }
+
+        figure { margin: 0 0 16px; }
+        figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+        figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+        table { border-collapse: collapse; margin: 0 0 16px; }
+        th, td { border: 1px solid var(--line); padding: 6px 13px; text-align: left; vertical-align: top; }
+        td.number { text-align: right; white-space: nowrap; }
+        td code { overflow-wrap: anywhere; }
+
+        /* Wide tables scroll inside the page on narrow screens, like the code blocks. */
+        .wide { overflow-x: auto; margin: 0 0 16px; }
+        .wide table { margin: 0; }
+
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    </style>
+</head>
+<body>
+<main>
+    <h1>A desktop IFC viewer on xeoifc.dll</h1>
+
+    <p>xeoIFC Qt is a desktop IFC viewer for Windows and Linux. It loads large IFC files and many files at once, shows them in 3D
+        with the model tree and the properties, finds elements and writes a selection to a new IFC file. It is about 4,500 lines of
+        C++ with Qt 6 Widgets, and its source code is open (MIT licence).</p>
+
+    <p>The IFC work is done by <code>xeoifc.dll</code> (<code>libxeoifc.so</code> on Linux), the native library of xeoIFC. It reads
+        the files, tessellates them, draws them into the application window, answers queries and writes IFC. The application uses
+        60 of the 67 functions of one plain C header. This page shows the calls, what the library can do and how fast it is.</p>
+
+    <h2>1. The application</h2>
+
+    <figure>
+        <a href="xeoifc-qt.png"><img src="xeoifc-qt.png" width="1677" height="1030"
+            alt="xeoIFC Qt with the villa model: 3D view, model tree, properties panel and the load log"></a>
+        <figcaption>xeoIFC Qt with the <a href="../villa/">villa</a> from the authoring showcase. The console under the 3D view shows
+            the load log of the library.</figcaption>
+    </figure>
+
+    <ul>
+        <li>Open <code>.ifc</code> and <code>.ifczip</code> files (IFC 2x3, IFC 4, IFC 4.3) from the file dialog, the recent list or
+            by drag and drop. Several files load in parallel into one scene.</li>
+        <li>Rotate about the point under the cursor, pan and zoom. Click an element, or drag a rectangle to select many.</li>
+        <li>Model tree by spatial structure, class, type and material; attributes and property sets of the selected element.</li>
+        <li>Find elements by entity id, GlobalId or name.</li>
+        <li>Hide, isolate and make transparent.</li>
+        <li>Sharp edges and drafting lines: axes, footprints, plan lines, annotations and grids.</li>
+        <li>Write the selection, or several loaded files, to one new IFC file (split and merge).</li>
+        <li>Reload files that change on disk, with the same view.</li>
+    </ul>
+
+    <h2>2. Download</h2>
+
+    <p><a href="https://github.com/xeofoundry/xeoIFC/releases/latest/download/xeoifc-qt-source.zip">xeoifc-qt-source.zip</a>
+        (14 MB) has all that you need to build xeoIFC Qt, except Qt:</p>
+    <ul>
+        <li>The source code of the application (MIT licence).</li>
+        <li>The library: <code>xeoifc.h</code>, <code>xeoifc.dll</code> with its import library for Windows x64, and
+            <code>libxeoifc.so</code> for Linux x64 and Linux arm64.</li>
+        <li>A Visual Studio solution for Windows (no Qt Visual Studio Tools needed) and a <code>CMakeLists.txt</code> for Windows,
+            Linux and macOS.</li>
+        <li>A README with the build steps, the licence texts and the notices of the open-source parts in the library.</li>
+    </ul>
+
+    <h2>3. How easy</h2>
+
+    <p>The library has a plain C interface: functions, opaque handles, and UTF-8 JSON strings in and out. A string or buffer from
+        the library is yours until you give it back with the matching <code>xeoifc_free_*</code> function. The excerpts show the
+        calls of the application without its Qt wrapper, which is 584 lines (<code>XeoIfc.h</code>, <code>XeoIfc.cpp</code>).
+        There is also a <a href="#python">Python</a> version.</p>
+
+    <h3>Load a file in the background</h3>
+
+    <p>A load job reads and tessellates the file on its own thread. The application polls it from a GUI timer.</p>
+
+    <pre><code>#include &lt;xeoifc.h&gt;
+
+/* Called on the job thread: pass it on to the GUI thread. Phases: "parse", "geom", "pack". */
+static void on_progress(void* user, const char* phase, uint32_t done, uint32_t total) { /* ... */ }
+
+XeoIfcSession* s = xeoifc_session_new();
+xeoifc_session_set_roots(s, "[\"C:/models\"]");     /* the folders that the session may read and write */
+
+XeoIfcLoadCallbacks callbacks = { NULL, on_progress, NULL };
+XeoIfcJob* job = xeoifc_load_start(s, "C:/models/villa.ifc", "{\"docId\":\"villa\"}", &amp;callbacks);
+
+/* Every ~30 ms (a GUI timer): 0 running, 1 done, 2 failed, 3 cancelled */
+char* status = NULL;
+int state = xeoifc_job_poll(s, job, &amp;status);
+/* done: {"state":"done","docId":"villa","stats":{"elements":294,"triangles":26018,..},"tree":..} */
+xeoifc_free_string(status);</code></pre>
+
+    <h3>Draw into your window</h3>
+
+    <p>The renderer uses wgpu (DirectX 12, Vulkan or Metal) and draws into a native window that you give it. It draws only when
+        something changed: when the view does not move, <code>xeoifc_viewer_frame</code> returns at once.</p>
+
+    <pre><code>// A widget with its own native window: the renderer draws into it, Qt does not paint it
+// (WA_PaintOnScreen, and paintEngine() returns nullptr).
+setAttribute(Qt::WA_NativeWindow);
+setAttribute(Qt::WA_PaintOnScreen);
+
+void* display = nullptr;                             // Windows: the HWND is sufficient
+#if defined(Q_OS_LINUX) &amp;&amp; QT_CONFIG(xcb)
+if (auto* x11 = qGuiApp-&gt;nativeInterface&lt;QNativeInterface::QX11Application&gt;())
+    display = x11-&gt;display();                        // Linux: the X11 window id and its Display*
+#endif
+const qreal dpr = devicePixelRatioF();               // sizes and positions are physical pixels
+const uint32_t w = std::lround(width() * dpr), h = std::lround(height() * dpr);
+XeoIfcViewer* v = xeoifc_viewer_create(winId(), display, w, h, nullptr);
+
+uint8_t* pack = nullptr;
+size_t len = 0;
+xeoifc_job_take_pack(job, &amp;pack, &amp;len);              // the tessellated model from the load job
+xeoifc_viewer_set_scene(v, pack, len, 0, nullptr);   // 0 replaces all models, 1 adds one
+xeoifc_free_bytes(pack, len);
+xeoifc_job_free(job);
+
+// Draws only after a change. Mouse: xeoifc_viewer_orbit, _pan_to, _zoom. Resize: xeoifc_viewer_resize.
+connect(&amp;m_timer, &amp;QTimer::timeout, [v] { xeoifc_viewer_frame(v); });
+m_timer.start(16);</code></pre>
+
+    <h3>Pick an element and show its properties</h3>
+
+    <pre><code>/* A click at (x, y) in physical pixels. The scene index tells which loaded model was hit. */
+uint32_t scene, entity;
+double point[3];                                     /* the point on the surface */
+if (xeoifc_viewer_pick(v, x, y, &amp;scene, &amp;entity, point) == 1) {
+    uint32_t pair[2] = { scene, entity };
+    xeoifc_viewer_set_selection(v, pair, 1);         /* 1 = one (scene, entity) pair */
+    /* {"type":"IfcWall","globalId":"2C1kfNlluuvc_DT_K$K6Bj","name":"Front wall between the rooms",..} */
+    char* info = xeoifc_element_query(s, "villa", entity, 0);
+    /* [{"pset":"Pset_WallCommon","props":[{"name":"IsExternal","value":"T","unit":null}]}] */
+    char* psets = xeoifc_element_query(s, "villa", entity, 1);
+    /* ... show them ... */
+    xeoifc_free_string(info);
+    xeoifc_free_string(psets);
+}</code></pre>
+
+    <h3>Query and export</h3>
+
+    <p>The document API is one function, <code>xeoifc_call</code>: a JSON request in, a JSON response out. These calls find all
+        external walls and write three of them to a new IFC file.</p>
+
+    <pre><code>char* found = xeoifc_call(s, "{\"op\":\"query.select\",\"doc\":\"villa\",\"args\":{"
+    "\"text\":\"is IfcWall and Pset_WallCommon.IsExternal = true\","
+    "\"select\":[\"name\",\"storey.Name\"],\"includeRefs\":true,\"limit\":1000}}");
+/* {"ok":true,"result":{"count":14,"items":[{"name":"Front wall between the rooms","storey.Name":"Ground floor"},..],
+    "refs":["#1022","#1113","#1218",..],..},..} */
+xeoifc_free_string(found);
+
+/* Walls as a new IFC file. selection = entity ids ("#1022" is 1022). */
+uint8_t* ifc = NULL;
+size_t size = 0;
+if (xeoifc_export(s, "[{\"docId\":\"villa\",\"selection\":[1022,1113,1218]}]", &amp;ifc, &amp;size, NULL) == 0) {
+    fwrite(ifc, 1, size, file);
+    xeoifc_free_bytes(ifc, size);
+}
+/* More items merge models: [{"docId":"a","selection":[]},{"docId":"b","selection":[]}] */</code></pre>
+
+    <h3 id="python">The same in Python</h3>
+
+    <p>Each language that can call C can use the library. <a href="external_walls.py">external_walls.py</a> is a complete Python
+        script with <code>ctypes</code> and no other package. It loads a model, finds the external walls and writes them to a new
+        IFC file. It gives the same result with <code>xeoifc.dll</code> on Windows and with <code>libxeoifc.so</code> on Linux x64
+        and arm64.</p>
+
+    <pre><code>lib = ctypes.CDLL(str(pathlib.Path(sys.argv[1]).resolve()))   # xeoifc.dll or libxeoifc.so
+...
+job = load_start(s, model.as_posix().encode(), b'{"docId":"m"}', None)
+while (state := job_poll(s, job, byref(status))) == 0:   # 0 running, 1 done, 2 failed, 3 cancelled
+    time.sleep(0.03)
+...
+walls = call("query.select", {"text": "is IfcWall and Pset_WallCommon.IsExternal = true",
+                              "select": ["name", "storey.Name"], "includeRefs": True, "limit": 1000})
+ids = [int(ref[1:]) for ref in walls["result"]["refs"]]   # "#1022" -&gt; 1022
+export(s, json.dumps([{"docId": "m", "selection": ids}]).encode(), byref(out), byref(size), None)</code></pre>
+
+    <pre><code>&gt; python external_walls.py xeoifc.dll villa.ifc
+villa.ifc: 294 elements, 26018 triangles, 0.04 s
+  Front wall between the rooms (Ground floor)
+  Front wall, wing joint (Ground floor)
+  Guest bedroom front wall west (Ground floor)
+  ...
+  First floor east wall (First floor)
+14 external walls -&gt; external-walls.ifc (51 KB)
+evaluation marker: True</code></pre>
+
+    <h2>4. How powerful</h2>
+
+    <div class="wide"><table>
+        <tr><th>Document API</th><td>111 operations in 27 groups through <code>xeoifc_call</code>: queries, entities, property and
+            quantity sets, materials, classifications, types, spatial structure, placements, new elements with openings,
+            transactions with undo and redo, validation, diff and merge. <code>api.describe</code> returns the whole API as JSON or
+            as TypeScript declarations. A wrong call gets an answer with a hint, for example the allowed values of an
+            enumeration.</td></tr>
+        <tr><th>Queries</th><td><code>is IfcWall and Pset_WallCommon.IsExternal = true and storey.Name = "Level 1"</code>, with
+            columns such as <code>name</code>, <code>globalId</code>, <code>Pset_WallCommon.FireRating</code> or
+            <code>storey.Name</code></td></tr>
+        <tr><th>Files</th><td><code>.ifc</code> and <code>.ifczip</code>, IFC 2x3, IFC 4 and IFC 4.3, from a path or from bytes</td></tr>
+        <tr><th>Split and merge</th><td><code>xeoifc_export</code> writes a selection, a whole model or several models to one IFC
+            file, with the same writer as the command-line tool and the web viewer</td></tr>
+        <tr><th>Loading</th><td>Background jobs with progress, a preview while the file loads, and cancel. Each file loads on its
+            own thread; the application loads up to 8 files at the same time.</td></tr>
+        <tr><th>Renderer</th><td>wgpu on DirectX 12, Vulkan or Metal. Many models in one scene, each with its own placement. Pick,
+            rectangle pick and hover; selection, visibility and transparency. Camera: orbit about the point under the cursor,
+            anchored pan, zoom to the cursor, fit, view directions, save and restore. Sharp edges and 5 drafting line
+            layers.</td></tr>
+        <tr><th>Interface</th><td>One C header with 67 functions. Any compiler and any language that can call C. One session or
+            viewer per thread; load callbacks come from the job thread.</td></tr>
+        <tr><th>Platforms</th><td>Windows x64 (<code>xeoifc.dll</code>); Linux x64 and arm64 (<code>libxeoifc.so</code>, glibc
+            2.35 or newer). macOS: prepared, no library yet.</td></tr>
+    </table></div>
+
+    <h3>Measured</h3>
+
+    <p>Load time of the library: read the file, make the geometry (openings cut) and pack it for the renderer, from
+        <code>xeoifc_load_start</code> until <code>xeoifc_job_poll</code> returns 1. Median of 3 runs on a laptop with an AMD Ryzen 9
+        7940HS, Windows 11, xeoIFC 1.0.12.</p>
+
+    <div class="wide"><table>
+        <tr><th>Model</th><th>File</th><th>Entities</th><th>Elements</th><th>Triangles</th><th>Load time</th></tr>
+        <tr><td><a href="../villa/">Villa</a></td><td>0.7 MB, IFC 4</td><td class="number">7,555</td><td class="number">294</td>
+            <td class="number">26,018</td><td class="number">0.04 s</td></tr>
+        <tr><td><a href="../../Duplex.ifc">Duplex</a> apartment</td><td>2.4 MB, IFC 2x3</td><td class="number">38,898</td>
+            <td class="number">239</td><td class="number">28,070</td><td class="number">0.18 s</td></tr>
+        <tr><td><a href="../">Viadotto Acerno</a> bridge</td><td>8.4 MB .ifczip (33 MB IFC), IFC 4.3</td>
+            <td class="number">253,318</td><td class="number">6,988</td><td class="number">2,525,527</td>
+            <td class="number">0.55 s</td></tr>
+    </table></div>
+
+    <h2>5. Build it yourself</h2>
+
+    <p>You need Qt 6.3 or newer with Qt Widgets and the Qt SVG plugins, and a C++20 compiler. The README in the zip has all
+        steps.</p>
+
+    <h3>Windows x64</h3>
+
+    <p>Visual Studio 2022 or 2026 and the Qt kit "MSVC 2022 64-bit". Set <code>QTDIR</code> to the kit, open
+        <code>xeoifc-qt.sln</code> and build <code>Release</code>, <code>x64</code>. The build puts <code>xeoifc.dll</code> and the Qt
+        runtime next to the exe. With CMake:</p>
+
+    <pre><code>cmake -S . -B build -DCMAKE_PREFIX_PATH=C:\Qt\6.8.3\msvc2022_64
+cmake --build build --config Release</code></pre>
+
+    <h3>Linux x64 and arm64</h3>
+
+    <p>Ubuntu 24.04, or another distribution with glibc 2.35 and Qt 6.3 or newer. The renderer uses Vulkan on X11; on a Wayland
+        desktop the application runs through XWayland.</p>
+
+    <pre><code>sudo apt install build-essential cmake qt6-base-dev libqt6svg6 qt6-qpa-plugins libgl-dev libvulkan1 mesa-vulkan-drivers
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+./build/xeoifc-qt</code></pre>
+
+    <h3>macOS</h3>
+
+    <p>The CMake project and the Metal code path are prepared, but there is no <code>libxeoifc.dylib</code> yet. Ask
+        <a href="https://xeofoundry.com">xeoFoundry</a> if you need it.</p>
+
+    <h2>6. Licence</h2>
+
+    <p>xeoIFC Qt is open source under the MIT licence. You can use, change and distribute it, also in commercial products. The
+        xeokit logo files in <code>resources/</code> are not covered by the MIT licence.</p>
+
+    <p><code>xeoifc.dll</code> and <code>libxeoifc.so</code> are not open source. They are licensed under the
+        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>sdk/LICENSE.txt</code> in the zip): you can use and redistribute them unmodified, in binary form and free
+        of charge, solely for testing and evaluation. For commercial or production use, contact
+        <a href="https://xeofoundry.com">xeoFoundry</a>. All functions work without a licence key. Without a key, each IFC file
+        that the library writes gets one more element: an <code>IfcBuildingElementProxy</code> with the text "xeoIFC evaluation
+        version" next to the model. A licence key from <a href="https://xeofoundry.com">xeoFoundry</a> removes it:</p>
+
+    <pre><code>xeoifc_set_licence_key(s, "YOUR-KEY", NULL);   /* 1 licensed, 0 no key, -1 unknown or expired */</code></pre>
+
+    <footer>
+        More: <a href="../">viewer showcase</a> - <a href="../villa/">a villa from one picture</a> -
+        Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
+        Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
+    </footer>
+</main>
+</body>
+</html>

@@ -8,12 +8,15 @@
 //   {id, type: "load", source, name, circleSegments}   source = absolute URL | Blob | ArrayBuffer
 //                                                    -> {id, type: "progress", phase, done, total}*
 //                                                       {id, type: "loaded", packed, edges, tree, sourceId, isStep}
+//   {id, type: "metadata", source}                    -> {id, type: "progress", phase, done, total}*      (IFC only, no geometry)
+//                                                       {id, type: "metadata", tree, sourceId}
 //   {id, type: "properties", sourceId, entityId, isStep} -> {id, type: "properties", json}
-//   {type: "clear"}                                    (no response)
+//   {type: "release", sourceId, isStep}                (no response; frees that one model)
+//   {type: "clear"}                                    (no response; frees every model)
 //   any failure                                      -> {id, type: "error", message}
 
-import initIfc, {worker_load_begin, worker_load_chunk, worker_load_finish, worker_properties, worker_clear_models} from "../wasm/viewer_wasm.js";
-import initStep, {step_load, step_properties, step_clear_models} from "../wasm/viewer_wasm_step.js";
+import initIfc, {worker_load_begin, worker_load_chunk, worker_load_finish, worker_metadata_finish, worker_properties, worker_release_model, worker_clear_models} from "../wasm/viewer_wasm.js";
+import initStep, {step_load, step_properties, step_release_model, step_clear_models} from "../wasm/viewer_wasm_step.js";
 import {buildPackEdges} from "./packEdges.js";
 
 const SNIFF_BYTES = 65536;
@@ -78,6 +81,9 @@ async function load(msg, onProgress) {
     }
 
     if (isStepCad(concat(head, headLength).subarray(0, SNIFF_BYTES))) {
+        if (msg.type === "metadata") {
+            throw "Metadata can only be loaded from IFC files";
+        }
         for (let chunk; (chunk = await read());) { // The STEP CAD reader needs random access: whole file
             head.push(chunk);
             headLength += chunk.length;
@@ -94,6 +100,10 @@ async function load(msg, onProgress) {
     head.length = 0;
     for (let chunk; (chunk = await read());) {
         worker_load_chunk(chunk);
+    }
+    if (msg.type === "metadata") {
+        onProgress("parse", 0, 1);
+        return {isStep: false, result: worker_metadata_finish()};
     }
     return {isStep: false, result: worker_load_finish(onProgress, () => {})};
 }
@@ -116,9 +126,23 @@ async function handle(msg) {
             const edges = buildPackEdges(packed);
             postMessage({id, type: "loaded", packed, edges, tree: result.tree, sourceId: result.sourceId, isStep},
                 [packed, edges.indices.buffer, edges.offsets.buffer]);
+        } else if (msg.type === "metadata") {
+            const onProgress = (phase, done, total) => postMessage({id, type: "progress", phase, done, total});
+            const {result} = await load(msg, onProgress);
+            postMessage({id, type: "metadata", tree: result.tree, sourceId: result.sourceId});
         } else if (msg.type === "properties") {
             const query = msg.isStep ? step_properties : worker_properties;
             postMessage({id, type: "properties", json: query(msg.sourceId, msg.entityId)});
+        } else if (msg.type === "release") {
+            if (msg.isStep) {
+                if (stepReady) {
+                    await stepReady;
+                    step_release_model(msg.sourceId);
+                }
+            } else if (ifcReady) {
+                await ifcReady;
+                worker_release_model(msg.sourceId);
+            }
         } else if (msg.type === "clear") {
             if (ifcReady) {
                 await ifcReady;

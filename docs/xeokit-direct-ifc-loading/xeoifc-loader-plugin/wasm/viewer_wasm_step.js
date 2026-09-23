@@ -59,6 +59,14 @@ export function step_properties(source_id, entity_id) {
     }
     return v1;
 }
+
+/**
+ * Drop one retained STEP model while the others stay. Unknown ids are ignored.
+ * @param {number} source_id
+ */
+export function step_release_model(source_id) {
+    wasm.step_release_model(source_id);
+}
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,

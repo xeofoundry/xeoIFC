@@ -71,6 +71,16 @@ load jobs with progress callbacks, and the wgpu renderer drawing into a native w
 Function groups and a C example:
 [architecture/integration-map.md](architecture/integration-map.md#native-library-xeoifcdll-c-abi-any-language)
 
+<a href="https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-qt/">
+  <img width="900" alt="xeoIFC Qt, an open-source desktop IFC viewer on xeoifc.dll, with the villa model - click for the showcase page" src="docs/showcase/xeoifc-qt/xeoifc-qt.png" />
+</a>
+
+xeoIFC Qt is an open-source (MIT) desktop IFC viewer for Windows and Linux: about 4,500 lines of C++ with Qt 6 Widgets on
+`xeoifc.dll`. Click the image for the [showcase page](https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-qt/) with the calls it
+makes and measured load times, or download the
+[source code with the prebuilt library](https://github.com/xeofoundry/xeoIFC/releases/latest/download/xeoifc-qt-source.zip)
+(Visual Studio solution and CMake).
+
 ## Authoring
 
 xeoIFC does not only read IFC, it writes it: the document API creates projects, storeys, elements with geometry, openings,
