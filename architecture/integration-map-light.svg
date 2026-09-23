@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img"
-     aria-label="Three hosts (browser wasm viewer, CLI, native programs on the xeoifc.dll C ABI) each go through a thin binding into the ifc-session document API, which drives the shared engine crates; renderers and the converter pipeline take the engine directly."
+     aria-label="Three builds (the WebAssembly library in the browser, the CLI, the native library with the xeoifc.dll C ABI) each go through a thin binding into the ifc-session document API, which drives the shared engine crates; renderers and the converter pipeline take the engine directly."
      font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
@@ -22,16 +22,16 @@
   <!-- HOSTS -->
   <g>
     <rect x="40" y="44" width="360" height="130" rx="6" fill="#EDF1EC" stroke="#C9CFD3"/>
-    <text x="58" y="70" font-size="16" font-weight="600" fill="#182029">Browser: WASM viewer</text>
-    <text x="58" y="88" font-size="12" fill="#66707A" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">web/  TypeScript + WebGPU</text>
+    <text x="58" y="70" font-size="16" font-weight="600" fill="#182029">Browser: WebAssembly library</text>
+    <text x="58" y="88" font-size="12" fill="#66707A" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">viewer_wasm.js  xeoIFC Web, xeokit loader</text>
     <rect x="58" y="102" width="150" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
     <text x="68" y="122" font-size="12" font-weight="500" fill="#182029">Main thread</text>
-    <text x="68" y="138" font-size="11.5" fill="#66707A">Viewer: camera, pick,</text>
-    <text x="68" y="151" font-size="11.5" fill="#66707A">pack upload to GPU</text>
+    <text x="68" y="138" font-size="11.5" fill="#66707A">Viewer: WebGPU canvas,</text>
+    <text x="68" y="151" font-size="11.5" fill="#66707A">camera, pick, select</text>
     <rect x="222" y="102" width="160" height="54" rx="4" fill="#FFFFFF" stroke="#C9CFD3"/>
     <text x="232" y="122" font-size="12" font-weight="500" fill="#182029">Web Worker</text>
-    <text x="232" y="138" font-size="11.5" fill="#66707A">IfcSession: parse, ops,</text>
-    <text x="232" y="151" font-size="11.5" fill="#66707A">tessellate, export</text>
+    <text x="232" y="138" font-size="11.5" fill="#66707A">worker_*: load, query,</text>
+    <text x="232" y="151" font-size="11.5" fill="#66707A">document API, export</text>
 
     <rect x="420" y="44" width="360" height="130" rx="6" fill="#EDF1EC" stroke="#C9CFD3"/>
     <text x="438" y="70" font-size="16" font-weight="600" fill="#182029">CLI: xeoifc.exe</text>
@@ -81,10 +81,10 @@
   <!-- BINDINGS -->
   <g>
     <rect x="40" y="226" width="360" height="86" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
-    <text x="58" y="250" font-size="14" font-weight="600" fill="#182029">wasm-bindgen classes</text>
-    <text x="58" y="270" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">IfcSession  crates/wasm/ifc-session</text>
-    <text x="58" y="287" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">Viewer      crates/viewer/wasm</text>
-    <text x="58" y="304" font-size="11.5" fill="#66707A">call(json) + openBytes / takeBytes side channels</text>
+    <text x="58" y="250" font-size="14" font-weight="600" fill="#182029">wasm-bindgen: viewer_wasm</text>
+    <text x="58" y="270" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">worker_call  worker_load_*  worker_export_*</text>
+    <text x="58" y="287" font-size="12" fill="#182029" font-family="ui-monospace, SFMono-Regular, Consolas, Menlo, monospace">Viewer       crates/viewer/wasm</text>
+    <text x="58" y="304" font-size="11.5" fill="#66707A">worker_call(json); bytes in chunks, take_bytes out</text>
 
     <rect x="420" y="226" width="360" height="86" rx="6" fill="#FFFFFF" stroke="#C9CFD3"/>
     <text x="438" y="250" font-size="14" font-weight="600" fill="#182029">Rust API and stdio</text>
@@ -189,11 +189,11 @@
     <path d="M490,174 L490,214 L20,214 L20,700 L601,700 L601,684"/>
   </g>
   <g font-size="11" fill="#66707A">
-    <text x="1188" y="300" transform="rotate(90 1188 300)">packed scene buffer to the renderer (Viewer main thread, xeoifc_viewer_set_scene)</text>
+    <text x="1188" y="300" transform="rotate(90 1188 300)">packed scene to the renderer (Viewer.set_packed_scene, xeoifc_viewer_set_scene)</text>
     <text x="30" y="716">converter pipeline (src/pipeline.rs): StepFile, Model, SceneBuilder, GLB writer, no session in between</text>
   </g>
 
   <g font-size="11" fill="#66707A">
-    <text x="40" y="760">Rust workspace: one Cargo build produces the wasm modules, the CLI and xeoifc.dll from the same crates; any desktop or server application links the DLL (reference host: apps/xeoifc-qt).</text>
+    <text x="40" y="760">Rust workspace: one Cargo build produces the WebAssembly library, the CLI and the native library from the same crates; reference hosts: xeoIFC Web and xeoIFC Qt (both MIT).</text>
   </g>
 </svg>

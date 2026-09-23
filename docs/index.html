@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IFC Viewer — WebGPU / Rust WASM</title>
+    <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/index-Bl09ePcj.js"></script>
+    <script type="module" crossorigin src="./assets/index-fsSUiDbX.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-CEZiO54d.css">
   </head>
   <body>
@@ -31,7 +31,7 @@
           <div id="sidebar-resizer" title="Drag to resize"></div>
           <div id="properties" class="properties empty">Select an element to inspect properties</div>
           <footer id="status-bar" aria-live="polite">
-            <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.ids,.rvm,.las,.laz" multiple hidden />
+            <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.ids,.rvm,.las,.laz,.xml,.landxml" multiple hidden />
             <button id="about-link" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
             <button id="open-button" type="button">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -519,7 +519,7 @@
             <ul id="bcf-topics"></ul>
             <div id="bcf-detail"></div>
           </div>
-          <div id="welcome-drop-zone"><div>Drop files here</div><div class="drop-formats">(.ifc/.ifczip/.stp/.jt/.glb/.rvm/.las/.laz)</div></div>
+          <div id="welcome-drop-zone"><div>Drop files here</div><div class="drop-formats">(.ifc/.ifczip/.stp/.jt/.glb/.rvm/.las/.laz/LandXML .xml)</div></div>
           <div id="welcome-panel">
             <h1 class="brand-title" aria-label="xeoIFC">
               <img class="brand-icon" src="./xeokit-icon.svg?v=2" alt="" aria-hidden="true" />
@@ -537,8 +537,8 @@
               <span>xeo</span><span>IFC</span>
             </div>
             <hr />
-            <h2 id="about-title">About xeoIFC WebAssembly viewer</h2>
-            <p>This demo viewer showcases xeoIFC in the browser. It loads IFC models locally with WebAssembly and renders them with WebGPU.</p>
+            <h2 id="about-title">About xeoIFC Web</h2>
+            <p>xeoIFC Web is the demo viewer of the xeoIFC WebAssembly library. It loads IFC models locally with WebAssembly and renders them with WebGPU.</p>
             <p>No IFC model information is uploaded or stored server side by this viewer. All IFC data is processed in the client web browser.</p>
 
             <p>XeoIFC converts any IFC file: IFC2X3, IFC4 or newer, same as the native xeoIFC converter application/API library.</p>
@@ -551,11 +551,13 @@
 
             <p><b>Repository: </b><a href="https://github.com/xeofoundry/xeoIFC" target="_blank" rel="noreferrer">www.github.com/xeofoundry/xeoIFC</a></p>
 
+            <p><b>Source code: </b>xeoIFC Web is open source under the MIT licence: xeoifc-web-source.zip, with the prebuilt xeoIFC WebAssembly library, on the <a href="https://github.com/xeofoundry/xeoIFC/releases/" target="_blank" rel="noreferrer">releases page</a>.</p>
+
             <p><b>Open-source software: </b><a href="./THIRD-PARTY-NOTICES.txt" target="_blank" rel="noreferrer">Third-party notices</a></p>
 
             <p id="about-versions-row" hidden><b>Versions: </b><span id="about-versions"></span></p>
 
-            <p><b>Licence: </b>Loading, viewing and all tools work without a licence key. Exported files then carry an "Evaluation version" text; with a licence key they are written without it. The key is entered in the Settings panel.</p>
+            <p><b>Licence: </b>Loading, viewing and all tools work without a licence key. Exported files then carry an "Evaluation version" text; with a licence key they are written without it. The key is entered in the Settings panel. The xeoIFC WebAssembly library is licensed under the <a href="./xeoIFC-Testing-License.txt" target="_blank" rel="noreferrer">xeoIFC Testing License</a>.</p>
 
             <p class="powered-by">Powered by xeoFoundry - <a href="https://xeofoundry.com" target="_blank">www.xeofoundry.com</a></p>
           </div>

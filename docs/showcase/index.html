@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>xeoIFC WebAssembly viewer - live showcase</title>
+    <title>xeoIFC showcase - a browser IFC viewer on the xeoIFC WebAssembly library</title>
     <link rel="icon" href="../xeokit-icon.svg"/>
     <style>
-        /* Laid out like the README section this page is linked from, with the live viewer where the screenshot is. */
+        /* Same README look as xeoifc-qt/index.html, with the live viewer in place of the screenshot. */
         :root {
             color-scheme: light dark;
             --ground: #ffffff;
@@ -37,38 +37,33 @@
             margin: 0;
         }
 
-        main {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 32px 16px 48px;
-        }
+        main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
 
-        h1 {
-            font-size: 2em;
-            font-weight: 600;
-            margin: 0 0 16px;
-            padding-bottom: .3em;
-            border-bottom: 1px solid var(--line);
-        }
-
-        h2 {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin: 24px 0 16px;
-            padding-bottom: .3em;
-            border-bottom: 1px solid var(--line);
-        }
+        h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 24px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h3 { font-size: 1.25em; font-weight: 600; margin: 24px 0 16px; }
 
         a { color: var(--link); text-decoration: none; }
         a:hover { text-decoration: underline; }
 
-        code {
+        code, pre {
             font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
             font-size: 85%;
             background: var(--code);
-            padding: .2em .4em;
             border-radius: 6px;
         }
+
+        code { padding: .2em .4em; }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; }
+        pre code { padding: 0; background: none; font-size: 100%; }
+
+        table { border-collapse: collapse; margin: 0 0 16px; }
+        th, td { border: 1px solid var(--line); padding: 6px 13px; text-align: left; vertical-align: top; }
+        td code { overflow-wrap: anywhere; }
+
+        /* Wide tables scroll inside the page on narrow screens, like the code blocks. */
+        .wide { overflow-x: auto; margin: 0 0 16px; }
+        .wide table { margin: 0; }
 
         /* Same footprint as the README screenshot: 900 px wide, about 16:9. */
         #viewer {
@@ -91,25 +86,28 @@
             color: var(--muted);
         }
 
-        footer {
-            margin-top: 32px;
-            padding-top: 16px;
-            border-top: 1px solid var(--line);
-            font-size: 14px;
-            color: var(--muted);
-        }
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
     </style>
 </head>
 <body>
 <main>
-    <h1>xeoIFC</h1>
+    <h1>A browser IFC viewer on the xeoIFC WebAssembly library</h1>
 
-    <h2>WebAssembly viewer</h2>
+    <p>xeoIFC Web is an IFC viewer that runs in the browser. It loads large IFC files and many files at once, shows them in 3D
+        with the model tree and the properties, finds, measures and cuts, checks BCF, IDS and clashes, and writes a selection or
+        several models to a new IFC file. It is about 16,600 lines of TypeScript, and its source code is open (MIT licence).</p>
 
-    <p>This is the viewer itself, not a screenshot: xeoIFC runs as a WebAssembly module in your browser and has loaded the
-        Viadotto Acerno bridge (IFC 4.3). Rotate, zoom and pan with the mouse, click elements to select them.</p>
+    <p>The IFC work is done by the xeoIFC WebAssembly library, the browser form of <code>xeoifc.dll</code>. Its engine runs in a
+        Web Worker: it reads the files, tessellates them, answers queries and writes IFC. Its renderer draws with WebGPU into a
+        canvas on the page. Nothing is uploaded: the files stay on your computer. This page shows the calls and what the library
+        can do.</p>
 
-    <iframe id="viewer" src="../?load=Viadotto-Acerno.ifczip&amp;embed=1" title="xeoIFC WebAssembly viewer with the Viadotto Acerno bridge"
+    <h2>1. The application</h2>
+
+    <p>This is the viewer itself, not a screenshot: xeoIFC Web has loaded the Viadotto Acerno bridge (IFC 4.3). Rotate, zoom
+        and pan with the mouse, click elements to select them.</p>
+
+    <iframe id="viewer" src="../?load=Viadotto-Acerno.ifczip&amp;embed=1" title="xeoIFC Web with the Viadotto Acerno bridge"
             allow="fullscreen" allowfullscreen></iframe>
 
     <div class="under-viewer">
@@ -117,10 +115,10 @@
         <a href="../?load=Viadotto-Acerno.ifczip">Open in the full viewer</a>
     </div>
 
-    <p>The demo runs locally in the browser. In the <a href="../">full viewer</a>, Drag&amp;Drop <code>.ifc</code> or
-        <code>.ifczip</code> files from your machine to render them locally (no upload of any IFC data).</p>
+    <p>In the <a href="../">full viewer</a>, Drag&amp;Drop <code>.ifc</code> or <code>.ifczip</code> files from your machine to
+        render them locally (no upload of any IFC data).</p>
 
-    <p>The WASM viewer supports</p>
+    <p>xeoIFC Web supports</p>
     <ul>
         <li>Loading of any number of files into one scene.</li>
         <li>Selecting elements in the tree view or 3D view, show element properties and property sets/quantities.</li>
@@ -128,7 +126,251 @@
         <li>Load terrain from public GIS databases around georeferenced IFC models.</li>
         <li>Export of selected elements to a new IFC file (split).</li>
         <li>Export of several loaded files to a new IFC file (merge).</li>
+        <li>BCF, Minimap, storey shift, clip planes, measuring tool, compare revisions tool.</li>
+        <li>File types: .ifc, .ifczip, .jt, .stp, .step, .glb, .bcf, .bcfzip, .las, .laz</li>
     </ul>
+
+    <h2>2. Download</h2>
+
+    <p>Download <code>xeoifc-web-source.zip</code> (2.5 MB) from the <a href="https://github.com/xeofoundry/xeoIFC/releases/">releases
+        page</a>. It has all that you need to build xeoIFC Web, except Node.js:</p>
+    <ul>
+        <li>The source code of the application (MIT licence): <code>index.html</code>, <code>src/</code> with TypeScript and CSS,
+            <code>package.json</code> and <code>vite.config.ts</code>.</li>
+        <li>The library: the wasm modules with their JavaScript bindings and TypeScript declarations. <code>viewer_wasm</code> is
+            the engine and the renderer; <code>viewer_wasm_jt</code>, <code>viewer_wasm_step</code>,
+            <code>viewer_wasm_formats</code> and <code>viewer_wasm_fall</code> load on first use.</li>
+        <li>A README with the build steps, the licence texts and the notices of the open-source parts in the library.</li>
+    </ul>
+
+    <p>There are no sample models in the zip: use your own IFC files.</p>
+
+    <h2>3. Using the library</h2>
+
+    <p>The library is one module with two faces: engine functions that a Web Worker calls, and the <code>Viewer</code> class on
+        the page. Control is JSON; the model crosses from the worker to the page as one transferable buffer. The excerpts are
+        from <code>src/worker.ts</code>, the whole bridge to the engine, and <code>src/main.ts</code>, shortened.</p>
+
+    <h3>Load a file in the worker</h3>
+
+    <p>The worker is a second instance of the same module. It gets the file in chunks and gives each chunk to the engine at
+        once, so the text is never whole in memory. <code>worker_load_finish</code> tessellates the model and returns it as one
+        packed buffer.</p>
+
+    <pre><code>// src/worker.ts
+import init, { worker_load_begin, worker_load_chunk, worker_load_finish } from './pkg/viewer_wasm';
+
+const post = self.postMessage.bind(self) as (msg: unknown, transfer?: Transferable[]) =&gt; void;
+const ready = init();
+
+const onProgress = (phase: string, done: number, total: number) =&gt; {
+  post({ type: 'progress', phase, done, total });                 // phases: "parse", "geom", "pack"
+};
+const onSnapshot = (packed: Uint8Array) =&gt; {
+  post({ type: 'snapshot', packed }, [packed.buffer]);            // the scene so far, while the file loads
+};
+
+self.onmessage = async (e: MessageEvent&lt;WorkerRequest&gt;) =&gt; {
+  await ready;
+  const msg = e.data;
+  switch (msg.type) {
+    case 'load-begin':
+      worker_load_begin(msg.circleSegments, msg.renderSharpEdges, msg.clearExisting, msg.orphanedElementsMode);
+      break;
+    case 'load-chunk':
+      worker_load_chunk(new Uint8Array(msg.buffer));
+      post({ type: 'chunk-ok' });                                 // the page can send the next chunk
+      break;
+    case 'load-finish': {
+      const out = worker_load_finish(onProgress, onSnapshot);     // {packed, tree, sourceId, lineLayers, ..}
+      post({ type: 'loaded', packed: out.packed, tree: out.tree, sourceId: out.sourceId }, [out.packed.buffer]);
+      break;
+    }
+  }
+};</code></pre>
+
+    <p>The page reads the file as a stream and sends it in chunks of 8 MB. Each chunk is transferred, not copied.</p>
+
+    <pre><code>// src/main.ts (ParserWorker.loadStream)
+worker.postMessage({
+  type: 'load-begin',
+  circleSegments: settings.circleSegments,                        // 18
+  clearExisting,                                                  // true: replace the loaded models
+  orphanedElementsMode: settings.orphanedElementsMode,            // 'ignore', 'ifc-project' or 'ifc-site'
+  renderSharpEdges: settings.renderSharpEdges,
+});
+const CHUNK = 8 * 1024 * 1024;
+const reader = source.stream().getReader();
+for (;;) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  queued.push(value);
+  queuedBytes += value.length;
+  if (queuedBytes &gt;= CHUNK) await flush();   // one ArrayBuffer: postMessage({ type: 'load-chunk', buffer }, [buffer]),
+}                                            // then wait for 'chunk-ok'
+await flush();
+worker.postMessage({ type: 'load-finish' });</code></pre>
+
+    <h3>Draw into a canvas</h3>
+
+    <p>The renderer uses wgpu on WebGPU and draws into a canvas of the page. It draws only when something changed: when the view
+        does not move, <code>frame()</code> returns <code>false</code> at once.</p>
+
+    <pre><code>// src/main.ts
+import init, { Viewer } from './pkg/viewer_wasm';
+
+await init();
+viewer = await Viewer.create(canvas);                             // canvas.width and height in device pixels
+
+// While the file loads: the snapshots from the worker
+const onSnapshot = (packed: Uint8Array): void =&gt; {
+  if (clearExisting) viewer.set_packed_scene(packed);
+  else viewer.preview_append_scene(packed);                       // over the models that are already loaded
+};
+
+// The loaded model. The result pairs each entity id with a viewer handle for picking, selection and visibility.
+const elementHandles = viewer.set_packed_scene(result.packed);   // [entity id, handle, entity id, handle, ..]
+
+// Mouse: viewer.orbit, pan_start / pan_to / pan_end, zoom_pick. Resize: viewer.resize(width, height, devicePixelRatio).
+const loop = (): void =&gt; {
+  viewer.frame();
+  requestAnimationFrame(loop);
+};
+requestAnimationFrame(loop);</code></pre>
+
+    <h3>Pick an element and show its properties</h3>
+
+    <pre><code>// src/main.ts: a click at (x, y) in device pixels, like the canvas
+const rect = canvas.getBoundingClientRect();
+const x = Math.round((e.clientX - rect.left) * devicePixelRatio);
+const y = Math.round((e.clientY - rect.top) * devicePixelRatio);
+const id = await viewer.pick(x, y);                               // the viewer handle, or undefined for the background
+if (id !== undefined) {
+  viewer.select(id, e.ctrlKey || e.metaKey);                      // ctrl adds to the selection
+  const source = elementSources.get(id);                          // { sourceId, entityId }, from the handle pairs
+  // {"type":"IfcWall","globalId":"2C1kfNlluuvc_DT_K$K6Bj","name":"Front wall between the rooms",..}
+  const info = await parser.query('element_info', source.sourceId, source.entityId);
+  // [{"pset":"Pset_WallCommon","props":[{"name":"IsExternal","value":"T","unit":null}]}]
+  const properties = await parser.query('properties', source.sourceId, source.entityId);
+}
+
+// src/worker.ts: the 'query' message
+value = msg.method === 'element_info'
+  ? worker_element_info(msg.sourceId, msg.id)
+  : worker_properties(msg.sourceId, msg.id);
+post({ type: 'result', reqId: msg.reqId, value });</code></pre>
+
+    <h3>Query and export</h3>
+
+    <p>The document API is one function, <code>worker_call</code>: a JSON request in, a JSON response out, with the same
+        operations and error codes as <code>xeoifc_call</code> of the native library and the command-line tool. The loaded
+        models are the documents <code>s1</code>, <code>s2</code>, ... These calls find all external walls and write three of
+        them to a new IFC file.</p>
+
+    <pre><code>// src/worker.ts: the 'call' message
+post({ type: 'result', reqId: msg.reqId, value: worker_call(msg.request) });
+
+// src/main.ts
+const found = await parser.call({ op: 'query.select', doc: 's1', args: {
+  text: 'is IfcWall and Pset_WallCommon.IsExternal = true',
+  select: ['name', 'storey.Name'], includeRefs: true, limit: 1000 } });
+// {"ok":true,"result":{"count":14,"items":[{"name":"Front wall between the rooms","storey.Name":"Ground floor"},..],
+//   "refs":["#1022","#1113","#1218",..],..},..}</code></pre>
+
+    <p>The viewer keeps only metadata after tessellation. So the export reads the file again, in a worker of its own that ends
+        afterwards. More files before <code>export-run</code> merge the models.</p>
+
+    <pre><code>// src/main.ts (runIfcExport). selection = entity ids ("#1022" is 1022); empty = the whole file.
+const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
+worker.postMessage({ type: 'export-reset' });
+worker.postMessage({ type: 'export-chunk', buffer }, [buffer]);  // the source file again, in chunks of 8 MB
+worker.postMessage({ type: 'export-file-done', selection: Uint32Array.of(1022, 1113, 1218) });
+worker.postMessage({ type: 'export-run', licenceKey, bounds });
+// 'export-done' brings the IFC file, then worker.terminate()
+
+// src/worker.ts
+case 'export-reset':     worker_export_reset(); break;
+case 'export-chunk':     worker_export_chunk(new Uint8Array(msg.buffer)); post({ type: 'chunk-ok' }); break;
+case 'export-file-done': worker_export_file_done(msg.selection); post({ type: 'export-file-ok' }); break;
+case 'export-run': {
+  const out = worker_export_run(msg.licenceKey, Date.now() / 1000, msg.bounds ? Float64Array.from(msg.bounds) : undefined);
+  post({ type: 'export-done', data: out.data, warnings: out.warnings, entities: out.entities }, [out.data.buffer]);
+  break;
+}</code></pre>
+
+    <h3>The same in a script</h3>
+
+    <p>The Script panel (in the Lab menu) runs JavaScript with the <code>xeo</code> API of <code>xeoifc run</code>, the API that
+        made the <a href="villa/">villa</a>, in a sandboxed worker. Document calls go to <code>worker_call</code>, and their
+        changes reach the model only on Apply; <code>xeo.viewer</code> calls go to the <code>Viewer</code>. These two lines colour
+        the external walls red:</p>
+
+    <pre><code>const walls = await xeo.query.select({ text: 'is IfcWall and Pset_WallCommon.IsExternal = true',
+  select: ['name', 'storey.Name'], includeRefs: true, limit: 1000 });
+await xeo.viewer.color({ refs: walls.refs, color: 'red' });</code></pre>
+
+    <h2>4. What the library can do</h2>
+
+    <div class="wide"><table>
+        <tr><th>Document API</th><td>111 operations in 27 groups through <code>worker_call</code>: queries, entities, property and
+            quantity sets, materials, classifications, types, spatial structure, placements, new elements with openings,
+            transactions with undo and redo, validation, diff and merge. <code>api.describe</code> returns the whole API as JSON or
+            as TypeScript declarations. A wrong call gets an answer with a hint, for example the allowed values of an
+            enumeration.</td></tr>
+        <tr><th>Queries</th><td><code>is IfcWall and Pset_WallCommon.IsExternal = true and storey.Name = "Level 1"</code>, with
+            columns such as <code>name</code>, <code>globalId</code>, <code>Pset_WallCommon.FireRating</code> or
+            <code>storey.Name</code></td></tr>
+        <tr><th>Files</th><td><code>.ifc</code> and <code>.ifczip</code>, IFC 2x3, IFC 4 and IFC 4.3, streamed in chunks. Separate
+            modules, fetched on first use: JT, STEP CAD, point clouds (LAS, LAZ, COPC, E57, PLY, XYZ, PTS) and meshes (OBJ, STL,
+            PLY, RVM, LandXML)</td></tr>
+        <tr><th>Split and merge</th><td><code>worker_export_run</code> writes a selection, a whole model or several models to one
+            IFC file, with the same writer as the command-line tool and the native library</td></tr>
+        <tr><th>Loading</th><td>In a Web Worker, with progress, a preview while the file loads, and cancel. Any number of files
+            into one scene. After tessellation the model is pruned to its metadata, so large models fit into the 4 GiB of a wasm
+            instance.</td></tr>
+        <tr><th>Renderer</th><td>wgpu on WebGPU, into a canvas. Many models in one scene, each with its own placement. Pick,
+            rectangle pick and hover; selection, visibility, transparency, colours and clip planes. Camera: orbit about the point
+            under the cursor, anchored pan, zoom to the cursor, fit, view directions, orthographic, save and restore. Sharp edges,
+            5 drafting line layers, point clouds and terrain.</td></tr>
+        <tr><th>Interface</th><td>One ES module with TypeScript declarations: 22 engine functions and the <code>Viewer</code>
+            class with 76 methods. No framework.</td></tr>
+        <tr><th>Application</th><td>xeoIFC Web, TypeScript: model tree, properties, search, measure, section planes, 2D section
+            drawings, storey shift, minimap, walk and saved views, BCF, IDS, clash check, compare revisions, properties as a
+            table, GIS terrain, GLB and XKT readers. Lab: heat flow, script editor, AI assistant with your own API key.</td></tr>
+        <tr><th>Browsers</th><td>Chrome and Edge 113 or newer. On Linux, WebGPU can need
+            <code>chrome://flags/#enable-unsafe-webgpu</code>.</td></tr>
+    </table></div>
+
+    <h2>5. Build it yourself</h2>
+
+    <p>You need Node.js 20.19 or newer. The library in the zip is prebuilt: no Rust, no wasm-pack. The README in the zip has all
+        steps.</p>
+
+    <pre><code>npm install
+npm run dev       # http://localhost:5173
+npm run build     # the static site in dist/</code></pre>
+
+    <p>Put <code>dist/</code> on any web server. WebGPU needs a secure context: <code>https://</code>, or
+        <code>localhost</code>. Serve the <code>.wasm</code> files as <code>application/wasm</code>.</p>
+
+    <h2>6. Licence</h2>
+
+    <p>xeoIFC Web is open source under the MIT licence. You can use, change and distribute it, also in commercial products. The
+        xeokit logo (<code>public/xeokit-icon.svg</code>) is not covered by the MIT licence.</p>
+
+    <p>The library, the <code>.wasm</code> modules with their generated bindings in <code>src/pkg*</code>, is not open source. It
+        is licensed under the <a href="../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>LICENSE-xeoifc.txt</code>
+        in the zip): you can use and redistribute it unmodified, in binary form and free of charge, solely for testing and
+        evaluation. For commercial or production use, contact <a href="https://xeofoundry.com">xeoFoundry</a>. All functions
+        work without a licence key. Without a key, each IFC file that the library writes gets one more element: an
+        <code>IfcBuildingElementProxy</code> with the text "xeoIFC evaluation version" next to the model. A licence key from
+        <a href="https://xeofoundry.com">xeoFoundry</a> removes it. In xeoIFC Web, enter the key in the Settings panel. In your
+        own worker, set the key for the saves of <code>worker_call</code> and give it to each export:</p>
+
+    <pre><code>// saves of worker_call; returns {"state":"licensed"|"evaluation"|"invalid"|"expired","expires":..}
+worker_set_licence_key('YOUR-KEY', Date.now() / 1000);
+// exports: the key is the first argument
+worker_export_run('YOUR-KEY', Date.now() / 1000, bounds);</code></pre>
 
     <footer>
         More: <a href="villa/">a villa from one picture</a> - <a href="xeoifc-qt/">a desktop IFC viewer on xeoifc.dll</a> -

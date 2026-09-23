@@ -1,3 +1,4 @@
+<!-- Generated file: edit the source in the dev repository. sha256:a11269a31d9dd980 -->
 # xeoIFC converter configuration file
 
 The [command-line converter](README.md) reads optional settings from a JSON file before every conversion.
@@ -55,7 +56,8 @@ The values above are the defaults, i.e. what the converter uses when there is no
 | `exportIfcValueTypes` | `"yes"` / `"no"` | `"yes"` | Add `ifcValueType` to every property, for example `IfcPowerMeasure`. |
 | `excludeMetadataForIfcTypes` | array of IFC type names | `[]` | Leave objects of these types out of the metadata file. |
 
-See [metadata-format.md](metadata-format.md) for the resulting JSON.
+See [metadata-format.md](metadata-format.md) for the resulting JSON. These options and the GUID filters below apply to the metadata
+JSON only; a metadata IFC (`-m <path>.ifc` or `.ifczip`) always contains the whole model.
 
 ## Filters
 
@@ -63,7 +65,7 @@ See [metadata-format.md](metadata-format.md) for the resulting JSON.
 |---|---|---|---|
 | `excludeGeometryForIfcTypes` | array of IFC type names | `["IfcOpeningElement"]` | No geometry is exported for these types. |
 | `exportGeometryOnlyForIfcTypes` | array of IFC type names | `[]` | When not empty, only these types (and their subtypes) get geometry. |
-| `excludeGUIDs` | array of GlobalId strings | `[]` | Exclude these objects from the glTF and the metadata. |
+| `excludeGUIDs` | array of GlobalId strings | `[]` | Exclude these objects from the glTF and the metadata JSON. |
 | `exportOnlyGUIDs` | array of GlobalId strings | `[]` | When not empty, only these objects are exported. |
 | `includeOrphanedElements` | see below | `"no"` | Export elements that are not part of the spatial structure. |
 

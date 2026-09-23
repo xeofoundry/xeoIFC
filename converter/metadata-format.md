@@ -1,9 +1,13 @@
+<!-- Generated file: edit the source in the dev repository. sha256:24d756c74fc721df -->
 # xeoIFC metadata JSON format
 
 With `-m <path>.json` the [command-line converter](README.md) writes all non-geometric information of the IFC model into one JSON
 file: the object tree, property sets, element quantities, materials, groups and units. The file follows the xeokit metadata
 conventions (`metaObjects` with `id`, `name`, `type`, `parent`), so it can be loaded by xeokit directly, and extends them with the
 IFC data described here.
+
+With `-m <path>.ifc` or `-m <path>.ifczip` the converter writes a metadata IFC instead: the input model without its geometry, see
+[Metadata file types](README.md#metadata-file-types).
 
 The glTF node names and the metadata `id` values are both the IFC GlobalId, which links geometry and metadata.
 

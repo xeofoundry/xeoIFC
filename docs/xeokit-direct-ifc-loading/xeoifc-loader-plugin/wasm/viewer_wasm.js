@@ -740,8 +740,8 @@ if (Symbol.dispose) Viewer.prototype[Symbol.dispose] = Viewer.prototype.free;
 
 /**
  * What the About panel shows for a licence key: `{"state":"licensed"|"evaluation"|"invalid"|"expired","expires":<unix>}`.
- * Loading and viewing never ask for a key; an export without a valid one carries the "Evaluation version" text
- * (`worker_export_run`). `now_unix`: seconds, from the page's clock.
+ * Loading and viewing never ask for a key; a save or export without a valid one carries the "Evaluation version" text
+ * (`worker_set_licence_key`, `worker_export_run`). `now_unix`: seconds, from the page's clock.
  * @param {string} key
  * @param {number} now_unix
  * @returns {string}
@@ -995,7 +995,9 @@ export function worker_load_chunk(chunk) {
  * worker; `on_progress(phase, done, total)` fires throttled (phases:
  * "parse", "geom", "pack") and `on_snapshot(Uint8Array)` with a packed
  * preview of the elements finished so far. Returns
- * `{ packed: Uint8Array, tree: string|undefined, heapMB: number }`.
+ * `{ packed: Uint8Array, tree: string|undefined, groupings: string, sourceId: number, heapMB: number,
+ * edgesAvailable: boolean, lineLayers: Float32Array[], lineOwners: Uint32Array[] }`: `lineLayers` holds the
+ * drafting line segments per layer, `lineOwners` the entity id of each segment.
  * @param {Function} on_progress
  * @param {Function} on_snapshot
  * @returns {any}
@@ -1055,6 +1057,47 @@ export function worker_properties(source_id, entity_id) {
  */
 export function worker_release_model(source_id) {
     wasm.worker_release_model(source_id);
+}
+
+/**
+ * Save document `doc_id` (`document.save`: validation first, the dirty flag as usual) as bytes that only this engine
+ * reads back, through `worker_load_chunk`, `worker_edit_chunk` and `worker_export_chunk`: for a host that keeps an
+ * edited model to load, edit or export it again. They are no IFC for other programs, so they carry no evaluation
+ * text. Throws the API error JSON.
+ * @param {string} doc_id
+ * @returns {Uint8Array}
+ */
+export function worker_save_sealed(doc_id) {
+    const ptr0 = passStringToWasm0(doc_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_save_sealed(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Set the licence key ("" = none) for the saves of `worker_call` (`document.save`, `document.exportSubset` with
+ * `bytes`): without a valid key they carry the "Evaluation version" text. The key stays set when models are cleared.
+ * `now_unix`: seconds, from the page's clock. Returns `{"state":"licensed"|"evaluation"|"invalid"|"expired","expires":<unix>}`.
+ * @param {string} key
+ * @param {number} now_unix
+ * @returns {string}
+ */
+export function worker_set_licence_key(key, now_unix) {
+    let deferred2_0;
+    let deferred2_1;
+    try {
+        const ptr0 = passStringToWasm0(key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.worker_set_licence_key(ptr0, len0, now_unix);
+        deferred2_0 = ret[0];
+        deferred2_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+    }
 }
 
 /**
@@ -1590,6 +1633,10 @@ function __wbg_get_imports() {
         },
         __wbg_queue_65d985f3e6d786a6: function(arg0) {
             const ret = arg0.queue;
+            return ret;
+        },
+        __wbg_random_039a7d5d06e0d333: function() {
+            const ret = Math.random();
             return ret;
         },
         __wbg_requestAdapter_9ff5c9d1ff271165: function(arg0, arg1) {
@@ -2173,17 +2220,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 253, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 260, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 292, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 299, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 253, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 260, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },

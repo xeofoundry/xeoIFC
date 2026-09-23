@@ -108,8 +108,8 @@
 
     <h2>2. Download</h2>
 
-    <p><a href="https://github.com/xeofoundry/xeoIFC/releases/latest/download/xeoifc-qt-source.zip">xeoifc-qt-source.zip</a>
-        (14 MB) has all that you need to build xeoIFC Qt, except Qt:</p>
+    <p>Download <code>xeoifc-qt-source.zip</code> (14 MB) from the <a href="https://github.com/xeofoundry/xeoIFC/releases/">releases
+        page</a>. It has all that you need to build xeoIFC Qt, except Qt:</p>
     <ul>
         <li>The source code of the application (MIT licence).</li>
         <li>The library: <code>xeoifc.h</code>, <code>xeoifc.dll</code> with its import library for Windows x64, and
@@ -119,7 +119,7 @@
         <li>A README with the build steps, the licence texts and the notices of the open-source parts in the library.</li>
     </ul>
 
-    <h2>3. How easy</h2>
+    <h2>3. Using the library</h2>
 
     <p>The library has a plain C interface: functions, opaque handles, and UTF-8 JSON strings in and out. A string or buffer from
         the library is yours until you give it back with the matching <code>xeoifc_free_*</code> function. The excerpts show the
@@ -243,7 +243,7 @@ villa.ifc: 294 elements, 26018 triangles, 0.04 s
 14 external walls -&gt; external-walls.ifc (51 KB)
 evaluation marker: True</code></pre>
 
-    <h2>4. How powerful</h2>
+    <h2>4. What the library can do</h2>
 
     <div class="wide"><table>
         <tr><th>Document API</th><td>111 operations in 27 groups through <code>xeoifc_call</code>: queries, entities, property and
@@ -256,7 +256,7 @@ evaluation marker: True</code></pre>
             <code>storey.Name</code></td></tr>
         <tr><th>Files</th><td><code>.ifc</code> and <code>.ifczip</code>, IFC 2x3, IFC 4 and IFC 4.3, from a path or from bytes</td></tr>
         <tr><th>Split and merge</th><td><code>xeoifc_export</code> writes a selection, a whole model or several models to one IFC
-            file, with the same writer as the command-line tool and the web viewer</td></tr>
+            file, with the same writer as the command-line tool and xeoIFC Web</td></tr>
         <tr><th>Loading</th><td>Background jobs with progress, a preview while the file loads, and cancel. Each file loads on its
             own thread; the application loads up to 8 files at the same time.</td></tr>
         <tr><th>Renderer</th><td>wgpu on DirectX 12, Vulkan or Metal. Many models in one scene, each with its own placement. Pick,
@@ -330,7 +330,7 @@ cmake --build build -j
     <pre><code>xeoifc_set_licence_key(s, "YOUR-KEY", NULL);   /* 1 licensed, 0 no key, -1 unknown or expired */</code></pre>
 
     <footer>
-        More: <a href="../">viewer showcase</a> - <a href="../villa/">a villa from one picture</a> -
+        More: <a href="../">a browser IFC viewer on the WebAssembly library</a> - <a href="../villa/">a villa from one picture</a> -
         Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
         Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
     </footer>

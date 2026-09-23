@@ -1,0 +1,373 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeokit + xeoIFC: direct IFC loading</title>
+    <link rel="icon" href="../../xeokit-icon.svg"/>
+    <style>
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 15px;
+            color: black;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        #myCanvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background: lightblue;
+            background-image: linear-gradient(lightblue, white);
+        }
+
+        #info { /* Welcome panel, removed on the first click */
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 460px;
+            max-width: calc(100% - 60px);
+            z-index: 300000;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            padding: 18px 22px;
+        }
+
+        #info h1 {
+            font-size: 20px;
+            margin: 0 0 8px 0;
+        }
+
+        #info p {
+            margin: 0 0 8px 0;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* File controls + properties */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        #fileControls {
+            position: absolute;
+            top: 20px;
+            left: 380px;
+            z-index: 200000;
+        }
+
+        #fileControls button {
+            margin-right: 6px;
+        }
+
+        #status {
+            margin-top: 8px;
+        }
+
+        #properties {
+            position: absolute;
+            top: 80px;
+            right: 10px;
+            width: 360px;
+            max-height: 50%;
+            overflow-y: auto;
+            z-index: 200000;
+            background-color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            padding: 6px;
+            display: none;
+        }
+
+        #properties th {
+            text-align: left;
+            padding-top: 6px;
+        }
+
+        #properties td {
+            padding-right: 10px;
+            vertical-align: top;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* NavCubePlugin */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        #myNavCubeCanvas {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            bottom: 50px;
+            right: 10px;
+            z-index: 200000;
+        }
+
+        /* ----------------------------------------------------------------------------------------------------------*/
+        /* TreeViewPlugin */
+        /* ----------------------------------------------------------------------------------------------------------*/
+
+        #treeViewContainer {
+            pointer-events: all;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            scrollbar-width: none; /* Scrolls by wheel and touch, no scroll bar */
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.2); /* 80% transparent */
+            top: 10px;
+            bottom: 0;
+            z-index: 200000;
+            left: 0;
+            padding-left: 10px;
+            user-select: none;
+            width: 350px;
+        }
+
+        #treeViewContainer::-webkit-scrollbar {
+            display: none;
+        }
+
+        #treeViewContainer ul {
+            list-style: none;
+            padding-left: 1.75em;
+            pointer-events: none;
+        }
+
+        #treeViewContainer ul li {
+            position: relative;
+            width: 500px;
+            pointer-events: none;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            vertical-align: middle;
+        }
+
+        #treeViewContainer ul li a {
+            background-color: #eee;
+            border-radius: 50%;
+            color: #000;
+            display: inline-block;
+            height: 1.5em;
+            left: -1.5em;
+            position: absolute;
+            text-align: center;
+            text-decoration: none;
+            width: 1.5em;
+            pointer-events: all;
+        }
+
+        #treeViewContainer ul li a.plus {
+            background-color: #ded;
+        }
+
+        #treeViewContainer ul li a:active {
+            top: 1px;
+        }
+
+        #treeViewContainer ul li span:hover {
+            color: white;
+            cursor: pointer;
+            background: black;
+        }
+
+        #treeViewContainer ul li span {
+            display: inline-block;
+            width: calc(100% - 50px);
+            padding-left: 2px;
+            pointer-events: all;
+            height: 23px;
+        }
+
+        #treeViewContainer .highlighted-node { /* Appearance of node highlighted with TreeViewPlugin#showNode() */
+            border: black solid 1px;
+            background: yellow;
+            color: black;
+            padding-left: 1px;
+            padding-right: 5px;
+        }
+
+    </style>
+</head>
+<body>
+<canvas id="myCanvas"></canvas>
+<canvas id="myNavCubeCanvas"></canvas>
+<div id="info">
+    <h1>xeokit + xeoIFC WebAssembly</h1>
+    <p>The xeoIFC <a href="https://github.com/xeofoundry/xeoIfc" target="_other">(https://github.com/xeofoundry/xeoIfc)</a> engine runs as a WebAssembly module in a
+        Web Worker, parses and tessellates the IFC file and hands one packed geometry buffer plus an object tree
+        to a <a href="https://github.com/xeokit/xeokit-sdk" target="_other">xeokit</a> SceneModel and MetaModel. No conversion
+        step, no server, no upload.</p>
+    <p>Click an object for its property sets.</p>
+    <p>Documentation and more examples: <a href="../index.html">XeoIFCLoaderPlugin</a></p>
+</div>
+<div id="treeViewContainer"></div>
+<div id="fileControls">
+    <button id="loadIfc">Duplex.ifc</button>
+    <button id="fitView">Zoom to bounds</button>
+    <!-- The native file input truncates long names, so it stays hidden behind a button and the name is shown here -->
+    <button id="chooseFile">Choose file</button>
+    <input type="file" id="fileInput" accept=".ifc,.ifczip" hidden/>
+    <span id="fileName"></span>
+    <div>or drop an .ifc or .ifczip file</div>
+    <div id="status">Loading JavaScript modules...</div>
+</div>
+<div id="properties"></div>
+</body>
+
+<script type="importmap">
+    {
+        "imports": {
+            "@xeokit/xeokit-sdk": "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.min.es.js"
+        }
+    }
+</script>
+
+<script type="module">
+
+    import {Viewer, NavCubePlugin, TreeViewPlugin} from "@xeokit/xeokit-sdk";
+    // npm package @xeofoundry/xeoifc-loader-plugin, copied into the parent folder by web/scripts/sync-xeokit-demo.mjs
+    import {XeoIFCLoaderPlugin} from "../xeoifc-loader-plugin/src/index.js";
+
+    const viewer = new Viewer({
+        canvasId: "myCanvas",
+        transparent: true
+    });
+
+    new NavCubePlugin(viewer, {
+        canvasId: "myNavCubeCanvas",
+        visible: true,
+        size: 250,
+        alignment: "bottomRight",
+        bottomMargin: 100,
+        rightMargin: 10
+    });
+
+    new TreeViewPlugin(viewer, {
+        containerElement: document.getElementById("treeViewContainer"),
+        autoExpandDepth: 3
+    });
+
+    const xeoIFCLoader = new XeoIFCLoaderPlugin(viewer);
+
+    // "click", not "pointerdown": a link inside the panel must still receive its click
+    window.addEventListener("click", () => document.getElementById("info").remove(), {once: true, capture: true});
+
+    const statusElement = document.getElementById("status");
+    const propertiesElement = document.getElementById("properties");
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Load an IFC file; source is {src: url} or {file: File}
+    //------------------------------------------------------------------------------------------------------------------
+
+    let sceneModel = null;
+    let selectedEntity = null;
+
+    function load(source) {
+        if (sceneModel) {
+            sceneModel.destroy();
+        }
+        selectedEntity = null;
+        propertiesElement.style.display = "none";
+        statusElement.innerText = "Loading...";
+        const t0 = performance.now();
+
+        const name = source.file ? source.file.name : source.src.split("/").pop();
+        const MAX_NAME = 60;
+        document.getElementById("fileName").innerText = name.length <= MAX_NAME ? name : name.slice(0, MAX_NAME - 20) + "..." + name.slice(-17);
+
+        const model = sceneModel = xeoIFCLoader.load({
+            ...source,
+            id: "myModel",
+            edges: true,
+            onProgress: (phase, done, total) => {
+                const elapsed = Math.round((performance.now() - t0) / 1000);
+                statusElement.innerText = (total > 1 ? `${phase} ${done} / ${total}` : `${phase}...`) + ` (${elapsed} s)`;
+            }
+        });
+
+        model.on("loaded", () => {
+            viewer.cameraFlight.jumpTo(model);
+            // Stop the clock when the model is on screen, not when xeokit reports "loaded": the first frames upload the
+            // geometry and compile shaders, and the GPU works through that after the frame callbacks have returned.
+            // Reading a pixel back blocks until the GPU has caught up.
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                const gl = viewer.scene.canvas.gl;
+                gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+                const seconds = (performance.now() - t0) / 1000;
+                statusElement.innerHTML = "Model loaded in " + (seconds < 10 ? seconds.toFixed(1) : Math.round(seconds)) + " seconds<br>Objects: " + model.numEntities;
+            }));
+        });
+
+        model.on("error", (message) => {
+            statusElement.innerText = message;
+        });
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Click an object -> property sets from the model inside the wasm module
+    //------------------------------------------------------------------------------------------------------------------
+
+    viewer.cameraControl.on("picked", async (pickResult) => {
+        const entity = pickResult.entity;
+        if (!entity) {
+            return;
+        }
+        if (selectedEntity) {
+            selectedEntity.selected = false;
+        }
+        selectedEntity = entity;
+        entity.selected = true;
+        showProperties(entity.id, await xeoIFCLoader.getProperties(entity.id));
+    });
+
+    function showProperties(objectId, propertySets) {
+        const metaObject = viewer.metaScene.metaObjects[objectId];
+        const table = document.createElement("table");
+        const addRow = (tag, cells) => {
+            const row = table.insertRow();
+            for (const text of cells) {
+                const cell = document.createElement(tag);
+                cell.innerText = text ?? "";
+                if (cells.length === 1) {
+                    cell.colSpan = 3;
+                }
+                row.append(cell);
+            }
+        };
+        addRow("th", [metaObject ? `${metaObject.type}: ${metaObject.name}` : objectId]);
+        for (const propertySet of propertySets) {
+            addRow("th", [propertySet.pset]);
+            for (const prop of propertySet.props) {
+                addRow("td", [prop.name, prop.value, prop.unit]);
+            }
+        }
+        propertiesElement.replaceChildren(table);
+        propertiesElement.style.display = "block";
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // File controls
+    //------------------------------------------------------------------------------------------------------------------
+
+    document.getElementById("loadIfc").onclick = () => load({src: "../../Duplex.ifc"});
+    document.getElementById("fitView").onclick = () => {
+        viewer.cameraFlight.flyTo({aabb: viewer.scene.getAABB(viewer.scene.visibleObjectIds)}); // Bounds of what is visible
+    };
+    document.getElementById("chooseFile").onclick = () => document.getElementById("fileInput").click();
+    document.getElementById("fileInput").onchange = (event) => {
+        const file = event.target.files[0];
+        event.target.value = ""; // So that choosing the same file again fires "change"
+        if (file) {
+            load({file});
+        }
+    };
+    document.body.ondragover = (event) => event.preventDefault();
+    document.body.ondrop = (event) => {
+        event.preventDefault();
+        if (event.dataTransfer.files[0]) {
+            load({file: event.dataTransfer.files[0]});
+        }
+    };
+
+    load({src: "../../Duplex.ifc"});
+
+</script>
+</html>

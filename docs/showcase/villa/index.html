@@ -100,7 +100,7 @@
         including furniture etc. Use xeoIFC API</blockquote>
 
     <p>Claude read the API with <code>xeoifc describe</code>, wrote <a href="villa.js">one JavaScript file</a> and ran it. Three short
-        follow-ups refined the result:</p>
+        follow-ups refined the result (which also demonstrates how to edit existing models):</p>
 
     <blockquote class="prompt followup">there should be a small hallway at the top of the stairs, so that all 3 rooms can be accessed from there</blockquote>
     <blockquote class="prompt followup">add a staircase window on the north wall</blockquote>
@@ -118,10 +118,10 @@
 
     <h2>2. The IFC model</h2>
 
-    <p>This is the live xeoIFC WebAssembly viewer with the generated <code>villa.ifc</code>. Rotate, zoom and pan with the mouse,
-        click the sofa, a cypress or the lawn to see what it is.</p>
+    <p>This is xeoIFC Web, the browser viewer on the xeoIFC WebAssembly library, with the generated <code>villa.ifc</code>.
+        Rotate, zoom and pan with the mouse, click the sofa, a cypress or the lawn to see what it is.</p>
 
-    <iframe id="viewer" src="../../?load=showcase/villa/villa.ifc&amp;embed=1" title="xeoIFC WebAssembly viewer with the generated villa"
+    <iframe id="viewer" src="../../?load=showcase/villa/villa.ifc&amp;embed=1" title="xeoIFC Web with the generated villa"
             allow="fullscreen" allowfullscreen></iframe>
 
     <div class="under-viewer">
@@ -199,7 +199,7 @@ await xeo.document.save({ path: 'villa.ifc', overwrite: true });</code></pre>
         <a href="villa.jpg">villa.jpg</a> (the picture). <code>xeoifc describe</code> prints the whole API as TypeScript declarations.</p>
 
     <footer>
-        More: <a href="../">viewer showcase</a> - <a href="../xeoifc-qt/">a desktop IFC viewer on xeoifc.dll</a> -
+        More: <a href="../">xeoIFC Web</a> - <a href="../xeoifc-qt/">a desktop IFC viewer on xeoifc.dll</a> -
         Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
         Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
     </footer>

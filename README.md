@@ -1,3 +1,4 @@
+<!-- Generated file: edit the source in the dev repository. sha256:3c9427fc09c9108a -->
 # xeoIFC
 
 Public repository of xeoIFC, the xeoFoundry IFC toolkit.
@@ -5,33 +6,49 @@ Public repository of xeoIFC, the xeoFoundry IFC toolkit.
 xeoIFC is one Rust engine for reading, querying, tessellating, converting and writing IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3).
 It is delivered in four forms, each described in its own section below:
 
-1. **WebAssembly viewer** - runs entirely in the browser.
+1. **WebAssembly library** - wasm modules with a JavaScript/TypeScript API, for web applications; runs entirely in the browser.
 2. **Loader for xeokit** - loads IFC directly into a xeokit viewer, without a conversion step.
 3. **Command-line converter** - Windows AMD64, Linux ARM64, Linux AMD64; IFC to glTF/GLB with xeokit metadata, the successor to
    cxconverter.
 4. **Native library** - `xeoifc.dll` / `libxeoifc.so` with a C ABI, for desktop and server applications in C++, C#, Python, Java, ...
 
-All four share one document API (JSON ops in, JSON results out) for query, edit, split and merge; see [Architecture](#architecture).
-The same API creates IFC models from scratch; see [Authoring](#authoring).
+The two libraries are the same engine with the same function groups, one for the browser and one for native programs; each
+comes with an open-source demo viewer (xeoIFC Web, xeoIFC Qt). All four forms run on this engine, and the libraries and the
+command-line tool share one document API (JSON ops in, JSON results out) for query, edit, split and merge; see
+[Architecture](#architecture). The same API creates IFC models from scratch; see [Authoring](#authoring).
 
-## 1. WebAssembly viewer
+## 1. WebAssembly library
 
-Try the browser demo:
+The WebAssembly library is the xeoIFC engine for web applications: wasm modules with JavaScript bindings and TypeScript
+declarations. IFC files are processed in the browser; nothing is uploaded. A Web Worker calls its engine functions: load (the
+file streamed in chunks, then tessellated), query (model tree, properties, georeference), the document API (the same JSON ops as
+the native library and the command-line tool), the IFC export (split and merge) and the licence key. On the page, its WebGPU
+`Viewer` class draws the models into a canvas, with camera, picking, selection, visibility and clip planes. Other formats (JT,
+STEP, point clouds and meshes) are format modules that load on first use.
+
+Function groups and a TypeScript example:
+[architecture/integration-map.md](architecture/integration-map.md#webassembly-library-viewer_wasm-typescript-javascript)
+
+Try xeoIFC Web, the demo viewer on the library:
 https://xeofoundry.github.io/xeoIFC/
 
-The demo runs locally in the browser. Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
+Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
 
 <a href="https://xeofoundry.github.io/xeoIFC/showcase/">
-  <img width="900" alt="xeoIFC WebAssembly viewer showing the Viadotto Acerno bridge - click for the live version of this view" src="https://github.com/user-attachments/assets/c5272d82-81b3-41b8-8290-16657814b002" />
+  <img width="900" alt="xeoIFC Web showing the Viadotto Acerno bridge - click for the live version of this view" src="https://github.com/user-attachments/assets/c5272d82-81b3-41b8-8290-16657814b002" />
 </a>
 
-Click the image for the [live version of this view](https://xeofoundry.github.io/xeoIFC/showcase/): the same page section with the
-running viewer in place of the screenshot and this model (Viadotto Acerno, IFC 4.3) loaded. Or open the model in the
-[full viewer](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
+Click the image for the [live version of this view](https://xeofoundry.github.io/xeoIFC/showcase/): the showcase page of
+xeoIFC Web, with the running viewer in place of the screenshot and this model (Viadotto Acerno, IFC 4.3) loaded. Or open the
+model in the [full viewer](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
+
+xeoIFC Web is an open-source (MIT) browser IFC viewer: about 16,600 lines of TypeScript on the xeoIFC WebAssembly library. The
+[showcase page](https://xeofoundry.github.io/xeoIFC/showcase/) shows the calls it makes. Download  `xeoifc-web-source.zip` (source code with the prebuilt library): [https://github.com/xeofoundry/xeoIFC/releases/](https://github.com/xeofoundry/xeoIFC/releases/)
+(a Vite project: `npm install`, `npm run dev`; no Rust needed).
 
 <br/>
 
-The WASM viewer supports
+xeoIFC Web supports
 - Loading of any number of files into one scene.
 - Selecting elements in the tree view or 3D view, show element properties and property sets/quantities.
 - Search for GUIDs, names, types etc.
@@ -41,13 +58,17 @@ The WASM viewer supports
 - BCF, Minimap, storey shift, clip planes, measuring tool, compare revisions tool.
 - File types: .ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.las,.laz
 
-## 2. Loader for xeokit
+## 2. Loader for xeokit (XeoIFCLoaderPlugin)
 
-The same WebAssembly module can feed a [xeokit](https://github.com/xeokit/xeokit-sdk) viewer directly, without a conversion step:
+The WebAssembly library also feeds a [xeokit](https://github.com/xeokit/xeokit-sdk) viewer directly, without a conversion step:
+the plugin runs xeoIFC in a Web Worker, unpacks its geometry buffer into a xeokit `SceneModel`, builds the `MetaModel` from the
+object tree and queries property sets from the loaded model. It loads `.ifc` and `.ifczip` files (no upload of
+any data).
+
+Documentation and live examples:
 https://xeofoundry.github.io/xeoIFC/xeokit-direct-ifc-loading/
 
-The page runs xeoIFC in a Web Worker, unpacks its geometry buffer into a xeokit `SceneModel`, builds the `MetaModel` from the object
-tree and queries property sets from the loaded model. Drag&Drop `.ifc`, `.ifczip`, `.stp` or `.step` files (no upload of any data).
+The examples: a xeokit viewer that loads dropped files, and metadata from IFC for geometry from XKT.
 
 ## 3. Command-line converter
 
@@ -77,9 +98,9 @@ Function groups and a C example:
 
 xeoIFC Qt is an open-source (MIT) desktop IFC viewer for Windows and Linux: about 4,500 lines of C++ with Qt 6 Widgets on
 `xeoifc.dll`. Click the image for the [showcase page](https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-qt/) with the calls it
-makes and measured load times, or download the
-[source code with the prebuilt library](https://github.com/xeofoundry/xeoIFC/releases/latest/download/xeoifc-qt-source.zip)
-(Visual Studio solution and CMake).
+makes and measured load times, or download the `xeoifc-qt-source.zip` package with Visual Studio solution and CMake:
+[https://github.com/xeofoundry/xeoIFC/releases/](https://github.com/xeofoundry/xeoIFC/releases/)
+
 
 ## Authoring
 
@@ -121,13 +142,13 @@ TypeScript declarations.
 
 ## Architecture
 
-The same Rust crates serve the browser viewer, the command-line converter and any desktop or server application (C++, C#,
-Python, Java, ...) that loads the xeoIFC native library; each host goes through one document API (JSON ops in, JSON results
-out) and the shared geometry engine.
+The same Rust crates build the WebAssembly library, the command-line converter and the native library. Browser applications
+(xeoIFC Web, the xeokit loader) load the WebAssembly library, desktop and server applications (C++, C#, Python, Java, ...) the
+native library; each host goes through one document API (JSON ops in, JSON results out) and the shared geometry engine.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="architecture/integration-map-dark.svg">
-  <img src="architecture/integration-map-light.svg" alt="How the xeoIFC crates are used by the WASM viewer, the CLI and native desktop or server applications" width="1200">
+  <img src="architecture/integration-map-light.svg" alt="How the xeoIFC crates are used by the WebAssembly library, the CLI and the native library" width="1200">
 </picture>
 
 Full integration map with the viewer load path, per-host code samples and a comparison table:
@@ -135,8 +156,8 @@ Full integration map with the viewer load path, per-host code samples and a comp
 
 ## Third-party software
 
-xeoIFC and the WebAssembly viewer include open-source components (Rust crates under MIT, Apache-2.0,
+The xeoIFC libraries and the converter include open-source components (Rust crates under MIT, Apache-2.0,
 ISC, Zlib and similar permissive licences, among them `laz` for LAZ point clouds, `wgpu`, `i_overlay`,
 `earcutr` and `delaunator`), plus code derived from jcadlib and csg.js. The full list with all licence
-texts ships as `THIRD-PARTY-NOTICES.txt` in every release package and with the viewer:
+texts ships as `THIRD-PARTY-NOTICES.txt` in every release package and with xeoIFC Web:
 [THIRD-PARTY-NOTICES.txt](https://xeofoundry.github.io/xeoIFC/THIRD-PARTY-NOTICES.txt)

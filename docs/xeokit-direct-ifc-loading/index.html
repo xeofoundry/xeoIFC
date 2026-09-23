@@ -1,372 +1,291 @@
 <!doctype html>
-<html>
+<!-- Generated from sdk/packages/xeoifc-loader-plugin/README.md by web/scripts/xeokit-docs-page.mjs - do not edit. -->
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>xeokit + xeoIFC: direct IFC and STEP loading</title>
+    <title>XeoIFCLoaderPlugin - load IFC directly into xeokit</title>
     <link rel="icon" href="../xeokit-icon.svg"/>
     <style>
+        /* Same README look as ../showcase/xeoifc-qt/index.html. */
+        :root {
+            color-scheme: light dark;
+            --ground: #ffffff;
+            --ink: #1f2328;
+            --muted: #59636e;
+            --line: #d1d9e0;
+            --link: #0969da;
+            --code: #eff1f3;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ground: #0d1117;
+                --ink: #f0f6fc;
+                --muted: #9198a1;
+                --line: #3d444d;
+                --link: #4493f8;
+                --code: #262c36;
+            }
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            font-size: 15px;
-            color: black;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: var(--ground);
             margin: 0;
         }
 
-        #myCanvas {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            background: lightblue;
-            background-image: linear-gradient(lightblue, white);
+        main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
+
+        h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 24px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h3 { font-size: 1.25em; font-weight: 600; margin: 24px 0 16px; }
+
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 85%;
+            background: var(--code);
+            border-radius: 6px;
         }
 
-        #info { /* Welcome panel, removed on the first click */
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 460px;
-            max-width: calc(100% - 60px);
-            z-index: 300000;
-            background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 8px;
-            padding: 18px 22px;
-        }
+        code { padding: .2em .4em; }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; }
+        pre code { padding: 0; background: none; font-size: 100%; }
 
-        #info h1 {
-            font-size: 20px;
-            margin: 0 0 8px 0;
-        }
+        table { border-collapse: collapse; margin: 0 0 16px; }
+        th, td { border: 1px solid var(--line); padding: 6px 13px; text-align: left; vertical-align: top; }
+        td code { overflow-wrap: anywhere; }
 
-        #info p {
-            margin: 0 0 8px 0;
-        }
+        /* Wide tables scroll inside the page on narrow screens, like the code blocks. */
+        .wide { overflow-x: auto; margin: 0 0 16px; }
+        .wide table { margin: 0; }
 
-        /* ----------------------------------------------------------------------------------------------------------*/
-        /* File controls + properties */
-        /* ----------------------------------------------------------------------------------------------------------*/
-
-        #fileControls {
-            position: absolute;
-            top: 20px;
-            left: 380px;
-            z-index: 200000;
-        }
-
-        #fileControls button {
-            margin-right: 6px;
-        }
-
-        #status {
-            margin-top: 8px;
-        }
-
-        #properties {
-            position: absolute;
-            top: 80px;
-            right: 10px;
-            width: 360px;
-            max-height: 50%;
-            overflow-y: auto;
-            z-index: 200000;
-            background-color: rgba(255, 255, 255, 0.8);
-            font-size: 13px;
-            padding: 6px;
-            display: none;
-        }
-
-        #properties th {
-            text-align: left;
-            padding-top: 6px;
-        }
-
-        #properties td {
-            padding-right: 10px;
-            vertical-align: top;
-        }
-
-        /* ----------------------------------------------------------------------------------------------------------*/
-        /* NavCubePlugin */
-        /* ----------------------------------------------------------------------------------------------------------*/
-
-        #myNavCubeCanvas {
-            position: absolute;
-            width: 250px;
-            height: 250px;
-            bottom: 50px;
-            right: 10px;
-            z-index: 200000;
-        }
-
-        /* ----------------------------------------------------------------------------------------------------------*/
-        /* TreeViewPlugin */
-        /* ----------------------------------------------------------------------------------------------------------*/
-
-        #treeViewContainer {
-            pointer-events: all;
-            overflow-y: scroll;
-            overflow-x: hidden;
-            scrollbar-width: none; /* Scrolls by wheel and touch, no scroll bar */
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.2); /* 80% transparent */
-            top: 10px;
-            bottom: 0;
-            z-index: 200000;
-            left: 0;
-            padding-left: 10px;
-            user-select: none;
-            width: 350px;
-        }
-
-        #treeViewContainer::-webkit-scrollbar {
-            display: none;
-        }
-
-        #treeViewContainer ul {
-            list-style: none;
-            padding-left: 1.75em;
-            pointer-events: none;
-        }
-
-        #treeViewContainer ul li {
-            position: relative;
-            width: 500px;
-            pointer-events: none;
-            padding-top: 3px;
-            padding-bottom: 3px;
-            vertical-align: middle;
-        }
-
-        #treeViewContainer ul li a {
-            background-color: #eee;
-            border-radius: 50%;
-            color: #000;
-            display: inline-block;
-            height: 1.5em;
-            left: -1.5em;
-            position: absolute;
-            text-align: center;
-            text-decoration: none;
-            width: 1.5em;
-            pointer-events: all;
-        }
-
-        #treeViewContainer ul li a.plus {
-            background-color: #ded;
-        }
-
-        #treeViewContainer ul li a:active {
-            top: 1px;
-        }
-
-        #treeViewContainer ul li span:hover {
-            color: white;
-            cursor: pointer;
-            background: black;
-        }
-
-        #treeViewContainer ul li span {
-            display: inline-block;
-            width: calc(100% - 50px);
-            padding-left: 2px;
-            pointer-events: all;
-            height: 23px;
-        }
-
-        #treeViewContainer .highlighted-node { /* Appearance of node highlighted with TreeViewPlugin#showNode() */
-            border: black solid 1px;
-            background: yellow;
-            color: black;
-            padding-left: 1px;
-            padding-right: 5px;
-        }
-
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
     </style>
 </head>
 <body>
-<canvas id="myCanvas"></canvas>
-<canvas id="myNavCubeCanvas"></canvas>
-<div id="info">
-    <h1>xeokit + xeoIFC WebAssembly</h1>
-    <p>The xeoIFC <a href="https://github.com/xeofoundry/xeoIfc" target="_other">(https://github.com/xeofoundry/xeoIfc)</a> engine runs as a WebAssembly module in a
-        Web Worker, parses and tessellates the IFC or STEP CAD file and hands one packed geometry buffer plus an object tree
-        to a <a href="https://github.com/xeokit/xeokit-sdk" target="_other">xeokit</a> SceneModel and MetaModel. No conversion
-        step, no server, no upload.</p>
-    <p>Click an object for its property sets.</p>
-</div>
-<div id="treeViewContainer"></div>
-<div id="fileControls">
-    <button id="loadIfc">Duplex.ifc</button>
-    <button id="fitView">Zoom to bounds</button>
-    <!-- The native file input truncates long names, so it stays hidden behind a button and the name is shown here -->
-    <button id="chooseFile">Choose file</button>
-    <input type="file" id="fileInput" accept=".ifc,.ifczip,.stp,.step" hidden/>
-    <span id="fileName"></span>
-    <div>or drop an .ifc, .ifczip, .stp or .step file</div>
-    <div id="status">Loading JavaScript modules...</div>
-</div>
-<div id="properties"></div>
-</body>
+<main>
+    <h1 id="xeofoundryxeoifc-loader-plugin">@xeofoundry/xeoifc-loader-plugin</h1>
 
-<script type="importmap">
-    {
-        "imports": {
-            "@xeokit/xeokit-sdk": "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.min.es.js"
-        }
-    }
-</script>
+    <p><a href="https://github.com/xeokit/xeokit-sdk">xeokit</a> Viewer plugin that loads <strong>IFC</strong> (<code>.ifc</code>, <code>.ifczip</code>)
+        files directly in the browser - with their geometry, or as the metadata of a model whose geometry comes from XKT or glTF. The
+        <a href="https://github.com/xeofoundry/xeoIfc">xeoIFC</a> engine runs as a WebAssembly module in a Web Worker,
+        parses and tessellates the file and hands one packed geometry buffer plus an object tree to the plugin, which builds a xeokit
+        <code>SceneModel</code> and <code>MetaModel</code> from them. No conversion step, no server, no upload.</p>
 
-<script type="module">
+    <p>Documentation and live examples: <a href="index.html">https://xeofoundry.github.io/xeoIFC/xeokit-direct-ifc-loading/</a></p>
 
-    import {Viewer, NavCubePlugin, TreeViewPlugin} from "@xeokit/xeokit-sdk";
-    // npm package @xeofoundry/xeoifc-loader-plugin, copied next to this page by web/scripts/sync-xeokit-demo.mjs
+    <h2 id="live-examples">Live examples</h2>
+
+    <ul>
+        <li><a href="viewer/index.html">Viewer</a>: direct loading of <code>Duplex.ifc</code>, or of your own
+            IFC file by file dialog or drag and drop, with the object tree and the property sets of a clicked object.</li>
+        <li><a href="xeoifc-loader-plugin/examples/metadata-with-xkt.html">Metadata + XKT</a>:
+            the tree and types from <code>loadMetadata()</code>, the geometry from <code>XKTLoaderPlugin</code>, and the property sets of a clicked object.</li>
+    </ul>
+
+    <h2 id="two-ways-to-use-it">Two ways to use it</h2>
+
+    <p>IFC is the only file format involved; how much work happens in the browser is your choice:</p>
+
+    <div class="wide"><table>
+        <tr><th></th><th>Geometry</th><th>Metadata, properties</th><th>Work in the browser</th><th>Pick it when</th></tr>
+        <tr><td><strong>1. Direct</strong></td><td>the IFC</td><td>the same IFC</td><td>parse + full geometry incl. booleans and opening cuts</td><td>files come from users, nothing can be prepared</td></tr>
+        <tr><td><strong>2. Metadata only</strong></td><td>XKT or glTF from the xeoIFC converter</td><td>an IFC, or the metadata IFC of the converter</td><td>parse only</td><td>large models: geometry as XKT, IFC as the metadata format instead of a JSON metamodel</td></tr>
+    </table></div>
+
+    <p>1 is <code>load()</code> (<a href="#usage">Usage</a>); 2 is <code>loadMetadata()</code> next to the xeokit loader of the geometry. In both, objects are
+        identified by IFC GlobalId and <code>getProperties()</code> reads property sets on demand from the IFC kept in the engine.</p>
+
+    <h3 id="metadata-only">Metadata only</h3>
+
+    <p>The converter writes geometry and metadata from one IFC. With an <code>.ifc</code> or <code>.ifczip</code> metadata path, the metadata file is the
+        input IFC without its geometry (Duplex.ifc: 2.4 MB become 0.6 MB, 0.15 MB as <code>.ifczip</code>), not a JSON metamodel:</p>
+
+    <pre><code class="language-bash">xeoifc -i model.ifc -o model.xkt -m model.meta.ifc</code></pre>
+
+    <pre><code class="language-javascript">import {Viewer, XKTLoaderPlugin} from "@xeokit/xeokit-sdk";
+import {XeoIFCLoaderPlugin} from "@xeofoundry/xeoifc-loader-plugin";
+
+const xktLoader = new XKTLoaderPlugin(viewer);
+const xeoIFCLoader = new XeoIFCLoaderPlugin(viewer);
+
+// Parses the IFC, builds no geometry: tree and types as xeokit metamodel JSON
+const metaModelJSON = await xeoIFCLoader.loadMetadata({id: "myModel", src: "model.meta.ifc"});
+
+// Geometry from XKT; same model ID, same object IDs (IFC GlobalId)
+const sceneModel = xktLoader.load({id: "myModel", src: "model.xkt", metaModelJSON});
+
+// Property sets on demand, as after load()
+const propertySets = await xeoIFCLoader.getProperties(objectId);</code></pre>
+
+    <p><code>loadMetadata()</code> also accepts the full IFC, so the original file can serve as the metadata of an XKT made earlier. The result
+        is plain xeokit metamodel JSON (<code>{metaObjects: [{id, name, type, parent}]}</code>): any xeokit loader with a <code>metaModelJSON</code> parameter
+        takes it (<code>XKTLoaderPlugin</code>, <code>GLTFLoaderPlugin</code>, ...), and <code>TreeViewPlugin</code> and friends work as usual. Property sets are not part
+        of it; they stay in the engine and are decoded per object by <code>getProperties()</code>.</p>
+
+    <p>Objects are matched by GlobalId. When a file uses one GlobalId for several objects, the converter names the repeats
+        <code>&lt;GlobalId&gt;_&lt;n&gt;</code> in its XKT / GLB output; the engine applies the same rule in the same order, so <code>loadMetadata()</code> and <code>load()</code>
+        return those object IDs too and every object finds its own metadata and properties.</p>
+
+    <p>Runnable page: <a href="xeoifc-loader-plugin/examples/metadata-with-xkt.html"><code>examples/metadata-with-xkt.html</code></a>.</p>
+
+    <h2 id="install">Install</h2>
+
+    <pre><code class="language-bash">npm install @xeofoundry/xeoifc-loader-plugin @xeokit/xeokit-sdk</code></pre>
+
+    <p><code>@xeokit/xeokit-sdk</code> is a peer dependency: the plugin uses the same xeokit instance as your application.</p>
+
+    <h2 id="usage">Usage</h2>
+
+    <pre><code class="language-javascript">import {Viewer, TreeViewPlugin} from "@xeokit/xeokit-sdk";
+import {XeoIFCLoaderPlugin} from "@xeofoundry/xeoifc-loader-plugin";
+
+const viewer = new Viewer({canvasId: "myCanvas"});
+new TreeViewPlugin(viewer, {containerElement: document.getElementById("treeViewContainer")});
+
+const xeoIFCLoader = new XeoIFCLoaderPlugin(viewer);
+
+const sceneModel = xeoIFCLoader.load({
+    id: "myModel",
+    src: "Duplex.ifc",                  // or file: aFile, or data: anArrayBuffer
+    edges: true,
+    excludeTypes: ["IfcSpace"],
+    onProgress: (phase, done, total) =&gt; console.log(phase, done, total)
+});
+
+sceneModel.on("loaded", () =&gt; viewer.cameraFlight.jumpTo(sceneModel));
+sceneModel.on("error", (message) =&gt; console.error(message));
+
+// Property sets are queried on demand from the model retained inside the WebAssembly engine
+viewer.cameraControl.on("picked", async (pickResult) =&gt; {
+    const propertySets = await xeoIFCLoader.getProperties(pickResult.entity.id);
+    // [{pset: "Pset_WallCommon", props: [{name: "IsExternal", value: "T", unit: null}, ...]}, ...]
+});</code></pre>
+
+    <h3 id="new-xeoifcloaderpluginviewer-cfg"><code>new XeoIFCLoaderPlugin(viewer, cfg?)</code></h3>
+
+    <div class="wide"><table>
+        <tr><th>Option</th><th>Default</th><th></th></tr>
+        <tr><td><code>id</code></td><td><code>"XeoIFCLoader"</code></td><td>Plugin ID in <code>viewer.plugins</code></td></tr>
+        <tr><td><code>workerSrc</code></td><td>package-relative</td><td>URL of <code>xeoifc.worker.js</code>, see "Without a bundler"</td></tr>
+        <tr><td><code>includeTypes</code>, <code>excludeTypes</code>, <code>globalizeObjectIds</code></td><td></td><td>Defaults for the load parameters of the same name</td></tr>
+    </table></div>
+
+    <h3 id="loadparams-returns-scenemodel"><code>load(params)</code> returns <code>SceneModel</code></h3>
+
+    <div class="wide"><table>
+        <tr><th>Parameter</th><th>Default</th><th></th></tr>
+        <tr><td><code>id</code></td><td>generated</td><td>SceneModel / MetaModel ID</td></tr>
+        <tr><td><code>src</code> | <code>file</code> | <code>data</code></td><td></td><td>URL, <code>File</code>/<code>Blob</code>, or <code>ArrayBuffer</code>. <code>.ifc</code> or <code>.ifczip</code> is detected from the content</td></tr>
+        <tr><td><code>includeTypes</code> / <code>excludeTypes</code></td><td></td><td>Filter objects by type, eg. <code>["IfcSpace"]</code></td></tr>
+        <tr><td><code>globalizeObjectIds</code></td><td><code>false</code></td><td>Prefix object IDs with the model ID, to load the same file twice</td></tr>
+        <tr><td><code>reuseGeometries</code></td><td><code>true</code></td><td><code>false</code> shares no geometry between meshes (as in <code>XKTLoaderPlugin</code>): fewest draw calls, most memory</td></tr>
+        <tr><td><code>maxReusedGeometries</code></td><td><code>500</code></td><td>Upper bound of shared geometries, see "Frame rate"</td></tr>
+        <tr><td><code>circleSegments</code></td><td><code>18</code></td><td>Tessellation segments of a full circle (4..64)</td></tr>
+        <tr><td><code>onProgress</code></td><td></td><td><code>(phase, done, total)</code>; phases <code>"read"</code> (MB), <code>"parse"</code>, <code>"geom"</code>, <code>"pack"</code>, <code>"edges"</code> (worker) and <code>"scene"</code> (SceneModel build)</td></tr>
+        <tr><td>anything else</td><td></td><td>Passed to the <code>SceneModel</code> constructor: <code>edges</code>, <code>dtxEnabled</code>, <code>origin</code>, <code>position</code>, <code>rotation</code>, <code>scale</code>, <code>backfaces</code>, <code>saoEnabled</code>, ...</td></tr>
+    </table></div>
+
+    <h3 id="loadmetadataparams-returns-promisemetaobjects"><code>loadMetadata(params)</code> returns <code>Promise&lt;{metaObjects}&gt;</code></h3>
+
+    <div class="wide"><table>
+        <tr><th>Parameter</th><th>Default</th><th></th></tr>
+        <tr><td><code>id</code></td><td>required</td><td>ID of the model the metadata belongs to: the <code>id</code> given to the loader of the geometry</td></tr>
+        <tr><td><code>src</code> | <code>file</code> | <code>data</code></td><td></td><td>URL, <code>File</code>/<code>Blob</code>, or <code>ArrayBuffer</code> of an <code>.ifc</code> / <code>.ifczip</code>: a full IFC or a metadata IFC</td></tr>
+        <tr><td><code>includeTypes</code> / <code>excludeTypes</code></td><td></td><td>Filter objects by type; set the same filter on the geometry loader</td></tr>
+        <tr><td><code>globalizeObjectIds</code></td><td><code>false</code></td><td>Prefix object IDs with the model ID; set it on the geometry loader too</td></tr>
+        <tr><td><code>onProgress</code></td><td></td><td><code>(phase, done, total)</code>; phases <code>"read"</code> (MB) and <code>"parse"</code></td></tr>
+    </table></div>
+
+    <p>No geometry is built and no CSG runs; the engine keeps the parsed file for <code>getProperties()</code> until the model with this ID is
+        destroyed or <code>unloadMetadata(id)</code> is called.</p>
+
+    <p>IFC objects get their IFC GlobalId as <code>Entity#id</code> and <code>MetaObject#id</code>, like the other xeokit loaders; objects without a GlobalId
+        get <code>&lt;modelId&gt;#&lt;entity id&gt;</code>. IfcSpaces load hidden. Geometry used more than once is instanced. The
+        model is converted from Z-up to xeokit's Y-up and placed with a double-precision origin, so georeferenced files render without jitter.</p>
+
+    <p>The engine in this package is an evaluation build: it adds an "Evaluation version" text to every model, flat on the ground just
+        outside the footprint (25% of the model width, the same mark the xeoIFC command-line converter writes without a licence key). The
+        text is one more object of the model, <code>&lt;modelId&gt;#4294967295</code>, and is not affected by <code>includeTypes</code> / <code>excludeTypes</code>.</p>
+
+    <p>The worker reads the file as a stream and feeds IFC text to the engine chunk by chunk, so files larger than the 2 GB <code>ArrayBuffer</code>
+        limit load; the practical limits are the 4 GB wasm heap of the engine and what xeokit and the GPU hold for the resulting triangles.</p>
+
+    <p>The worker also computes the edge indices of every mesh (edges sharper than 30 degrees, like the xeoIFC viewer), because xeokit's
+        own edge generation on the main thread dominated the load time of large models. The <code>SceneModel</code> is then built in 40 ms time
+        slices, so the page stays responsive and <code>onProgress</code> keeps reporting.</p>
+
+    <h3 id="frame-rate">Frame rate</h3>
+
+    <p>xeokit draws every shared (instanced) geometry with a draw call of its own in each render pass, so a model with thousands of
+        reused geometries becomes draw-call bound, while sharing nothing multiplies the vertex data. The plugin therefore shares only the
+        <code>maxReusedGeometries</code> geometries whose sharing saves the most vertices and batches the rest. Measured on a stadium model with
+        670 k instances, 76 M triangles and 7177 reused geometries (RTX 4070 Laptop, edges on): all shared 194 ms per frame, 500 shared
+        (default) 50 ms, none shared 250 ms.</p>
+
+    <p>Several models can be loaded side by side (loads run one after the other in the worker). The engine keeps each parsed file for <code>getProperties()</code> and frees it when
+        its model is destroyed (or its metadata unloaded); once no model of the plugin is left the engine is cleared as a whole. <code>plugin.destroy()</code> terminates the worker.</p>
+
+    <h2 id="bundlers">Bundlers</h2>
+
+    <p>The package is plain ES modules. The plugin starts its worker with <code>new Worker(new URL("./xeoifc.worker.js", import.meta.url))</code> and
+        the worker fetches the <code>.wasm</code> files the same way, which Vite, webpack 5, Rollup, Parcel and esbuild-based setups resolve on their own.</p>
+
+    <p>Verified with Vite 8 (dev server and production build) without any configuration. If an older Vite dev server loses the worker or
+        wasm URLs during dependency pre-bundling, exclude the package from it:</p>
+
+    <pre><code class="language-javascript">// vite.config.js
+export default {
+    optimizeDeps: {exclude: ["@xeofoundry/xeoifc-loader-plugin"]}
+};</code></pre>
+
+    <h2 id="without-a-bundler">Without a bundler</h2>
+
+    <p>Serve the package folder (<code>src/</code> and <code>wasm/</code> next to each other) from your own origin and map the xeokit import:</p>
+
+    <pre><code class="language-html">&lt;script type="importmap"&gt;
+    {"imports": {"@xeokit/xeokit-sdk": "https://cdn.jsdelivr.net/npm/@xeokit/xeokit-sdk@2.6.114/dist/xeokit-sdk.min.es.js"}}
+&lt;/script&gt;
+&lt;script type="module"&gt;
+    import {Viewer} from "@xeokit/xeokit-sdk";
     import {XeoIFCLoaderPlugin} from "./xeoifc-loader-plugin/src/index.js";
+&lt;/script&gt;</code></pre>
 
-    const viewer = new Viewer({
-        canvasId: "myCanvas",
-        transparent: true
-    });
+    <p>Browsers only start same-origin workers, so the plugin itself cannot be loaded from a CDN as is. If the files must live on another
+        origin, host a same-origin copy of <code>src/xeoifc.worker.js</code> (with its two imports pointing at the wasm location) and pass it as
+        <code>workerSrc</code>. The server has to send <code>.wasm</code> as <code>application/wasm</code>.</p>
 
-    new NavCubePlugin(viewer, {
-        canvasId: "myNavCubeCanvas",
-        visible: true,
-        size: 250,
-        alignment: "bottomRight",
-        bottomMargin: 100,
-        rightMargin: 10
-    });
+    <h2 id="package-contents">Package contents</h2>
 
-    new TreeViewPlugin(viewer, {
-        containerElement: document.getElementById("treeViewContainer"),
-        autoExpandDepth: 3
-    });
+    <div class="wide"><table>
+        <tr><th>Path</th><th></th></tr>
+        <tr><td><code>src/XeoIFCLoaderPlugin.js</code></td><td>The plugin (main thread)</td></tr>
+        <tr><td><code>src/xeoifc.worker.js</code></td><td>Module worker hosting the engine</td></tr>
+        <tr><td><code>src/packEdges.js</code></td><td>Edge indices of the packed meshes (worker)</td></tr>
+        <tr><td><code>wasm/viewer_wasm*.{js,wasm}</code></td><td>xeoIFC engine modules, each fetched on first use</td></tr>
+        <tr><td><code>examples/metadata-with-xkt.html</code></td><td>Metadata-only page (no bundler)</td></tr>
+        <tr><td><code>index.d.ts</code></td><td>TypeScript declarations</td></tr>
+        <tr><td><code>LICENSE.txt</code></td><td>xeoIFC Testing License</td></tr>
+    </table></div>
 
-    const xeoIFCLoader = new XeoIFCLoaderPlugin(viewer);
+    <h2 id="licence">Licence</h2>
 
-    // "click", not "pointerdown": a link inside the panel must still receive its click
-    window.addEventListener("click", () => document.getElementById("info").remove(), {once: true, capture: true});
+    <p>The whole package, including the plugin JavaScript and the xeoIFC engine in <code>wasm/</code>, is under the
+        <a href="https://xeofoundry.github.io/xeoIFC/xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>LICENSE.txt</code>): use for testing and
+        evaluation. The package takes no licence key, so the engine adds the "Evaluation version" text described above to every model.</p>
 
-    const statusElement = document.getElementById("status");
-    const propertiesElement = document.getElementById("properties");
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Load an IFC or STEP file; source is {src: url} or {file: File}
-    //------------------------------------------------------------------------------------------------------------------
-
-    let sceneModel = null;
-    let selectedEntity = null;
-
-    function load(source) {
-        if (sceneModel) {
-            sceneModel.destroy();
-        }
-        selectedEntity = null;
-        propertiesElement.style.display = "none";
-        statusElement.innerText = "Loading...";
-        const t0 = performance.now();
-
-        const name = source.file ? source.file.name : source.src.split("/").pop();
-        const MAX_NAME = 60;
-        document.getElementById("fileName").innerText = name.length <= MAX_NAME ? name : name.slice(0, MAX_NAME - 20) + "..." + name.slice(-17);
-
-        const model = sceneModel = xeoIFCLoader.load({
-            ...source,
-            id: "myModel",
-            edges: true,
-            onProgress: (phase, done, total) => {
-                const elapsed = Math.round((performance.now() - t0) / 1000);
-                statusElement.innerText = (total > 1 ? `${phase} ${done} / ${total}` : `${phase}...`) + ` (${elapsed} s)`;
-            }
-        });
-
-        model.on("loaded", () => {
-            viewer.cameraFlight.jumpTo(model);
-            // Stop the clock when the model is on screen, not when xeokit reports "loaded": the first frames upload the
-            // geometry and compile shaders, and the GPU works through that after the frame callbacks have returned.
-            // Reading a pixel back blocks until the GPU has caught up.
-            requestAnimationFrame(() => requestAnimationFrame(() => {
-                const gl = viewer.scene.canvas.gl;
-                gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
-                const seconds = (performance.now() - t0) / 1000;
-                statusElement.innerHTML = "Model loaded in " + (seconds < 10 ? seconds.toFixed(1) : Math.round(seconds)) + " seconds<br>Objects: " + model.numEntities;
-            }));
-        });
-
-        model.on("error", (message) => {
-            statusElement.innerText = message;
-        });
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Click an object -> property sets from the model inside the wasm module
-    //------------------------------------------------------------------------------------------------------------------
-
-    viewer.cameraControl.on("picked", async (pickResult) => {
-        const entity = pickResult.entity;
-        if (!entity) {
-            return;
-        }
-        if (selectedEntity) {
-            selectedEntity.selected = false;
-        }
-        selectedEntity = entity;
-        entity.selected = true;
-        showProperties(entity.id, await xeoIFCLoader.getProperties(entity.id));
-    });
-
-    function showProperties(objectId, propertySets) {
-        const metaObject = viewer.metaScene.metaObjects[objectId];
-        const table = document.createElement("table");
-        const addRow = (tag, cells) => {
-            const row = table.insertRow();
-            for (const text of cells) {
-                const cell = document.createElement(tag);
-                cell.innerText = text ?? "";
-                if (cells.length === 1) {
-                    cell.colSpan = 3;
-                }
-                row.append(cell);
-            }
-        };
-        addRow("th", [metaObject ? `${metaObject.type}: ${metaObject.name}` : objectId]);
-        for (const propertySet of propertySets) {
-            addRow("th", [propertySet.pset]);
-            for (const prop of propertySet.props) {
-                addRow("td", [prop.name, prop.value, prop.unit]);
-            }
-        }
-        propertiesElement.replaceChildren(table);
-        propertiesElement.style.display = "block";
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // File controls
-    //------------------------------------------------------------------------------------------------------------------
-
-    document.getElementById("loadIfc").onclick = () => load({src: "../Duplex.ifc"});
-    document.getElementById("fitView").onclick = () => {
-        viewer.cameraFlight.flyTo({aabb: viewer.scene.getAABB(viewer.scene.visibleObjectIds)}); // Bounds of what is visible
-    };
-    document.getElementById("chooseFile").onclick = () => document.getElementById("fileInput").click();
-    document.getElementById("fileInput").onchange = (event) => {
-        const file = event.target.files[0];
-        event.target.value = ""; // So that choosing the same file again fires "change"
-        if (file) {
-            load({file});
-        }
-    };
-    document.body.ondragover = (event) => event.preventDefault();
-    document.body.ondrop = (event) => {
-        event.preventDefault();
-        if (event.dataTransfer.files[0]) {
-            load({file: event.dataTransfer.files[0]});
-        }
-    };
-
-    load({src: "../Duplex.ifc"});
-
-</script>
+    <footer>
+        More: <a href="../">xeoIFC Web</a> -
+        Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
+        Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
+    </footer>
+</main>
+</body>
 </html>
