@@ -1,5 +1,55 @@
 /* @ts-self-types="./viewer_wasm.d.ts" */
 
+/**
+ * GPU result of one model. Removed geometry stays on the GPU; only kept triangles are read for IFC Keep.
+ */
+export class GpuOuterShape {
+    static __wrap(ptr) {
+        const obj = Object.create(GpuOuterShape.prototype);
+        obj.__wbg_ptr = ptr;
+        GpuOuterShapeFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        GpuOuterShapeFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_gpuoutershape_free(ptr, 0);
+    }
+    /**
+     * @returns {any}
+     */
+    metadata() {
+        const ret = wasm.gpuoutershape_metadata(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Thirteen floats per triangle: nine coordinates, then sRGB RGBA. At most 64k triangles per call.
+     * @param {number} input
+     * @param {number} start
+     * @returns {Promise<any>}
+     */
+    read(input, start) {
+        const ret = wasm.gpuoutershape_read(this.__wbg_ptr, input, start);
+        return ret;
+    }
+    /**
+     * @param {Viewer} viewer
+     */
+    show_removed(viewer) {
+        _assertClass(viewer, Viewer);
+        const ret = wasm.gpuoutershape_show_removed(this.__wbg_ptr, viewer.__wbg_ptr);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+}
+if (Symbol.dispose) GpuOuterShape.prototype[Symbol.dispose] = GpuOuterShape.prototype.free;
+
 export class Viewer {
     static __wrap(ptr) {
         const obj = Object.create(Viewer.prototype);
@@ -95,6 +145,15 @@ export class Viewer {
         return ret;
     }
     /**
+     * The exact rebase centre `[x, y, z]` (f64): a point in the space of `camera_state` plus this is the point in the
+     * viewer's world frame. Empty without a scene.
+     * @returns {Float64Array}
+     */
+    base_center() {
+        const ret = wasm.viewer_base_center(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * Announce a new model load: the next `set_packed_scene` frames the model, and the mid-load
      * snapshots keep re-framing until the user moves the camera (after that the view is theirs).
      */
@@ -134,6 +193,18 @@ export class Viewer {
     camera_state() {
         const ret = wasm.viewer_camera_state(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * Whether `replace_model_elements` accepts these handles: all are known, all are of one model, and that model is not
+     * the preview.
+     * @param {Uint32Array} handles
+     * @returns {boolean}
+     */
+    can_replace_model_elements(handles) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_can_replace_model_elements(this.__wbg_ptr, ptr0, len0);
+        return ret !== 0;
     }
     cancel_view_animation() {
         wasm.viewer_cancel_view_animation(this.__wbg_ptr);
@@ -200,6 +271,27 @@ export class Viewer {
         }
     }
     /**
+     * `element_triangle_parts` of every instance of the element, hidden ones too, without display offsets or tilts;
+     * mirrored instances come back re-wound. Resolves to `{ triangles, parts, tooLarge }`: `tooLarge` is true when the
+     * element is over the readback cap (then it has no triangles).
+     * @param {number} handle
+     * @returns {Promise<any>}
+     */
+    element_source_triangle_parts(handle) {
+        const ret = wasm.viewer_element_source_triangle_parts(this.__wbg_ptr, handle);
+        return ret;
+    }
+    /**
+     * `element_triangles` plus one `[triangle count, r, g, b, a]` entry per instance (sRGB colour of the pack), in
+     * triangle order: resolves to `{ triangles: Float32Array, parts: Float32Array }`.
+     * @param {number} handle
+     * @returns {Promise<any>}
+     */
+    element_triangle_parts(handle) {
+        const ret = wasm.viewer_element_triangle_parts(this.__wbg_ptr, handle);
+        return ret;
+    }
+    /**
      * Triangles of one element, nine floats each, in the space of `camera_state` (display offsets included). Read
      * back from the GPU on demand; empty for an unknown, hidden or very large element.
      * @param {number} handle
@@ -235,6 +327,17 @@ export class Viewer {
             throw takeFromExternrefTable0(ret[1]);
         }
         return ret[0] !== 0;
+    }
+    /**
+     * The handles of `handles` that `set_visible` or `isolate` hid; unknown handles are left out.
+     * @param {Uint32Array} handles
+     * @returns {Uint32Array}
+     */
+    hidden_handles(handles) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_hidden_handles(this.__wbg_ptr, ptr0, len0);
+        return ret;
     }
     /**
      * Hover-highlight the element under `(x, y)` (physical px): a slight
@@ -284,6 +387,18 @@ export class Viewer {
         wasm.viewer_orbit(this.__wbg_ptr, dx, dy);
     }
     /**
+     * @param {Uint32Array} handles
+     * @param {number} quality
+     * @param {Function} on_progress
+     * @returns {Promise<GpuOuterShape>}
+     */
+    outer_shape_gpu(handles, quality, on_progress) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_outer_shape_gpu(this.__wbg_ptr, ptr0, len0, quality, on_progress);
+        return ret;
+    }
+    /**
      * @param {number} dx
      * @param {number} dy
      */
@@ -328,9 +443,8 @@ export class Viewer {
         return ret;
     }
     /**
-     * Every distinct element inside the pixel rect, as stable viewer
-     * handles: one scissored id pass + one readback, so even one-pixel
-     * slivers inside the rect are found.
+     * Every element covering a pixel in the rect, as stable viewer handles,
+     * including occluded elements. Hidden and section-clipped geometry is excluded.
      * @param {number} x
      * @param {number} y
      * @param {number} w
@@ -383,6 +497,30 @@ export class Viewer {
      */
     repaint() {
         wasm.viewer_repaint(this.__wbg_ptr);
+    }
+    /**
+     * Swap the geometry of one model in place: pack element i < `handles.len()` lands on the element of `handles[i]`,
+     * the next `passive` pack elements on new passive elements (merged colour buckets: drawn and orbit anchors, never
+     * picked, hovered or selected). The old geometry of `handles` and `cleared` goes; the other elements keep theirs.
+     * The buckets hold the geometry of the handles of `cleared` that are not in `handles`: they show while any of these
+     * shows (`set_visible`, `isolate`). Every handle stays valid. The pack is centred on `base_center`, without a
+     * placement. Returns the handles of the passive elements. Throws before any change on bad input.
+     * @param {Uint8Array} data
+     * @param {Uint32Array} handles
+     * @param {Uint32Array} cleared
+     * @param {number} passive
+     * @returns {Uint32Array}
+     */
+    replace_model_elements(data, handles, cleared, passive) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray32ToWasm0(cleared, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_replace_model_elements(this.__wbg_ptr, data, ptr0, len0, ptr1, len1, passive);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
     }
     /**
      * `width`/`height` are CSS pixels; physical size = CSS × dpr.
@@ -540,6 +678,32 @@ export class Viewer {
      */
     set_line_layer_visible(layer, visible) {
         wasm.viewer_set_line_layer_visible(this.__wbg_ptr, layer, visible);
+    }
+    /**
+     * Hide or show the whole model of `handle` with its sharp edges and drafting lines. The visibility of its elements
+     * stays as it is. False for an unknown handle.
+     * @param {number} handle
+     * @param {boolean} hidden
+     * @returns {boolean}
+     */
+    set_model_hidden(handle, hidden) {
+        const ret = wasm.viewer_set_model_hidden(this.__wbg_ptr, handle, hidden);
+        return ret !== 0;
+    }
+    /**
+     * Replace the sharp edges of the model of `handle`: xyz xyz pairs in the space of `camera_state`, `owners` the element
+     * handle of each pair. Pairs of unknown handles or of other models are left out. False for an unknown `handle` or
+     * when the lengths do not match.
+     * @param {number} handle
+     * @param {Float32Array} data
+     * @param {Uint32Array} owners
+     * @returns {boolean}
+     */
+    set_model_sharp_edges(handle, data, owners) {
+        const ptr0 = passArray32ToWasm0(owners, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_set_model_sharp_edges(this.__wbg_ptr, handle, data, ptr0, len0);
+        return ret !== 0;
     }
     /**
      * Parallel (orthographic) projection on or off. The view height in metres is `2 * distance * tan(22.5 deg)`,
@@ -1035,6 +1199,196 @@ export function worker_model_count() {
 }
 
 /**
+ * extractOuterShape (the converter's `--extractOuterShape` rules, `quality` 1..3) on triangles in viewer space, e.g. from
+ * `Viewer.element_triangle_parts`. `positions` holds nine coordinates per triangle, `groups` one mesh instance per
+ * triangle, `colors` the sRGB RGBA of each instance, `center` the viewer's base centre. `on_progress` receives 0..1.
+ * Returns `{ kept: Uint8Array, removed: Uint8Array, keptPerGroup: Uint32Array }`: packed scenes of the kept and of the
+ * removed triangles (for `Viewer.preview_append_scene`) and the kept count per group.
+ * @param {Float32Array} positions
+ * @param {Uint32Array} groups
+ * @param {Float32Array} colors
+ * @param {Float64Array} center
+ * @param {number} quality
+ * @param {Function} on_progress
+ * @returns {any}
+ */
+export function worker_outer_shape(positions, groups, colors, center, quality, on_progress) {
+    const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArrayF32ToWasm0(colors, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, quality, on_progress);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Parser worker: the `ElementClass` byte of each entity of viewer source `source_id` (type and site containment);
+ * zeros when the source is no IFC document (GLB, XKT).
+ * @param {number} source_id
+ * @param {Uint32Array} entity_ids
+ * @returns {Uint8Array}
+ */
+export function worker_outer_shape_classes(source_id, entity_ids) {
+    const ptr0 = passArray32ToWasm0(entity_ids, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape_classes(source_id, ptr0, len0);
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
+}
+
+/**
+ * IFC payload of the last run for `worker_replace_bodies`: `{ status: Uint8Array, positions: Float32Array, owners:
+ * Uint32Array, colorOf: Uint32Array, colors: Float32Array }`. The triangles are the kept ones of the rewritten
+ * elements in viewer space, with the run element and the colour index of each; `colors` holds sRGB RGBA.
+ * @returns {any}
+ */
+export function worker_outer_shape_model_bodies() {
+    const ret = wasm.worker_outer_shape_model_bodies();
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Import a GPU mask result. Only kept triangles cross to this worker; counts refer to all source elements.
+ * @param {Float32Array} positions
+ * @param {Uint32Array} groups
+ * @param {Float32Array} colors
+ * @param {Uint32Array} group_element
+ * @param {Uint32Array} counts
+ * @param {Float64Array} center
+ * @param {boolean} merge
+ * @returns {any}
+ */
+export function worker_outer_shape_model_gpu(positions, groups, colors, group_element, counts, center, merge) {
+    const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArrayF32ToWasm0(colors, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passArray32ToWasm0(group_element, wasm.__wbindgen_malloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ptr4 = passArray32ToWasm0(counts, wasm.__wbindgen_malloc);
+    const len4 = WASM_VECTOR_LEN;
+    const ptr5 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+    const len5 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape_model_gpu(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, merge);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * The pack of the kept triangles of the last run again, merged by colour or not.
+ * @param {boolean} merge
+ * @returns {Uint8Array}
+ */
+export function worker_outer_shape_model_preview(merge) {
+    const ret = wasm.worker_outer_shape_model_preview(merge);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * The pack of the triangles the last run removed (read triangles of simplified elements not included).
+ * @returns {Uint8Array}
+ */
+export function worker_outer_shape_model_removed() {
+    const ret = wasm.worker_outer_shape_model_removed();
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Outer shape of one model: simplify (`simplify` bits 1 outdoor, 2 facade; the axes are the columns of the rotation of
+ * `placement`), the outer shape of the triangles with the proxies in place of the simplified elements, then each proxy
+ * kept whole when any of its triangles is kept. Viewer-space input: `positions` nine coordinates per triangle, `groups`
+ * one instance group per triangle, `colors` the sRGB RGBA and `group_element` the run element of each group,
+ * `element_classes` one `ElementClass` byte per run element (empty: no classes; there are then max(group_element) + 1
+ * run elements), `center` the viewer base centre, `placement` the 16 values (column-major) of the upload placement of the
+ * model. `on_progress` receives 0..1. The run stays for the other `worker_outer_shape_model_*` calls. Returns
+ * `{ preview: Uint8Array, status: Uint8Array, proxy: Uint8Array, stats: string }`: the pack of the kept triangles (for
+ * `Viewer.preview_append_scene`), per run element the status (0 untouched, 1 rewritten, 2 dropped) and the proxy kind
+ * (0 none, 1 outdoor, 2 facade), and JSON `{ elements, untouched, rewritten, dropped, trianglesBefore, trianglesAfter,
+ * outdoor, facade, simplifiedBefore, simplifiedAfter, simplifyMs, shapeMs, packMs }`. A zero-area triangle does not
+ * change the status.
+ * @param {Float32Array} positions
+ * @param {Uint32Array} groups
+ * @param {Float32Array} colors
+ * @param {Uint32Array} group_element
+ * @param {Uint8Array} element_classes
+ * @param {Float64Array} center
+ * @param {Float64Array} placement
+ * @param {number} quality
+ * @param {number} simplify
+ * @param {boolean} merge
+ * @param {Function} on_progress
+ * @returns {any}
+ */
+export function worker_outer_shape_model_run(positions, groups, colors, group_element, element_classes, center, placement, quality, simplify, merge, on_progress) {
+    const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArrayF32ToWasm0(colors, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passArray32ToWasm0(group_element, wasm.__wbindgen_malloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ptr4 = passArray8ToWasm0(element_classes, wasm.__wbindgen_malloc);
+    const len4 = WASM_VECTOR_LEN;
+    const ptr5 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+    const len5 = WASM_VECTOR_LEN;
+    const ptr6 = passArrayF64ToWasm0(placement, wasm.__wbindgen_malloc);
+    const len6 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape_model_run(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, quality, simplify, merge, on_progress);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Swap pack of the last run for `Viewer.replace_model_elements`; the run elements of `unchanged` (IFC write skipped
+ * them) keep their geometry. Not merged: one pack element per rewritten element (`elements`: its run element), `cleared`
+ * the rewritten and dropped run elements, `passive` 0. Merged: the run elements of `hidden` (hidden in the view) stay
+ * as without merge, so they stay hidden; the kept triangles of the others follow as one pack element per colour bucket,
+ * `cleared` also holds these others, `passive` is the bucket count. With `edges`: the sharp edges of the model after
+ * the swap in viewer space, with the owner of each segment (run element, or run element count + bucket); none over the
+ * edge budgets. Returns `{ pack, elements, cleared, passive, edges?, edgeOwners? }`.
+ * @param {boolean} merge
+ * @param {Uint32Array} unchanged
+ * @param {Uint32Array} hidden
+ * @param {boolean} edges
+ * @returns {any}
+ */
+export function worker_outer_shape_model_swap(merge, unchanged, hidden, edges) {
+    const ptr0 = passArray32ToWasm0(unchanged, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray32ToWasm0(hidden, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape_model_swap(merge, ptr0, len0, ptr1, len1, edges);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
  * Lazily decode property sets belonging to one element (or spatial node).
  * @param {number} source_id
  * @param {number} entity_id
@@ -1057,6 +1411,61 @@ export function worker_properties(source_id, entity_id) {
  */
 export function worker_release_model(source_id) {
     wasm.worker_release_model(source_id);
+}
+
+/**
+ * Parser worker: write the IFC payload of `worker_outer_shape_model_bodies` into document `doc_id` (the editable twin)
+ * as one change. `entity_ids` and `status` hold one entry per run element; `positions` (viewer space), `owners` (run
+ * element) and `color_of` (index into the sRGB RGBA `colors`) describe the triangles. Each corner goes to world metres
+ * as placement^-1 * (v + center) in f64; the weld distance of an element is max(1e-5, 4 * f32::EPSILON * max |v|)
+ * metres. Rewritten elements get a new body of their triangles, dropped ones lose their body. Returns
+ * `{"result": .., "warnings": [..]}` (`Session::replace_bodies`); throws the API error JSON or a text for bad input.
+ * @param {string} doc_id
+ * @param {Uint32Array} entity_ids
+ * @param {Uint8Array} status
+ * @param {Float32Array} positions
+ * @param {Uint32Array} owners
+ * @param {Uint32Array} color_of
+ * @param {Float32Array} colors
+ * @param {Float64Array} center
+ * @param {Float64Array} placement
+ * @returns {string}
+ */
+export function worker_replace_bodies(doc_id, entity_ids, status, positions, owners, color_of, colors, center, placement) {
+    let deferred11_0;
+    let deferred11_1;
+    try {
+        const ptr0 = passStringToWasm0(doc_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray32ToWasm0(entity_ids, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passArray8ToWasm0(status, wasm.__wbindgen_malloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ptr3 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
+        const len3 = WASM_VECTOR_LEN;
+        const ptr4 = passArray32ToWasm0(owners, wasm.__wbindgen_malloc);
+        const len4 = WASM_VECTOR_LEN;
+        const ptr5 = passArray32ToWasm0(color_of, wasm.__wbindgen_malloc);
+        const len5 = WASM_VECTOR_LEN;
+        const ptr6 = passArrayF32ToWasm0(colors, wasm.__wbindgen_malloc);
+        const len6 = WASM_VECTOR_LEN;
+        const ptr7 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+        const len7 = WASM_VECTOR_LEN;
+        const ptr8 = passArrayF64ToWasm0(placement, wasm.__wbindgen_malloc);
+        const len8 = WASM_VECTOR_LEN;
+        const ret = wasm.worker_replace_bodies(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8);
+        var ptr10 = ret[0];
+        var len10 = ret[1];
+        if (ret[3]) {
+            ptr10 = 0; len10 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred11_0 = ptr10;
+        deferred11_1 = len10;
+        return getStringFromWasm0(ptr10, len10);
+    } finally {
+        wasm.__wbindgen_free(deferred11_0, deferred11_1, 1);
+    }
 }
 
 /**
@@ -1131,6 +1540,11 @@ function __wbg_get_imports() {
             const ret = arg0.WorkerGlobalScope;
             return ret;
         },
+        __wbg___wbindgen_boolean_get_fa956cfa2d1bd751: function(arg0) {
+            const v = arg0;
+            const ret = typeof(v) === 'boolean' ? v : undefined;
+            return isLikeNone(ret) ? 0xFFFFFF : ret ? 1 : 0;
+        },
         __wbg___wbindgen_debug_string_c25d447a39f5578f: function(arg0, arg1) {
             const ret = debugString(arg1);
             const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -1146,6 +1560,11 @@ function __wbg_get_imports() {
             const ret = arg0 === null;
             return ret;
         },
+        __wbg___wbindgen_is_object_a27215656b807791: function(arg0) {
+            const val = arg0;
+            const ret = typeof(val) === 'object' && val !== null;
+            return ret;
+        },
         __wbg___wbindgen_is_undefined_c05833b95a3cf397: function(arg0) {
             const ret = arg0 === undefined;
             return ret;
@@ -1155,6 +1574,10 @@ function __wbg_get_imports() {
         },
         __wbg__wbg_cb_unref_fffb441def202758: function(arg0) {
             arg0._wbg_cb_unref();
+        },
+        __wbg_beginComputePass_705eb14eefc2b94e: function(arg0, arg1) {
+            const ret = arg0.beginComputePass(arg1);
+            return ret;
         },
         __wbg_beginRenderPass_10e1d8bb36f2f74e: function() { return handleError(function (arg0, arg1) {
             const ret = arg0.beginRenderPass(arg1);
@@ -1196,6 +1619,10 @@ function __wbg_get_imports() {
             const ret = arg0.createCommandEncoder(arg1);
             return ret;
         },
+        __wbg_createComputePipeline_3e135ff73c8fc483: function(arg0, arg1) {
+            const ret = arg0.createComputePipeline(arg1);
+            return ret;
+        },
         __wbg_createPipelineLayout_7a186f2e9bf0d605: function(arg0, arg1) {
             const ret = arg0.createPipelineLayout(arg1);
             return ret;
@@ -1226,6 +1653,9 @@ function __wbg_get_imports() {
             getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
             getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
         },
+        __wbg_dispatchWorkgroups_0cf298d736b85a78: function(arg0, arg1, arg2, arg3) {
+            arg0.dispatchWorkgroups(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0);
+        },
         __wbg_document_179650d6cb13c263: function(arg0) {
             const ret = arg0.document;
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
@@ -1237,6 +1667,9 @@ function __wbg_get_imports() {
             arg0.draw(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0, arg4 >>> 0);
         },
         __wbg_end_414453a89205612c: function(arg0) {
+            arg0.end();
+        },
+        __wbg_end_fb560a3ae8e3624e: function(arg0) {
             arg0.end();
         },
         __wbg_error_287b079609b734b7: function(arg0) {
@@ -1265,6 +1698,10 @@ function __wbg_get_imports() {
             const ret = arg0.finish(arg1);
             return ret;
         },
+        __wbg_getBindGroupLayout_cad8805dbabaab72: function(arg0, arg1) {
+            const ret = arg0.getBindGroupLayout(arg1 >>> 0);
+            return ret;
+        },
         __wbg_getContext_e79ddf6a9cb3cc76: function() { return handleError(function (arg0, arg1, arg2) {
             const ret = arg0.getContext(getStringFromWasm0(arg1, arg2));
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
@@ -1291,6 +1728,10 @@ function __wbg_get_imports() {
         },
         __wbg_gpu_a7c12045c25d009a: function(arg0) {
             const ret = arg0.gpu;
+            return ret;
+        },
+        __wbg_gpuoutershape_new: function(arg0) {
+            const ret = GpuOuterShape.__wrap(arg0);
             return ret;
         },
         __wbg_height_6eec812c213259a1: function(arg0) {
@@ -1344,6 +1785,16 @@ function __wbg_get_imports() {
             const ret = result;
             return ret;
         },
+        __wbg_instanceof_Object_33f20e6f12439f3e: function(arg0) {
+            let result;
+            try {
+                result = arg0 instanceof Object;
+            } catch (_) {
+                result = false;
+            }
+            const ret = result;
+            return ret;
+        },
         __wbg_instanceof_Window_05ba1ee4f6781663: function(arg0) {
             let result;
             try {
@@ -1375,6 +1826,10 @@ function __wbg_get_imports() {
         },
         __wbg_length_98f10d1e2f4ea968: function(arg0) {
             const ret = arg0.length;
+            return ret;
+        },
+        __wbg_limits_1c25cb4f379a4418: function(arg0) {
+            const ret = arg0.limits;
             return ret;
         },
         __wbg_limits_50a8c5e629dbfe40: function(arg0) {
@@ -1557,6 +2012,10 @@ function __wbg_get_imports() {
             const ret = new Uint32Array(getArrayU32FromWasm0(arg0, arg1));
             return ret;
         },
+        __wbg_new_from_slice_77cdfb7977362f3c: function(arg0, arg1) {
+            const ret = new Uint8Array(getArrayU8FromWasm0(arg0, arg1));
+            return ret;
+        },
         __wbg_new_from_slice_ddf8b82c4d6af38e: function(arg0, arg1) {
             const ret = new Float32Array(getArrayF32FromWasm0(arg0, arg1));
             return ret;
@@ -1607,6 +2066,10 @@ function __wbg_get_imports() {
             const ret = arg0.onSubmittedWorkDone();
             return ret;
         },
+        __wbg_popErrorScope_4cbc9ce0c8cc5a9f: function(arg0) {
+            const ret = arg0.popErrorScope();
+            return ret;
+        },
         __wbg_prototypesetcall_21a175a0a8157491: function(arg0, arg1, arg2) {
             Float64Array.prototype.set.call(getArrayF64FromWasm0(arg0, arg1), arg2);
         },
@@ -1615,6 +2078,9 @@ function __wbg_get_imports() {
         },
         __wbg_prototypesetcall_ba9c9a7197c11933: function(arg0, arg1, arg2) {
             Float32Array.prototype.set.call(getArrayF32FromWasm0(arg0, arg1), arg2);
+        },
+        __wbg_pushErrorScope_aad0eef2ff5b28d3: function(arg0, arg1) {
+            arg0.pushErrorScope(__wbindgen_enum_GpuErrorFilter[arg1]);
         },
         __wbg_push_d2ae3af0c1217ae6: function(arg0, arg1) {
             const ret = arg0.push(arg1);
@@ -1657,8 +2123,17 @@ function __wbg_get_imports() {
         __wbg_setBindGroup_6124849cc8547086: function(arg0, arg1, arg2) {
             arg0.setBindGroup(arg1 >>> 0, arg2);
         },
+        __wbg_setBindGroup_79afcff8b9db8be3: function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
+            arg0.setBindGroup(arg1 >>> 0, arg2, getArrayU32FromWasm0(arg3, arg4), arg5, arg6 >>> 0);
+        }, arguments); },
+        __wbg_setBindGroup_84eb639ac393a9f4: function(arg0, arg1, arg2) {
+            arg0.setBindGroup(arg1 >>> 0, arg2);
+        },
         __wbg_setIndexBuffer_17431786d06c1b7c: function(arg0, arg1, arg2, arg3, arg4) {
             arg0.setIndexBuffer(arg1, __wbindgen_enum_GpuIndexFormat[arg2], arg3, arg4);
+        },
+        __wbg_setPipeline_95c76ab8da697fcf: function(arg0, arg1) {
+            arg0.setPipeline(arg1);
         },
         __wbg_setPipeline_bab24dbce96903b9: function(arg0, arg1) {
             arg0.setPipeline(arg1);
@@ -1730,6 +2205,9 @@ function __wbg_get_imports() {
         __wbg_set_beginning_of_pass_write_index_27be5b0b35ec3de0: function(arg0, arg1) {
             arg0.beginningOfPassWriteIndex = arg1 >>> 0;
         },
+        __wbg_set_beginning_of_pass_write_index_c12e7856ee670800: function(arg0, arg1) {
+            arg0.beginningOfPassWriteIndex = arg1 >>> 0;
+        },
         __wbg_set_bind_group_layouts_5325d038771af328: function(arg0, arg1) {
             arg0.bindGroupLayouts = arg1;
         },
@@ -1771,6 +2249,9 @@ function __wbg_get_imports() {
         },
         __wbg_set_compare_1509dc1a5420943f: function(arg0, arg1) {
             arg0.compare = __wbindgen_enum_GpuCompareFunction[arg1];
+        },
+        __wbg_set_compute_5a859e405c9eb6c6: function(arg0, arg1) {
+            arg0.compute = arg1;
         },
         __wbg_set_count_26a934d1cd07d080: function(arg0, arg1) {
             arg0.count = arg1 >>> 0;
@@ -1832,11 +2313,17 @@ function __wbg_get_imports() {
         __wbg_set_end_of_pass_write_index_e8f52fc08bc0603e: function(arg0, arg1) {
             arg0.endOfPassWriteIndex = arg1 >>> 0;
         },
+        __wbg_set_end_of_pass_write_index_f4ab90c5743df805: function(arg0, arg1) {
+            arg0.endOfPassWriteIndex = arg1 >>> 0;
+        },
         __wbg_set_entries_3017e6132f938c6e: function(arg0, arg1) {
             arg0.entries = arg1;
         },
         __wbg_set_entries_fc76ca4d7da6a709: function(arg0, arg1) {
             arg0.entries = arg1;
+        },
+        __wbg_set_entry_point_4443daff87d82ef1: function(arg0, arg1, arg2) {
+            arg0.entryPoint = getStringFromWasm0(arg1, arg2);
         },
         __wbg_set_entry_point_6fec5723cc790927: function(arg0, arg1, arg2) {
             arg0.entryPoint = getStringFromWasm0(arg1, arg2);
@@ -1907,6 +2394,12 @@ function __wbg_get_imports() {
         __wbg_set_label_2f592bd1be3db6b3: function(arg0, arg1, arg2) {
             arg0.label = getStringFromWasm0(arg1, arg2);
         },
+        __wbg_set_label_4a1dd4244f80abc9: function(arg0, arg1, arg2) {
+            arg0.label = getStringFromWasm0(arg1, arg2);
+        },
+        __wbg_set_label_8b0da33fd11b2572: function(arg0, arg1, arg2) {
+            arg0.label = getStringFromWasm0(arg1, arg2);
+        },
         __wbg_set_label_8fd860a36d2c7b74: function(arg0, arg1, arg2) {
             arg0.label = getStringFromWasm0(arg1, arg2);
         },
@@ -1927,6 +2420,9 @@ function __wbg_get_imports() {
         },
         __wbg_set_label_f92ae11c77d74198: function(arg0, arg1, arg2) {
             arg0.label = getStringFromWasm0(arg1, arg2);
+        },
+        __wbg_set_layout_19e558a0fa724e95: function(arg0, arg1) {
+            arg0.layout = arg1;
         },
         __wbg_set_layout_7c5ba5bdcde8a0f0: function(arg0, arg1) {
             arg0.layout = arg1;
@@ -1959,6 +2455,9 @@ function __wbg_get_imports() {
             arg0.module = arg1;
         },
         __wbg_set_module_14e471fdd94c582d: function(arg0, arg1) {
+            arg0.module = arg1;
+        },
+        __wbg_set_module_9b938909233aed50: function(arg0, arg1) {
             arg0.module = arg1;
         },
         __wbg_set_multisample_85f073947b782d07: function(arg0, arg1) {
@@ -1995,6 +2494,9 @@ function __wbg_get_imports() {
             arg0.primitive = arg1;
         },
         __wbg_set_query_set_18679a8580267d5a: function(arg0, arg1) {
+            arg0.querySet = arg1;
+        },
+        __wbg_set_query_set_f1314b06c84c4b00: function(arg0, arg1) {
             arg0.querySet = arg1;
         },
         __wbg_set_r_527e5a41c4b1a846: function(arg0, arg1) {
@@ -2083,6 +2585,9 @@ function __wbg_get_imports() {
         },
         __wbg_set_texture_e25a73da75cf5808: function(arg0, arg1) {
             arg0.texture = arg1;
+        },
+        __wbg_set_timestamp_writes_26336a2ad72cdcaf: function(arg0, arg1) {
+            arg0.timestampWrites = arg1;
         },
         __wbg_set_timestamp_writes_c552d52fbb417005: function(arg0, arg1) {
             arg0.timestampWrites = arg1;
@@ -2220,17 +2725,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 260, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 309, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 299, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 347, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 260, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 309, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },
@@ -2303,6 +2808,9 @@ const __wbindgen_enum_GpuCompareFunction = ["never", "less", "equal", "less-equa
 const __wbindgen_enum_GpuCullMode = ["none", "front", "back"];
 
 
+const __wbindgen_enum_GpuErrorFilter = ["validation", "out-of-memory", "internal"];
+
+
 const __wbindgen_enum_GpuFrontFace = ["ccw", "cw"];
 
 
@@ -2349,6 +2857,9 @@ const __wbindgen_enum_GpuVertexFormat = ["uint8", "uint8x2", "uint8x4", "sint8",
 
 
 const __wbindgen_enum_GpuVertexStepMode = ["vertex", "instance"];
+const GpuOuterShapeFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_gpuoutershape_free(ptr, 1));
 const ViewerFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_viewer_free(ptr, 1));
@@ -2357,6 +2868,12 @@ function addToExternrefTable0(obj) {
     const idx = wasm.__externref_table_alloc();
     wasm.__wbindgen_externrefs.set(idx, obj);
     return idx;
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
 }
 
 const CLOSURE_DTORS = (typeof FinalizationRegistry === 'undefined')
