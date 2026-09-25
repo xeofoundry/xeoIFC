@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/index-BRogkPcw.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DmdLLkeU.css">
+    <script type="module" crossorigin src="./assets/index-Cbq6P2Yp.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B20V42cJ.css">
   </head>
   <body>
     <div id="app">
@@ -150,6 +150,9 @@
                 </svg>
               </button>
               <div id="lab-flyout" aria-label="Lab tools">
+                <button id="model-overview-button" class="tool-icon" type="button" title="Model overview: oriented 3D bounds linked to the file rows; camera unchanged. Small boxes stay at least 5 pixels wide." aria-label="Model overview" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="square" stroke-linejoin="round"><path d="M6.5 2.5h-4v4M17.5 2.5h4v4M2.5 17.5v4h4M17.5 21.5h4v-4" /><path stroke-width="1" d="M15 5.2l4.5 2V11L15 13l-4.5-2V7.2zM10.5 7.2L15 9.3l4.5-2.1M15 9.3V13M7.2 12.7l3 1.7v3.4l-3 1.7-3-1.7v-3.4zM4.2 14.4l3 1.7 3-1.7M7.2 16.1v3.4" /></svg>
+                </button>
                 <button id="heat-button" class="tool-icon" type="button" title="Heat flow simulation: finds the heated volume, emits heat rays from a grid of points in it and lets the building elements collect the heat" aria-label="Heat flow simulation" aria-expanded="false" aria-controls="heat-panel">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M10.3 14.4V5.9a1.7 1.7 0 0 1 3.4 0v8.5" />
@@ -200,6 +203,7 @@
             <button id="selection-isolate" type="button" role="menuitem">Isolate</button>
             <button id="selection-hide" type="button" role="menuitem">Hide</button>
             <button id="selection-transparent" type="button" role="menuitem">Set transparent</button>
+            <button id="selection-unload-model" type="button" role="menuitem" hidden>Unload model</button>
             <button id="selection-show-all" type="button" role="menuitem">Show all</button>
           </div>
           <div id="model-details-dock">
@@ -214,6 +218,10 @@
               <span id="memory-used">Memory —</span>
               <span id="fps">FPS —</span>
             </div>
+          </div>
+          <div id="terrain-credit" hidden>
+            <a id="terrain-credit-osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a>
+            <span id="terrain-credit-swisstopo">&copy; swisstopo</span>
           </div>
           <div id="settings-panel" role="dialog" aria-labelledby="settings-title" hidden>
             <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
@@ -231,6 +239,11 @@
             </div>
             <label><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
             <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
+            <label title="Keep thin geometry visible at a distance. Auto applies only to sparse corridor models; On applies to every model. Independent of sharp edges."><span>Thin-geometry overview</span><select id="setting-overview-mode">
+              <option value="auto">Auto</option>
+              <option value="off">Off</option>
+              <option value="on">On</option>
+            </select></label>
             <div class="settings-show-row">
               <span>Show</span>
               <div class="show-combo">
@@ -254,16 +267,22 @@
             <button id="terrain-close" class="panel-close" type="button" aria-label="Close terrain settings"></button>
             <h2 id="terrain-title">Terrain</h2>
             <label><input id="setting-terrain-only-georef" type="checkbox" /> Terrain only for georeferenced models</label>
+            <label><span>Elevation</span><select id="setting-terrain-source" title="Source of the terrain heights">
+              <option value="terrarium">AWS Terrain Tiles (world)</option>
+              <option value="swisstopo">swisstopo swissALTI3D (CH, LI)</option>
+            </select></label>
             <div class="terrain-inline" role="radiogroup" aria-label="Terrain surface">
-              <label><input id="setting-terrain-surface-osm" name="setting-terrain-surface" type="radio" value="osm" /> OpenStreetMap map</label>
-              <label><input id="setting-terrain-surface-shaded" name="setting-terrain-surface" type="radio" value="shaded" /> Height shading</label>
+              <label><input id="setting-terrain-surface-osm" name="setting-terrain-surface" type="radio" value="osm" /> OpenStreetMap textures</label>
+              <label><input id="setting-terrain-surface-height" name="setting-terrain-surface" type="radio" value="height" /> Height colors</label>
+              <label><input id="setting-terrain-surface-color" name="setting-terrain-surface" type="radio" value="color" /> Single color</label>
             </div>
-            <label><span>Max detail</span><input id="setting-terrain-zoom" type="range" min="10" max="15" step="1" /><output id="setting-terrain-zoom-value">z15</output></label>
+            <div id="terrain-legend" hidden><span id="terrain-legend-min"></span><span id="terrain-legend-bar"></span><span id="terrain-legend-max"></span></div>
+            <label><span>Opacity</span><input id="setting-terrain-map-opacity" type="range" min="0" max="100" step="1" /><output id="setting-terrain-map-opacity-value">100%</output></label>
+            <label><span>Color</span><input id="setting-terrain-triangle-color" type="color" title="Color of the Single color surface" /></label>
+            <label><input id="setting-terrain-grid-lines" type="checkbox" /> Grid lines</label>
+            <label><span>Max detail</span><input id="setting-terrain-zoom" type="range" min="10" max="19" step="1" title="Finest zoom: OpenStreetMap textures up to this zoom (at most z19). The terrain mesh stops at z15 (AWS Terrain Tiles) or z16 (swisstopo)." /><output id="setting-terrain-zoom-value">z18</output></label>
             <label><span>Grid size</span><input id="setting-terrain-extent" type="number" min="0" max="10000" step="50" /><span>m</span></label>
             <label><span>Height offset</span><input id="setting-terrain-height-offset" type="number" min="-500" max="500" step="0.5" /><span>m</span></label>
-            <label><input id="setting-terrain-fill-triangles" type="checkbox" /> Add transparent triangles</label>
-            <label><span>Triangle color</span><input id="setting-terrain-triangle-color" type="color" /></label>
-            <label><span>Triangle opacity</span><input id="setting-terrain-triangle-opacity" type="range" min="0" max="100" step="1" /><output id="setting-terrain-triangle-opacity-value">28%</output></label>
             <div id="terrain-position">Position: no model loaded</div>
             <label><span>Model EPSG</span><input id="setting-terrain-model-epsg" type="text" placeholder="e.g. 31467" autocomplete="off" spellcheck="false" /></label>
             <div class="terrain-inline">
@@ -284,7 +303,7 @@
               </div>
             </div>
             <div id="terrain-status" aria-live="polite"></div>
-            <div class="terrain-attribution">Elevation: Mapzen/AWS Terrain Tiles    Map (c) OpenStreetMap contributors</div>
+            <div id="terrain-attribution" class="terrain-attribution">Elevation: Mapzen/AWS Terrain Tiles    Map (c) OpenStreetMap contributors</div>
           </div>
           <div id="storey-shift-panel" role="dialog" aria-labelledby="storey-shift-title" hidden>
             <button id="storey-shift-close" class="panel-close" type="button" aria-label="Close storey shift"></button>
@@ -466,7 +485,7 @@
               <button id="outer-shape-run" class="panel-primary" type="button">Run</button>
             </div>
             <div class="outer-shape-options">
-              <label class="compare-option" title="Keep every triangle of a mesh instance if any triangle is visible from outside. Fully hidden instances still go. Applies after Simplify shapes."><input id="outer-shape-whole-meshes" type="checkbox" /> Keep whole meshes</label>
+              <label class="compare-option" title="Keep every triangle of a mesh instance if any triangle is visible from outside. Fully hidden instances still go. Applies after Simplify shapes."><input id="outer-shape-whole-meshes" type="checkbox" checked /> Keep whole meshes</label>
               <label class="compare-option" title="Simplify small dense outdoor objects and thin panels. Close small holes and louvre gaps before visibility; large openings stay. Review the preview before Keep."><input id="outer-shape-simplify" type="checkbox" /> Simplify shapes</label>
               <label title="Maximum projected hole or gap width to close in panels, in metres. Larger values remove more detail; not a minimum object area.">Detail size <input id="outer-shape-detail" type="number" min="0.01" step="0.01" value="0.20" style="width: 5em" aria-label="Detail size in metres" /> m</label>
               <label class="compare-option" title="Keep result draws the model as one mesh per colour: far fewer draw calls, but its elements can no longer be clicked. The IFC export keeps every element."><input id="outer-shape-merge" type="checkbox" checked /> Merge meshes by colour</label>
