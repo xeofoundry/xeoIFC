@@ -1161,6 +1161,21 @@ export function worker_export_run(licence_key, now_unix, bounds) {
 }
 
 /**
+ * STEP header and project length unit of one retained model, JSON (`queries::file_info_json`).
+ * @param {number} source_id
+ * @returns {string | undefined}
+ */
+export function worker_file_info(source_id) {
+    const ret = wasm.worker_file_info(source_id);
+    let v1;
+    if (ret[0] !== 0) {
+        v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    }
+    return v1;
+}
+
+/**
  * IFC coordinate-operation georeference for one retained model, JSON.
  * @param {number} source_id
  * @returns {string | undefined}
