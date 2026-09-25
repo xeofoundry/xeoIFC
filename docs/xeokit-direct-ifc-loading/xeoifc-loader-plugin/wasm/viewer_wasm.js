@@ -389,13 +389,21 @@ export class Viewer {
     /**
      * @param {Uint32Array} handles
      * @param {number} quality
+     * @param {Uint8Array} classes
+     * @param {number} detail_size
+     * @param {Float64Array} placement
+     * @param {boolean} keep_whole_meshes
      * @param {Function} on_progress
      * @returns {Promise<GpuOuterShape>}
      */
-    outer_shape_gpu(handles, quality, on_progress) {
+    outer_shape_gpu(handles, quality, classes, detail_size, placement, keep_whole_meshes, on_progress) {
         const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
-        const ret = wasm.viewer_outer_shape_gpu(this.__wbg_ptr, ptr0, len0, quality, on_progress);
+        const ptr1 = passArray8ToWasm0(classes, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passArrayF64ToWasm0(placement, wasm.__wbindgen_malloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_outer_shape_gpu(this.__wbg_ptr, ptr0, len0, quality, ptr1, len1, detail_size, ptr2, len2, keep_whole_meshes, on_progress);
         return ret;
     }
     /**
@@ -1265,11 +1273,13 @@ export function worker_outer_shape_model_bodies() {
  * @param {Float32Array} colors
  * @param {Uint32Array} group_element
  * @param {Uint32Array} counts
+ * @param {Uint8Array} proxy
+ * @param {Uint32Array} simplified
  * @param {Float64Array} center
  * @param {boolean} merge
  * @returns {any}
  */
-export function worker_outer_shape_model_gpu(positions, groups, colors, group_element, counts, center, merge) {
+export function worker_outer_shape_model_gpu(positions, groups, colors, group_element, counts, proxy, simplified, center, merge) {
     const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
     const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
@@ -1280,9 +1290,13 @@ export function worker_outer_shape_model_gpu(positions, groups, colors, group_el
     const len3 = WASM_VECTOR_LEN;
     const ptr4 = passArray32ToWasm0(counts, wasm.__wbindgen_malloc);
     const len4 = WASM_VECTOR_LEN;
-    const ptr5 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+    const ptr5 = passArray8ToWasm0(proxy, wasm.__wbindgen_malloc);
     const len5 = WASM_VECTOR_LEN;
-    const ret = wasm.worker_outer_shape_model_gpu(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, merge);
+    const ptr6 = passArray32ToWasm0(simplified, wasm.__wbindgen_malloc);
+    const len6 = WASM_VECTOR_LEN;
+    const ptr7 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+    const len7 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape_model_gpu(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, merge);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -1336,11 +1350,13 @@ export function worker_outer_shape_model_removed() {
  * @param {Float64Array} placement
  * @param {number} quality
  * @param {number} simplify
+ * @param {number} detail_size
+ * @param {boolean} keep_whole_meshes
  * @param {boolean} merge
  * @param {Function} on_progress
  * @returns {any}
  */
-export function worker_outer_shape_model_run(positions, groups, colors, group_element, element_classes, center, placement, quality, simplify, merge, on_progress) {
+export function worker_outer_shape_model_run(positions, groups, colors, group_element, element_classes, center, placement, quality, simplify, detail_size, keep_whole_meshes, merge, on_progress) {
     const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
     const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
@@ -1355,7 +1371,7 @@ export function worker_outer_shape_model_run(positions, groups, colors, group_el
     const len5 = WASM_VECTOR_LEN;
     const ptr6 = passArrayF64ToWasm0(placement, wasm.__wbindgen_malloc);
     const len6 = WASM_VECTOR_LEN;
-    const ret = wasm.worker_outer_shape_model_run(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, quality, simplify, merge, on_progress);
+    const ret = wasm.worker_outer_shape_model_run(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, quality, simplify, detail_size, keep_whole_meshes, merge, on_progress);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -2725,17 +2741,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 309, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 307, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 347, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 345, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 309, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 307, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },
