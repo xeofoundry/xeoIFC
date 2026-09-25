@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:3c9427fc09c9108a -->
+<!-- Generated file: edit the source in the dev repository. sha256:41c72348f0fcbb21 -->
 # xeoIFC
 
 Public repository of xeoIFC, the xeoFoundry IFC toolkit.
@@ -26,10 +26,7 @@ the native library and the command-line tool), the IFC export (split and merge) 
 `Viewer` class draws the models into a canvas, with camera, picking, selection, visibility and clip planes. Other formats (JT,
 STEP, point clouds and meshes) are format modules that load on first use.
 
-Function groups and a TypeScript example:
-[architecture/integration-map.md](architecture/integration-map.md#webassembly-library-viewer_wasm-typescript-javascript)
-
-Try xeoIFC Web, the demo viewer on the library:
+Try xeoIFC Web, the WebAssembly demo viewer on the library:
 https://xeofoundry.github.io/xeoIFC/
 
 Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
