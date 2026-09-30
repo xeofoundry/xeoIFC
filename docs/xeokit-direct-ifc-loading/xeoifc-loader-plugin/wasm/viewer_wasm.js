@@ -1,7 +1,7 @@
 /* @ts-self-types="./viewer_wasm.d.ts" */
 
 /**
- * GPU result of one model. Removed geometry stays on the GPU; only kept triangles are read for IFC Keep.
+ * Shared GPU visibility result. Removed geometry stays on the GPU; only target models' kept triangles are read.
  */
 export class GpuOuterShape {
     static __wrap(ptr) {
@@ -43,6 +43,20 @@ export class GpuOuterShape {
     show_removed(viewer) {
         _assertClass(viewer, Viewer);
         const ret = wasm.gpuoutershape_show_removed(this.__wbg_ptr, viewer.__wbg_ptr);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * Original input element indices of one model only; other models keep their normal appearance.
+     * @param {Viewer} viewer
+     * @param {Uint32Array} elements
+     */
+    show_removed_elements(viewer, elements) {
+        _assertClass(viewer, Viewer);
+        const ptr0 = passArray32ToWasm0(elements, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.gpuoutershape_show_removed_elements(this.__wbg_ptr, viewer.__wbg_ptr, ptr0, len0);
         if (ret[1]) {
             throw takeFromExternrefTable0(ret[0]);
         }
@@ -116,6 +130,20 @@ export class Viewer {
         wasm.viewer_add_points(this.__wbg_ptr, data);
     }
     /**
+     * @param {number} key
+     * @param {Float64Array} data
+     * @param {Float64Array} placement
+     * @param {boolean} visible
+     * @returns {number}
+     */
+    add_section_curve(key, data, placement, visible) {
+        const ret = wasm.viewer_add_section_curve(this.__wbg_ptr, key, data, placement, visible);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return ret[0];
+    }
+    /**
      * Refresh the orbit/zoom anchor from the surface under `(x, y)`
      * (physical px). A miss keeps the last anchor.
      * @param {number} x
@@ -143,6 +171,22 @@ export class Viewer {
     anchor_pick(x, y) {
         const ret = wasm.viewer_anchor_pick(this.__wbg_ptr, x, y);
         return ret;
+    }
+    /**
+     * Snapshot by stable handles, so removing another model cannot restore state to the wrong scene.
+     * @returns {string}
+     */
+    appearance_state() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.viewer_appearance_state(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
     }
     /**
      * The exact rebase centre `[x, y, z]` (f64): a point in the space of `camera_state` plus this is the point in the
@@ -206,6 +250,12 @@ export class Viewer {
         const ret = wasm.viewer_can_replace_model_elements(this.__wbg_ptr, ptr0, len0);
         return ret !== 0;
     }
+    /**
+     * User input or another load invalidates pending automatic camera adjustments.
+     */
+    cancel_load_framing() {
+        wasm.viewer_cancel_load_framing(this.__wbg_ptr);
+    }
     cancel_view_animation() {
         wasm.viewer_cancel_view_animation(this.__wbg_ptr);
     }
@@ -224,6 +274,9 @@ export class Viewer {
     clear_scene() {
         wasm.viewer_clear_scene(this.__wbg_ptr);
     }
+    clear_section_curves() {
+        wasm.viewer_clear_section_curves(this.__wbg_ptr);
+    }
     clear_selection() {
         wasm.viewer_clear_selection(this.__wbg_ptr);
     }
@@ -241,6 +294,21 @@ export class Viewer {
     static create(canvas) {
         const ret = wasm.viewer_create(canvas);
         return ret;
+    }
+    /**
+     * Terrain-only hit for GIS identify; independent of IFC selection/occlusion. Physical viewport pixels.
+     * @param {number} x
+     * @param {number} y
+     * @returns {string | undefined}
+     */
+    cursor_terrain_point(x, y) {
+        const ret = wasm.viewer_cursor_terrain_point(this.__wbg_ptr, x, y);
+        let v1;
+        if (ret[0] !== 0) {
+            v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+            wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+        }
+        return v1;
     }
     /**
      * Return the world-space model/terrain hit point under `(x, y)`, if any.
@@ -271,14 +339,51 @@ export class Viewer {
         }
     }
     /**
+     * Current rebased display matrices (column-major), null for handles without renderer slots.
+     * @param {Uint32Array} handles
+     * @returns {string}
+     */
+    element_display_transforms(handles) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.viewer_element_display_transforms(this.__wbg_ptr, ptr0, len0);
+            deferred2_0 = ret[0];
+            deferred2_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
+     * Preflight for tools that must report incomplete checks, rather than interpreting empty geometry as a pass.
+     * @param {number} handle
+     * @returns {string}
+     */
+    element_geometry_status(handle) {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.viewer_element_geometry_status(this.__wbg_ptr, handle);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
      * `element_triangle_parts` of every instance of the element, hidden ones too, without display offsets or tilts;
      * mirrored instances come back re-wound. Resolves to `{ triangles, parts, tooLarge }`: `tooLarge` is true when the
-     * element is over the readback cap (then it has no triangles).
+     * element is over the readback cap (then it has no triangles). `normals` also returns transformed source normals.
      * @param {number} handle
+     * @param {boolean} normals
      * @returns {Promise<any>}
      */
-    element_source_triangle_parts(handle) {
-        const ret = wasm.viewer_element_source_triangle_parts(this.__wbg_ptr, handle);
+    element_source_triangle_parts(handle, normals) {
+        const ret = wasm.viewer_element_source_triangle_parts(this.__wbg_ptr, handle, normals);
         return ret;
     }
     /**
@@ -301,6 +406,9 @@ export class Viewer {
         const ret = wasm.viewer_element_triangles(this.__wbg_ptr, handle);
         return ret;
     }
+    fit_axis_curve() {
+        wasm.viewer_fit_axis_curve(this.__wbg_ptr);
+    }
     /**
      * Frame one or more viewer element handles. An empty list frames the whole model.
      * @param {Uint32Array} handles
@@ -317,7 +425,7 @@ export class Viewer {
         wasm.viewer_fit_view(this.__wbg_ptr);
     }
     /**
-     * Focus the location under the cursor, including overview ribbons. Background returns false.
+     * Focus the location under the cursor, on visible geometry. Background returns false.
      * @param {number} x
      * @param {number} y
      * @returns {Promise<any>}
@@ -337,6 +445,14 @@ export class Viewer {
             throw takeFromExternrefTable0(ret[1]);
         }
         return ret[0] !== 0;
+    }
+    /**
+     * Source-geometry generation for the tree connector's on-demand bounds cache.
+     * @returns {number}
+     */
+    geometry_revision() {
+        const ret = wasm.viewer_geometry_revision(this.__wbg_ptr);
+        return ret >>> 0;
     }
     /**
      * The handles of `handles` that `set_visible` or `isolate` hid; unknown handles are left out.
@@ -360,6 +476,23 @@ export class Viewer {
      */
     hover(x, y) {
         const ret = wasm.viewer_hover(this.__wbg_ptr, x, y);
+        return ret;
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     */
+    hover_section_curve(x, y) {
+        wasm.viewer_hover_section_curve(this.__wbg_ptr, x, y);
+    }
+    /**
+     * One bounded automatic-framing step. False means sufficient coverage, no geometry, or stale readback.
+     * @param {boolean} local
+     * @param {number} threshold
+     * @returns {Promise<any>}
+     */
+    improve_load_framing(local, threshold) {
+        const ret = wasm.viewer_improve_load_framing(this.__wbg_ptr, local, threshold);
         return ret;
     }
     /**
@@ -401,6 +534,32 @@ export class Viewer {
      * @param {number} quality
      * @param {Uint8Array} classes
      * @param {number} detail_size
+     * @param {Float64Array} placements
+     * @param {Uint32Array} offsets
+     * @param {Uint32Array} targets
+     * @param {boolean} keep_whole_meshes
+     * @param {Function} on_progress
+     * @returns {Promise<GpuOuterShape>}
+     */
+    outer_shape_federation_gpu(handles, quality, classes, detail_size, placements, offsets, targets, keep_whole_meshes, on_progress) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray8ToWasm0(classes, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passArrayF64ToWasm0(placements, wasm.__wbindgen_malloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ptr3 = passArray32ToWasm0(offsets, wasm.__wbindgen_malloc);
+        const len3 = WASM_VECTOR_LEN;
+        const ptr4 = passArray32ToWasm0(targets, wasm.__wbindgen_malloc);
+        const len4 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_outer_shape_federation_gpu(this.__wbg_ptr, ptr0, len0, quality, ptr1, len1, detail_size, ptr2, len2, ptr3, len3, ptr4, len4, keep_whole_meshes, on_progress);
+        return ret;
+    }
+    /**
+     * @param {Uint32Array} handles
+     * @param {number} quality
+     * @param {Uint8Array} classes
+     * @param {number} detail_size
      * @param {Float64Array} placement
      * @param {boolean} keep_whole_meshes
      * @param {Function} on_progress
@@ -415,6 +574,16 @@ export class Viewer {
         const len2 = WASM_VECTOR_LEN;
         const ret = wasm.viewer_outer_shape_gpu(this.__wbg_ptr, ptr0, len0, quality, ptr1, len1, detail_size, ptr2, len2, keep_whole_meshes, on_progress);
         return ret;
+    }
+    /**
+     * Source geometry handles, including passive merged buckets. No preview, terrain or guide geometry.
+     * @returns {Uint32Array}
+     */
+    outer_shape_handles() {
+        const ret = wasm.viewer_outer_shape_handles(this.__wbg_ptr);
+        var v1 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
     }
     /**
      * @param {number} dx
@@ -485,12 +654,40 @@ export class Viewer {
         return ret;
     }
     /**
+     * @param {number} x
+     * @param {number} y
+     * @returns {Float64Array | undefined}
+     */
+    pick_section_curve(x, y) {
+        const ret = wasm.viewer_pick_section_curve(this.__wbg_ptr, x, y);
+        return ret;
+    }
+    /**
      * Replace the temporary append-mode loading preview without registering
      * selectable element handles.
      * @param {Uint8Array} data
      */
     preview_append_scene(data) {
         const ret = wasm.viewer_preview_append_scene(this.__wbg_ptr, data);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * Overlay the unchanged source edges on the outer-shape preview without altering the source buffers.
+     * @param {Uint32Array} handles
+     */
+    preview_model_sharp_edges(handles) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.viewer_preview_model_sharp_edges(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * Replace all outer-shape preview packs together. Parse the entire batch before replacing the displayed preview.
+     * @param {Array<any>} packs
+     */
+    preview_outer_shape_scenes(packs) {
+        const ret = wasm.viewer_preview_outer_shape_scenes(this.__wbg_ptr, packs);
         if (ret[1]) {
             throw takeFromExternrefTable0(ret[0]);
         }
@@ -529,19 +726,21 @@ export class Viewer {
      * picked, hovered or selected). The old geometry of `handles` and `cleared` goes; the other elements keep theirs.
      * The buckets hold the geometry of the handles of `cleared` that are not in `handles`: they show while any of these
      * shows (`set_visible`, `isolate`). Every handle stays valid. The pack is centred on `base_center`, without a
-     * placement. Returns the handles of the passive elements. Throws before any change on bad input.
+     * placement. `preserve_sharp_edges` keeps the original edge owners for a geometry-preserving merge-only.
+     * Returns the handles of the passive elements. Throws before any change on bad input.
      * @param {Uint8Array} data
      * @param {Uint32Array} handles
      * @param {Uint32Array} cleared
      * @param {number} passive
+     * @param {boolean} preserve_sharp_edges
      * @returns {Uint32Array}
      */
-    replace_model_elements(data, handles, cleared, passive) {
+    replace_model_elements(data, handles, cleared, passive, preserve_sharp_edges) {
         const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray32ToWasm0(cleared, wasm.__wbindgen_malloc);
         const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.viewer_replace_model_elements(this.__wbg_ptr, data, ptr0, len0, ptr1, len1, passive);
+        const ret = wasm.viewer_replace_model_elements(this.__wbg_ptr, data, ptr0, len0, ptr1, len1, passive, preserve_sharp_edges);
         if (ret[2]) {
             throw takeFromExternrefTable0(ret[1]);
         }
@@ -555,6 +754,14 @@ export class Viewer {
      */
     resize(width, height, dpr) {
         wasm.viewer_resize(this.__wbg_ptr, width, height, dpr);
+    }
+    /**
+     * @param {string} state
+     */
+    restore_appearance_state(state) {
+        const ptr0 = passStringToWasm0(state, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.viewer_restore_appearance_state(this.__wbg_ptr, ptr0, len0);
     }
     /**
      * Rebased and source-space bounds for the loaded render scene.
@@ -571,6 +778,15 @@ export class Viewer {
         } finally {
             wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
         }
+    }
+    /**
+     * @param {number} key
+     * @param {number} distance
+     * @returns {Float64Array | undefined}
+     */
+    section_curve_sample(key, distance) {
+        const ret = wasm.viewer_section_curve_sample(this.__wbg_ptr, key, distance);
+        return ret;
     }
     /**
      * Select an element by viewer handle; `additive` (ctrl-click) toggles it
@@ -601,6 +817,17 @@ export class Viewer {
         return ret;
     }
     /**
+     * Rail/Road axis segments in document metres and the model's upload placement; empty data clears it.
+     * @param {Float64Array} data
+     * @param {Float64Array} placement
+     */
+    set_axis_curtain(data, placement) {
+        const ret = wasm.viewer_set_axis_curtain(this.__wbg_ptr, data, placement);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
      * Set the viewer background color. Components are sRGB in the 0..1 range.
      * @param {number} r
      * @param {number} g
@@ -625,6 +852,13 @@ export class Viewer {
      */
     set_clip_planes(planes) {
         wasm.viewer_set_clip_planes(this.__wbg_ptr, planes);
+    }
+    /**
+     * @param {boolean} active
+     * @param {number} pixel_scale
+     */
+    set_curve_pick_mode(active, pixel_scale) {
+        wasm.viewer_set_curve_pick_mode(this.__wbg_ptr, active, pixel_scale);
     }
     /**
      * Walk mode: fade elements - 0 = as they are, 1..9 = tenths of transparency.
@@ -698,6 +932,17 @@ export class Viewer {
         wasm.viewer_set_field_of_view(this.__wbg_ptr, degrees);
     }
     /**
+     * @param {Float64Array} data
+     * @param {Float64Array} placement
+     * @param {boolean} focus
+     */
+    set_georeference_check(data, placement, focus) {
+        const ret = wasm.viewer_set_georeference_check(this.__wbg_ptr, data, placement, focus);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
      * @param {number} layer
      * @param {boolean} visible
      */
@@ -737,13 +982,6 @@ export class Viewer {
      */
     set_orthographic(ortho) {
         wasm.viewer_set_orthographic(this.__wbg_ptr, ortho);
-    }
-    /**
-     * Thin-geometry overview: 0 Auto, 1 Off, 2 On. Independent of sharp edges.
-     * @param {number} mode
-     */
-    set_overview_mode(mode) {
-        wasm.viewer_set_overview_mode(this.__wbg_ptr, mode);
     }
     /**
      * Upload a packed scene produced by `worker_load` (transferred from the
@@ -858,6 +1096,13 @@ export class Viewer {
         wasm.viewer_set_terrain_triangles(this.__wbg_ptr, data, r, g, b, a);
     }
     /**
+     * Hide/show terrain without freeing its geometry or textures. Hidden terrain is not picked.
+     * @param {boolean} visible
+     */
+    set_terrain_visible(visible) {
+        wasm.viewer_set_terrain_visible(this.__wbg_ptr, visible);
+    }
+    /**
      * @param {Uint32Array} handles
      * @param {boolean} transparent
      */
@@ -921,6 +1166,25 @@ export class Viewer {
      */
     unload_model(source) {
         const ret = wasm.viewer_unload_model(this.__wbg_ptr, source);
+        return ret !== 0;
+    }
+    /**
+     * Preserve uploaded edges of unchanged elements and append edges for rewritten geometry.
+     * @param {number} handle
+     * @param {Float32Array} data
+     * @param {Uint32Array} owners
+     * @param {Uint32Array} preserved
+     * @param {Uint32Array} affected
+     * @returns {boolean}
+     */
+    update_model_sharp_edges(handle, data, owners, preserved, affected) {
+        const ptr0 = passArray32ToWasm0(owners, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray32ToWasm0(preserved, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passArray32ToWasm0(affected, wasm.__wbindgen_malloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_update_model_sharp_edges(this.__wbg_ptr, handle, data, ptr0, len0, ptr1, len1, ptr2, len2);
         return ret !== 0;
     }
     /**
@@ -1191,6 +1455,39 @@ export function worker_georeference(source_id) {
 }
 
 /**
+ * @param {number} source_id
+ * @returns {string | undefined}
+ */
+export function worker_georeferencing(source_id) {
+    const ret = wasm.worker_georeferencing(source_id);
+    let v1;
+    if (ret[0] !== 0) {
+        v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    }
+    return v1;
+}
+
+/**
+ * @param {string} request
+ * @returns {string}
+ */
+export function worker_georeferencing_action(request) {
+    let deferred2_0;
+    let deferred2_1;
+    try {
+        const ptr0 = passStringToWasm0(request, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.worker_georeferencing_action(ptr0, len0);
+        deferred2_0 = ret[0];
+        deferred2_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+    }
+}
+
+/**
  * Whole-buffer load: begin + one chunk + finish (kept for callers that
  * already hold the full file, e.g. small drops and tests).
  * @param {Uint8Array} data
@@ -1256,6 +1553,33 @@ export function worker_load_chunk(chunk) {
  */
 export function worker_load_finish(on_progress, on_snapshot) {
     const ret = wasm.worker_load_finish(on_progress, on_snapshot);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Merge source meshes by exact colour only. Keeps all triangles and normals, without touching the IFC or RUN.
+ * @param {Float32Array} positions
+ * @param {Float32Array} normals
+ * @param {Uint32Array} groups
+ * @param {Float32Array} colors
+ * @param {Float64Array} center
+ * @returns {any}
+ */
+export function worker_merge_meshes(positions, normals, groups, colors, center) {
+    const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArrayF32ToWasm0(normals, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passArrayF32ToWasm0(colors, wasm.__wbindgen_malloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ptr4 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+    const len4 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_merge_meshes(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -1333,6 +1657,94 @@ export function worker_outer_shape_classes(source_id, entity_ids) {
 }
 
 /**
+ * @param {Float32Array} positions
+ * @param {Uint32Array} groups
+ * @param {Float32Array} colors
+ * @param {Uint32Array} group_element
+ * @param {Uint32Array} counts
+ * @param {Uint8Array} proxy
+ * @param {Uint32Array} proxy_triangles
+ * @param {Float64Array} center
+ * @param {Uint32Array} offsets
+ * @param {Uint32Array} targets
+ * @param {boolean} merge
+ * @returns {any}
+ */
+export function worker_outer_shape_federation_gpu(positions, groups, colors, group_element, counts, proxy, proxy_triangles, center, offsets, targets, merge) {
+    const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArrayF32ToWasm0(colors, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passArray32ToWasm0(group_element, wasm.__wbindgen_malloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ptr4 = passArray32ToWasm0(counts, wasm.__wbindgen_malloc);
+    const len4 = WASM_VECTOR_LEN;
+    const ptr5 = passArray8ToWasm0(proxy, wasm.__wbindgen_malloc);
+    const len5 = WASM_VECTOR_LEN;
+    const ptr6 = passArray32ToWasm0(proxy_triangles, wasm.__wbindgen_malloc);
+    const len6 = WASM_VECTOR_LEN;
+    const ptr7 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+    const len7 = WASM_VECTOR_LEN;
+    const ptr8 = passArray32ToWasm0(offsets, wasm.__wbindgen_malloc);
+    const len8 = WASM_VECTOR_LEN;
+    const ptr9 = passArray32ToWasm0(targets, wasm.__wbindgen_malloc);
+    const len9 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape_federation_gpu(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, ptr9, len9, merge);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Shared visibility across the federation. Offsets delimit each source model's elements; only target model indices
+ * are simplified and retained. Placements hold one column-major matrix per model (geometry is already in viewer space).
+ * @param {Float32Array} positions
+ * @param {Uint32Array} groups
+ * @param {Float32Array} colors
+ * @param {Uint32Array} group_element
+ * @param {Uint8Array} element_classes
+ * @param {Float64Array} center
+ * @param {Float64Array} placements
+ * @param {Uint32Array} offsets
+ * @param {Uint32Array} targets
+ * @param {number} quality
+ * @param {number} simplify
+ * @param {number} detail_size
+ * @param {boolean} keep_whole_meshes
+ * @param {boolean} merge
+ * @param {Function} on_progress
+ * @returns {any}
+ */
+export function worker_outer_shape_federation_run(positions, groups, colors, group_element, element_classes, center, placements, offsets, targets, quality, simplify, detail_size, keep_whole_meshes, merge, on_progress) {
+    const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArrayF32ToWasm0(colors, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ptr3 = passArray32ToWasm0(group_element, wasm.__wbindgen_malloc);
+    const len3 = WASM_VECTOR_LEN;
+    const ptr4 = passArray8ToWasm0(element_classes, wasm.__wbindgen_malloc);
+    const len4 = WASM_VECTOR_LEN;
+    const ptr5 = passArrayF64ToWasm0(center, wasm.__wbindgen_malloc);
+    const len5 = WASM_VECTOR_LEN;
+    const ptr6 = passArrayF64ToWasm0(placements, wasm.__wbindgen_malloc);
+    const len6 = WASM_VECTOR_LEN;
+    const ptr7 = passArray32ToWasm0(offsets, wasm.__wbindgen_malloc);
+    const len7 = WASM_VECTOR_LEN;
+    const ptr8 = passArray32ToWasm0(targets, wasm.__wbindgen_malloc);
+    const len8 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape_federation_run(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, quality, simplify, detail_size, keep_whole_meshes, merge, on_progress);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
  * IFC payload of the last run for `worker_replace_bodies`: `{ status: Uint8Array, positions: Float32Array, owners:
  * Uint32Array, colorOf: Uint32Array, colors: Float32Array }`. The triangles are the kept ones of the rewritten
  * elements in viewer space, with the run element and the colour index of each; `colors` holds sRGB RGBA.
@@ -1394,6 +1806,13 @@ export function worker_outer_shape_model_preview(merge) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * @param {number} model
+ */
+export function worker_outer_shape_model_release(model) {
+    wasm.worker_outer_shape_model_release(model);
 }
 
 /**
@@ -1459,13 +1878,25 @@ export function worker_outer_shape_model_run(positions, groups, colors, group_el
 }
 
 /**
+ * Select a source model partition before a preview/payload request. No visibility work or geometry copying.
+ * @param {number} model
+ */
+export function worker_outer_shape_model_select(model) {
+    const ret = wasm.worker_outer_shape_model_select(model);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
  * Swap pack of the last run for `Viewer.replace_model_elements`; the run elements of `unchanged` (IFC write skipped
  * them) keep their geometry. Not merged: one pack element per rewritten element (`elements`: its run element), `cleared`
  * the rewritten and dropped run elements, `passive` 0. Merged: the run elements of `hidden` (hidden in the view) stay
  * as without merge, so they stay hidden; the kept triangles of the others follow as one pack element per colour bucket,
- * `cleared` also holds these others, `passive` is the bucket count. With `edges`: the sharp edges of the model after
- * the swap in viewer space, with the owner of each segment (run element, or run element count + bucket); none over the
- * edge budgets. Returns `{ pack, elements, cleared, passive, edges?, edgeOwners? }`.
+ * `cleared` also holds these others, `passive` is the bucket count. `preservedEdges` names unchanged run elements whose
+ * uploaded edges must survive (including when merged). With `edges`: new edges for rewritten elements only, in viewer
+ * space, with owners (run element, or run element count + bucket); none over the edge budgets.
+ * Returns `{ pack, elements, cleared, passive, preservedEdges, edges?, edgeOwners? }`.
  * @param {boolean} merge
  * @param {Uint32Array} unchanged
  * @param {Uint32Array} hidden
@@ -1492,6 +1923,21 @@ export function worker_outer_shape_model_swap(merge, unchanged, hidden, edges) {
  */
 export function worker_properties(source_id, entity_id) {
     const ret = wasm.worker_properties(source_id, entity_id);
+    let v1;
+    if (ret[0] !== 0) {
+        v1 = getStringFromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    }
+    return v1;
+}
+
+/**
+ * Rail/Road axes with world-metre segment pairs. No IFC bytes are changed.
+ * @param {number} source_id
+ * @returns {string | undefined}
+ */
+export function worker_rail_axes(source_id) {
+    const ret = wasm.worker_rail_axes(source_id);
     let v1;
     if (ret[0] !== 0) {
         v1 = getStringFromWasm0(ret[0], ret[1]).slice();
@@ -1603,6 +2049,13 @@ export function worker_set_licence_key(key, now_unix) {
     } finally {
         wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
     }
+}
+
+/**
+ * @param {boolean} enabled
+ */
+export function worker_set_load_profiling(enabled) {
+    wasm.worker_set_load_profiling(enabled);
 }
 
 /**
@@ -1916,6 +2369,16 @@ function __wbg_get_imports() {
             const ret = result;
             return ret;
         },
+        __wbg_instanceof_Uint8Array_309b927aaf7a3fc7: function(arg0) {
+            let result;
+            try {
+                result = arg0 instanceof Uint8Array;
+            } catch (_) {
+                result = false;
+            }
+            const ret = result;
+            return ret;
+        },
         __wbg_instanceof_Window_05ba1ee4f6781663: function(arg0) {
             let result;
             try {
@@ -2139,6 +2602,10 @@ function __wbg_get_imports() {
         },
         __wbg_new_from_slice_77cdfb7977362f3c: function(arg0, arg1) {
             const ret = new Uint8Array(getArrayU8FromWasm0(arg0, arg1));
+            return ret;
+        },
+        __wbg_new_from_slice_7e254b47c77fb8cc: function(arg0, arg1) {
+            const ret = new Float64Array(getArrayF64FromWasm0(arg0, arg1));
             return ret;
         },
         __wbg_new_from_slice_ddf8b82c4d6af38e: function(arg0, arg1) {
@@ -2917,17 +3384,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 317, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 337, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 355, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 376, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 317, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 337, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>xeoIFC minimal host</title>
+  <style>
+    html, body { margin: 0; height: 100%; font: 14px system-ui, sans-serif; background: #f2f3f5; color: #1c1f24; }
+    body { display: grid; grid-template-rows: auto 1fr; }
+    header { display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 1px solid #d8dce2; }
+    main { display: grid; grid-template-columns: 1fr 320px; min-height: 0; }
+    canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+    pre { margin: 0; padding: 12px; overflow: auto; background: #fff; border-left: 1px solid #d8dce2; white-space: pre-wrap; }
+    #status { color: #5b6470; }
+    @media (prefers-color-scheme: dark) {
+      html, body { background: #15181c; color: #e6e8eb; }
+      header, pre { background: #1d2126; border-color: #2c323a; }
+      #status { color: #9aa3ad; }
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/minimal-Bb1nwZ17.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-YYuim3ZT.js">
+</head>
+<body>
+  <!-- A minimal host of the xeoIFC WebAssembly library: src/minimal.ts (page) and src/minimal-worker.ts (engine).
+       Open with ?model=<url of an .ifc or .ifczip> or pick a file; nothing is uploaded. -->
+  <header>
+    <strong>xeoIFC minimal host</strong>
+    <input id="file" type="file" accept=".ifc,.ifczip">
+    <span id="status">Needs a browser with WebGPU.</span>
+  </header>
+  <main>
+    <canvas id="canvas"></canvas>
+    <pre id="details"></pre>
+  </main>
+</body>
+</html>

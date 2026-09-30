@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:a11269a31d9dd980 -->
+<!-- Generated file: edit the source in the dev repository. sha256:018823175055d9bd -->
 # xeoIFC converter configuration file
 
 The [command-line converter](README.md) reads optional settings from a JSON file before every conversion.
@@ -39,6 +39,7 @@ All settings live in one object named `inputParameters`. Unknown keys are ignore
     "maxTransparency": 0.9,
     "deduplicateMaterials": 1,
     "deduplicateAccessors": 1,
+    "coordinatesOutputPrecision": 0.00001,
     "deduplicateMeshes": 1,
     "licenseKey": ""
   }
@@ -106,7 +107,8 @@ This violates the IFC standard, but it occurs. By default these elements are not
 | `gltfRootNodeRotationVector` | `[x, y, z]` | `[1, 0, 0]` | Axis of the root node rotation, see [coordinate system](README.md#units-and-coordinate-system). |
 | `gltfRootNodeRotationInDegrees` | number | `90` | Angle of the root node rotation. |
 | `deduplicateMaterials` | `1` / `0` | `1` | Re-use an existing material instead of writing one per mesh. |
-| `deduplicateAccessors` | `1` / `0` | `1` | Re-use accessors whose binary data is identical (compared by hash), which also removes the duplicate buffer data. |
+| `deduplicateAccessors` | `1` / `0` | `1` | Re-use accessors whose data is identical (vertex coordinates: within `coordinatesOutputPrecision`), which also removes the duplicate buffer data. |
+| `coordinatesOutputPrecision` | number (metres) | `0.00001` | Tolerance of `deduplicateAccessors` for vertex coordinates: an accessor is re-used when its coordinates differ by at most this distance, so vertices can move by that much. The default of 10 µm merges the rounding noise of repeated parts; `0` re-uses only identical data. cxconverter used `0.001`, which also merges parts that really differ by less than a millimetre and changes the volume of thin parts. |
 | `deduplicateMeshes` | `1` / `0` | `1` | Re-use identical mesh and primitive objects across glTF nodes. |
 
 IFC models repeat the same geometry very often (the mesh of one door type can occur thousands of times), so the three deduplication

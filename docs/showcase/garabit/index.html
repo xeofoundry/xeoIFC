@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeoIFC showcase - the Garabit viaduct from Eiffel's drawings</title>
+    <link rel="icon" href="../../xeokit-icon.svg"/>
+    <style>
+        /* Same README look as ../index.html. */
+        :root {
+            color-scheme: light dark;
+            --ground: #ffffff;
+            --ink: #1f2328;
+            --muted: #59636e;
+            --line: #d1d9e0;
+            --link: #0969da;
+            --code: #eff1f3;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ground: #0d1117;
+                --ink: #f0f6fc;
+                --muted: #9198a1;
+                --line: #3d444d;
+                --link: #4493f8;
+                --code: #262c36;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: var(--ground);
+            margin: 0;
+        }
+
+        main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
+
+        h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 24px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 85%;
+            background: var(--code);
+            border-radius: 6px;
+        }
+
+        code { padding: .2em .4em; }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; }
+        pre code { padding: 0; background: none; font-size: 100%; }
+
+        figure { margin: 0 0 16px; }
+        figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+        figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+        #viewer {
+            display: block;
+            width: 100%;
+            aspect-ratio: 900 / 600;
+            min-height: 320px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: #b8bec2;
+        }
+
+        .under-viewer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 8px 0 16px; font-size: 14px; color: var(--muted); }
+
+        table { border-collapse: collapse; margin: 0 0 16px; }
+        th, td { border: 1px solid var(--line); padding: 6px 13px; text-align: left; vertical-align: top; }
+        td.num { text-align: right; white-space: nowrap; }
+
+        .wide { overflow-x: auto; margin: 0 0 16px; }
+        .wide table { margin: 0; }
+
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    </style>
+</head>
+<body>
+<main>
+    <h1>The Garabit viaduct, rebuilt from Eiffel's drawings</h1>
+
+    <p>The Garabit viaduct carries the railway from B&eacute;ziers to Neussargues 122 m above the Truy&egrave;re. Gustave Eiffel's
+        company built it from 1880 to 1884: a crescent arch of 165 m, five iron piers, three lattice decks and two masonry
+        approach viaducts, 565 m in all. Eiffel published the complete design in 1889, with 19 plates of drawings and every
+        calculation. All of it is in the public domain.</p>
+
+    <p>This page shows a federated IFC 4.3 model of the viaduct that was built from those sources alone, by Claude Code (model
+        Fable 5.1) working with xeoIFC. The request was a model "as realistic as possible": foundations, rivets and details,
+        an IfcAlignment with real clothoids, swept cross sections instead of meshes, georeferenced so that the terrain of the
+        viewer fits, and only sources that may be published.</p>
+
+    <h2>1. The model</h2>
+
+    <p>This is xeoIFC Web with the five main files of the federation and the French national terrain (IGN RGE ALTI) around
+        them. Rotate, zoom and pan with the mouse, click a rivet line, a lattice bar or a dressed stone to see what it is and
+        where its dimensions come from.</p>
+
+    <iframe id="viewer" src="../../?load=showcase/garabit/garabit-showcase.federation.json&amp;embed=1&amp;terrain=ign"
+            title="xeoIFC Web with the Garabit viaduct" allow="fullscreen" allowfullscreen></iframe>
+
+    <div class="under-viewer">
+        <span>Move the pointer to the left edge of the viewer to open the model tree and the properties.</span>
+        <a href="../../?load=showcase/garabit/garabit-showcase.federation.json&amp;terrain=ign">Open in the full viewer</a>
+    </div>
+
+    <figure>
+        <img src="garabit-detail.jpg" alt="The arch springing beside pier 4, the lattice deck and the overhead line" width="1540" height="1000">
+        <figcaption>The arch springs from the base of pier 4. Every plate and angle of the built-up members is its own element.</figcaption>
+    </figure>
+
+    <div class="wide"><table>
+        <tr><th>Files</th><td>IFC4X3_ADD2, 9 federated files and one combined file, 238 MB (6.6 MB zipped without the rivets and the terrain)</td></tr>
+        <tr><th>Railway</th><td>IfcAlignment fitted to the IGN LiDAR HD survey: straight, circular arcs and clothoids in plan
+            (4.7 cm RMS on the viaduct), vertical curves, cant; rails and guard rails swept along the alignment; 1,134 sleepers
+            on linear placements; the track supports of the metal deck; 1500 V DC overhead line on the arched portals of the deck</td></tr>
+        <tr><th>Ironwork</th><td>5 piers with their horizontal bracing and ladders, the arch with its two pal&eacute;es, 3 decks: 33,000 plates, angles and lattice bars, 26 deck
+            bearings, 4 arch hinges on cast bearings tied down by anchor rods to the galleries in the pier masonry</td></tr>
+        <tr><th>Rivets</th><td>678,768, the published number, in 27,000 riveted joints (separate files)</td></tr>
+        <tr><th>Masonry</th><td>Approach viaducts, abutments, pier bases with the arched tunnels and anchorage galleries of piers 4 and 5, foundations:
+            20,409 m&sup3; as in the memoir, 9,065 dressed stones</td></tr>
+        <tr><th>Georeference</th><td>RGF93 / Lambert-93 (EPSG:2154) with NGF-IGN69 heights, IfcMapConversionScaled</td></tr>
+        <tr><th>Checks</th><td>All files pass the IfcOpenShell schema and rule validation without findings; every element tessellates</td></tr>
+    </table></div>
+
+    <h2>2. The sources</h2>
+
+    <figure>
+        <img src="eiffel-plate-10.jpg" alt="Plate 10 of Eiffel's memoir: sections of the arch chords and lattice, projection of the arch" width="1600" height="827">
+        <figcaption>Plate 10 of the memoir: chord and lattice sections of the arch and the projection with the montant stations.
+            The model takes the node heights, the montant lengths and the section of every panel from here.</figcaption>
+    </figure>
+
+    <div class="wide"><table>
+        <tr><th>Source</th><th>Used for</th><th>Rights</th></tr>
+        <tr><td>G. Eiffel, <i>M&eacute;moire pr&eacute;sent&eacute; &agrave; l'appui du projet d&eacute;finitif du viaduc de
+            Garabit</i>, 1889, with plates 1-19</td><td>all geometry and sections, masses and masonry volumes by part, the rivet
+            count</td><td>public domain</td></tr>
+        <tr><td>IGN LiDAR HD 2025</td><td>alignment fit, rail level, pier positions, ground line</td><td>Licence
+            Ouverte 2.0 (IGN)</td></tr>
+        <tr><td>IGN RGE ALTI, BD TOPO</td><td>terrain in the viewer and in the terrain file, first alignment guess</td><td>Licence Ouverte 2.0 (IGN)</td></tr>
+        <tr><td>SNCF R&eacute;seau, AFGC 2024</td><td>facts on today's track and repairs</td><td>facts only</td></tr>
+    </table></div>
+
+    <h2>3. How it is made</h2>
+
+    <p>The model is generated by <code>garabit-gen</code>, a small Rust program on the xeoIFC STEP writer, in about two seconds.
+        It holds every number with its source: dimensions read from the plates, sections from the memoir's tables, positions
+        measured in the LiDAR survey. Where the drawings are silent (gusset plates, rivet rows, foundation depths, the modern
+        track) it applies period detailing rules and calibrates to the memoir: the extra flange plates of the deck chords
+        follow the bending moments of the continuous girder, computed as Eiffel did, the foundation depths are solved so that
+        each masonry part has its published volume, and the rivet pitch so that the viaduct has exactly 678,768 rivets.
+        Members are cut to fit where they meet (bars cut along the chords, angles coped where they straddle a web, gussets
+        bent onto the flanges) and an interference check confirms that no two parts of the ironwork overlap.</p>
+
+    <p>Every element says where it comes from in the property set <code>Garabit_Provenance</code>: <i>Documented</i> (taken
+        from the drawings), <i>Scaled from plate</i>, <i>Measured</i> (LiDAR) or <i>Representative</i> (detailing rules), with
+        the plate or table as the source.</p>
+
+    <div class="wide"><table>
+        <tr><th>Part</th><th>Model</th><th>Memoir</th></tr>
+        <tr><td>Piers 1 to 5 (iron, t)</td><td class="num">51.1 / 78.6 / 111.0 / 149.6 / 149.6</td><td class="num">61.0 / 87.7 / 126.4 / 169.4 / 169.2</td></tr>
+        <tr><td>Decks Neussargues / central / Marvejols (t)</td><td class="num">313.3 / 186.4 / 810.2</td><td class="num">330.0 / 197.3 / 836.8</td></tr>
+        <tr><td>Arch (t)</td><td class="num">872.9</td><td class="num">1,073.0</td></tr>
+        <tr><td>Masonry (m&sup3;)</td><td class="num">20,409</td><td class="num">20,409</td></tr>
+        <tr><td>Rivets</td><td class="num">678,768</td><td class="num">678,768</td></tr>
+    </table></div>
+
+    <p>The arch is lighter than Eiffel's tonnage because the model uses only the member sections drawn on plates 2 and 10; the
+        connection plates, splices and fillers that make up the difference are not drawn.</p>
+
+    <h2>4. Files and licence</h2>
+
+    <p>The five main files are next to this page: <a href="garabit-00-railway.ifczip">railway</a>,
+        <a href="garabit-10-masonry.ifczip">masonry</a>, <a href="garabit-20-arch.ifczip">arch</a>,
+        <a href="garabit-21-piers.ifczip">piers</a>, <a href="garabit-22-deck.ifczip">decks</a>, listed in
+        <a href="garabit-showcase.federation.json">garabit-showcase.federation.json</a>. The complete federation, with the
+        three rivet files and a terrain file for other viewers, is published separately with its manifest
+        <code>garabit.federation.json</code>.</p>
+
+    <p>The model is offered under CC BY 4.0. Please credit "Viaduc de Garabit model: xeoFoundry, from G. Eiffel (1889) and IGN
+        LiDAR HD / RGE ALTI (Licence Ouverte 2.0)".</p>
+
+    <footer>
+        More: <a href="../">xeoIFC Web</a> - <a href="../villa/">a villa from one picture</a> -
+        <a href="../xeoifc-qt/">a desktop IFC viewer on xeoifc.dll</a> -
+        Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
+        Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
+    </footer>
+</main>
+</body>
+</html>

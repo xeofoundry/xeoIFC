@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeoIFC showcase - build on xeoIFC</title>
+    <link rel="icon" href="../../xeokit-icon.svg"/>
+    <style>
+        /* Same README look as ../index.html. */
+        :root {
+            color-scheme: light dark;
+            --ground: #ffffff;
+            --ink: #1f2328;
+            --muted: #59636e;
+            --line: #d1d9e0;
+            --link: #0969da;
+            --code: #eff1f3;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ground: #0d1117;
+                --ink: #f0f6fc;
+                --muted: #9198a1;
+                --line: #3d444d;
+                --link: #4493f8;
+                --code: #262c36;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: var(--ground);
+            margin: 0;
+        }
+
+        main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
+
+        h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 24px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h3 { font-size: 1.1em; font-weight: 600; margin: 0 0 8px; }
+
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 85%;
+            background: var(--code);
+            border-radius: 6px;
+        }
+
+        code { padding: .2em .4em; }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; }
+        pre code { padding: 0; background: none; font-size: 100%; }
+
+        table { border-collapse: collapse; margin: 0 0 16px; }
+        th, td { border: 1px solid var(--line); padding: 6px 13px; text-align: left; vertical-align: top; }
+
+        /* Wide tables scroll inside the page on narrow screens, like the code blocks. */
+        .wide { overflow-x: auto; margin: 0 0 16px; }
+        .wide table { margin: 0; }
+
+        .recipes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 0 0 16px; }
+        .recipe { border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; }
+        .recipe p { margin: 0 0 8px; font-size: 15px; }
+        .recipe p:last-child { margin: 0; }
+
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Build on xeoIFC</h1>
+
+    <p>xeoIFC is one IFC engine with the same functions in the browser (WebAssembly with a WebGPU viewer) and in native programs
+        (one plain C header). It reads IFC 2x3 to IFC 4.3, tessellates it, answers queries, and writes IFC for splits, merges and
+        authored models. This page is for developers who want xeoIFC inside their own product: which platforms exist today, a
+        small working program for each, and how evaluation and licences work.</p>
+
+    <h2>1. Platforms</h2>
+
+    <div class="wide">
+        <table>
+            <thead>
+            <tr><th>Host</th><th>What you use</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+            <tr><td>Browser</td><td>wasm modules with TypeScript declarations: engine functions in a Web Worker, the WebGPU
+                <code>Viewer</code> on the page</td><td>available</td></tr>
+            <tr><td>xeokit</td><td><code>XeoIFCLoaderPlugin</code>: IFC straight into a xeokit viewer</td><td>available</td></tr>
+            <tr><td>C, C++</td><td><code>xeoifc.h</code> with <code>xeoifc.dll</code> (Windows x64) or <code>libxeoifc.so</code>
+                (Linux x64, Linux arm64)</td><td>available</td></tr>
+            <tr><td>C#, .NET</td><td>P/Invoke over the same header</td><td>sample below; NuGet package on request</td></tr>
+            <tr><td>Python</td><td>ctypes over the same header</td><td>sample below; wheel on request</td></tr>
+            <tr><td>Java, Delphi, other languages</td><td>any language that calls C functions</td><td>through the header</td></tr>
+            <tr><td>Command line</td><td><code>xeoifc</code>: IFC to GLB, XKT or a self-contained HTML viewer; query, split, merge,
+                render; an MCP server for AI agents</td><td>Windows x64, Linux x64, Linux arm64</td></tr>
+            <tr><td>macOS, iOS, Android</td><td>-</td><td>on request</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>2. Recipes</h2>
+
+    <p>Every native sample does the same thing and prints the same lines: load a model with a background job, find the external
+        walls with one document API query, and write them to a new IFC file.</p>
+
+    <div class="recipes">
+        <div class="recipe">
+            <h3>Browser, about 150 lines</h3>
+            <p>One canvas, a streamed load in a worker, orbit, zoom, pick and properties.</p>
+            <p><a href="../../minimal.html?model=Duplex.ifc">Open it</a> - source: <code>minimal.html</code>,
+                <code>src/minimal.ts</code> and <code>src/minimal-worker.ts</code> in <code>xeoifc-web-source.zip</code>.</p>
+        </div>
+        <div class="recipe">
+            <h3>Browser, complete viewer</h3>
+            <p>xeoIFC Web: tree, properties, sections, measuring, BCF, IDS, clash, terrain, export. Open source (MIT).</p>
+            <p><a href="../../">Open it</a> - <a href="../">the calls it makes</a>.</p>
+        </div>
+        <div class="recipe">
+            <h3>xeokit</h3>
+            <p>Load <code>.ifc</code> and <code>.ifczip</code> into a xeokit viewer, without a conversion step.</p>
+            <p><a href="../../xeokit-direct-ifc-loading/">Documentation and examples</a></p>
+        </div>
+        <div class="recipe">
+            <h3>C</h3>
+            <p><code>external_walls.c</code> with CMake, on the library from <code>xeoifc-qt-source.zip</code>.</p>
+            <p><a href="https://github.com/xeofoundry/xeoIFC/tree/main/examples/c">examples/c</a></p>
+        </div>
+        <div class="recipe">
+            <h3>C# (.NET 8)</h3>
+            <p><code>Program.cs</code> with P/Invoke: <code>dotnet run -- xeoifc.dll model.ifc</code>.</p>
+            <p><a href="https://github.com/xeofoundry/xeoIFC/tree/main/examples/csharp">examples/csharp</a></p>
+        </div>
+        <div class="recipe">
+            <h3>Python</h3>
+            <p><code>external_walls.py</code> with ctypes, no packages: <code>python external_walls.py xeoifc.dll model.ifc</code>.</p>
+            <p><a href="https://github.com/xeofoundry/xeoIFC/tree/main/examples/python">examples/python</a></p>
+        </div>
+        <div class="recipe">
+            <h3>Desktop application</h3>
+            <p>xeoIFC Qt: a complete C++ viewer on the library, with the library drawing into the window. Open source (MIT).</p>
+            <p><a href="../xeoifc-qt/">The calls it makes and its load times</a></p>
+        </div>
+    </div>
+
+    <p>Downloads: <a href="https://github.com/xeofoundry/xeoIFC/releases/latest/download/xeoifc-web-source.zip">xeoifc-web-source.zip</a>
+        (the browser library with xeoIFC Web and the minimal host) and
+        <a href="https://github.com/xeofoundry/xeoIFC/releases/latest/download/xeoifc-qt-source.zip">xeoifc-qt-source.zip</a>
+        (the native library for Windows and Linux with xeoIFC Qt) - all releases on the
+        <a href="https://github.com/xeofoundry/xeoIFC/releases/">releases page</a>.</p>
+
+    <h2>3. The same API everywhere</h2>
+
+    <p>The browser library, the native library and the command line share one document API: JSON operations in, JSON results
+        out. The query of the samples is the same request in every language:</p>
+
+    <pre><code>{"op": "query.select", "doc": "m",
+ "args": {"text": "is IfcWall and Pset_WallCommon.IsExternal = true",
+          "select": ["name", "storey.Name"], "includeRefs": true}}</code></pre>
+
+    <p>The command line prints the whole API as TypeScript declarations: <code>xeoifc describe</code>.</p>
+
+    <h2>4. Evaluation and licences</h2>
+
+    <p>Every function works without a licence key; viewing is free. Without a key, each IFC file that the library writes carries
+        one more element, an <code>IfcBuildingElementProxy</code> with the text "xeoIFC evaluation version", and the converter
+        marks its GLB and XKT files the same way. A licence key removes the marker:</p>
+
+    <pre><code>xeoifc_set_licence_key(session, key, NULL);        /* C: 1 licensed, 0 no key, -1 unknown or expired */
+worker_set_licence_key(key, Date.now() / 1000);    // browser (Web Worker)
+xeoifc -i model.ifc -o model.glb --license-key KEY # command line, or XEO_IFC_LICENSE_KEY</code></pre>
+
+    <p>For your product we offer an engine licence (browser and native), export licences, custom builds of the web and desktop
+        viewers, and support with priority fixes on your files. The libraries are provided under the
+        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> for testing and evaluation. For commercial or
+        production use, contact <a href="https://xeofoundry.com">xeoFoundry</a>.</p>
+
+    <h2>5. Send us your hardest file</h2>
+
+    <p>Send up to three IFC files that your current engine struggles with. Within 48 hours you get back, privately: a
+        self-contained HTML viewer of each file, rendered views, and the load time and memory. No commitment -
+        <a href="https://xeofoundry.com">contact xeoFoundry</a>.</p>
+
+    <footer>
+        More: <a href="../">a browser IFC viewer on the WebAssembly library</a> - <a href="../xeoifc-qt/">a desktop IFC viewer
+        on xeoifc.dll</a> - <a href="../villa/">a villa from one picture</a> -
+        Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
+        Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
+    </footer>
+</main>
+</body>
+</html>

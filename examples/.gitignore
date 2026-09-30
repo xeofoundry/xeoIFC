@@ -1,0 +1,5 @@
+build/
+bin/
+obj/
+__pycache__/
+external-walls.ifc

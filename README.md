@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:41c72348f0fcbb21 -->
+<!-- Generated file: edit the source in the dev repository. sha256:3bc8ab16207ed002 -->
 # xeoIFC
 
 Public repository of xeoIFC, the xeoFoundry IFC toolkit.
@@ -81,9 +81,10 @@ Features, options, output files and license key: [converter/README.md](converter
 
 ## 4. Native library
 
-`xeoifc.dll` (`libxeoifc.so`, `libxeoifc.dylib`) exposes the whole engine through one plain C header, `xeoifc.h`. Any program that
+`xeoifc.dll` (`libxeoifc.so` on Linux) exposes the whole engine through one plain C header, `xeoifc.h`. Any program that
 can call C loads it: C++, C# (P/Invoke), Python (ctypes), Delphi, Java (JNA); desktop GUI applications and headless server processes
-alike. A host can use any subset of its function groups: the document API session, the IFC export (split and merge), background
+alike. Small working programs in C, C# and Python are in [examples](examples); the
+[Build on xeoIFC](https://xeofoundry.github.io/xeoIFC/showcase/integrate/) page lists every platform and recipe. A host can use any subset of its function groups: the document API session, the IFC export (split and merge), background
 load jobs with progress callbacks, and the wgpu renderer drawing into a native window handle.
 
 Function groups and a C example:
@@ -136,6 +137,7 @@ await xeo.document.save({ path: 'villa.ifc' });
 Every call is checked against the IFC schema and answers mistakes with a hint (for example the allowed values of an
 enumeration), which is what makes the API usable by people and by AI assistants alike. `xeoifc describe` prints the whole API as
 TypeScript declarations.
+
 
 ## Architecture
 

@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/index-BGGv7HCP.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-B20V42cJ.css">
+    <script type="module" crossorigin src="./assets/main-kQKyCetQ.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-YYuim3ZT.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-CX-nNJvF.css">
   </head>
   <body>
+    <div id="open-menu" role="menu" aria-label="Open file" hidden>
+      <button type="button" role="menuitem" data-load-mode="replace">Clear viewer and open file</button>
+      <button type="button" role="menuitem" data-load-mode="append">Open file and append to scene</button>
+    </div>
     <div id="app">
       <div id="main">
         <aside id="sidebar">
@@ -33,19 +38,12 @@
           <footer id="status-bar" aria-live="polite">
             <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.ids,.rvm,.las,.laz,.xml,.landxml" multiple hidden />
             <button id="about-link" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
-            <button id="open-button" type="button">
+            <button id="open-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="open-menu">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3.5 6.5h6l2 2h9v9.5h-17z" />
                 <path d="M3.5 8.5v-3h5.6l2 3" />
               </svg>
               <span>Open</span>
-            </button>
-            <button id="add-button" type="button" title="Append a model to the current scene">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 5v14" />
-                <path d="M5 12h14" />
-              </svg>
-              <span>Add</span>
             </button>
             <button id="export-button" type="button" disabled title="Export selected elements (or all loaded models if nothing is selected) to a new IFC file">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -55,12 +53,22 @@
               </svg>
               <span>Export</span>
             </button>
+            <button id="export-settings-button" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="export-settings-panel" title="Export settings">.ifc</button>
           </footer>
         </aside>
         <div id="main-resizer" title="Drag to resize"></div>
         <button id="sidebar-collapse-indicator" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true" title="Collapse sidebar" hidden></button>
         <div id="viewport-container">
           <canvas id="viewport"></canvas>
+          <div id="export-settings-panel" role="dialog" aria-labelledby="export-settings-title" hidden>
+            <button id="export-settings-close" class="panel-close" type="button" aria-label="Close export settings"></button>
+            <h2 id="export-settings-title">Export settings</h2>
+            <label><span>Format</span><select id="export-format"><option value="ifc">IFC (.ifc)</option></select></label>
+            <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
+            <label id="export-separate-row" title="Edited models are not merged into one file, but written to separate IFC files instead."><span>Keep IFC files separate</span><input id="export-separate" type="checkbox" /></label>
+            <p id="export-separate-hint" hidden>Separate files use the original model names, with numbered suffixes for duplicates.</p>
+          </div>
+
           <div id="viewport-tools" aria-label="Viewer tools">
             <button id="zoom-bounds-button" class="tool-icon" type="button" title="Zoom to bounds" aria-label="Zoom to bounds">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -143,10 +151,22 @@
                 <path d="M3.5 4.5h17v12h-9l-4.5 4v-4h-3.5zM12 7.5v4.5M12 14v.2" />
               </svg>
             </button>
+            <button id="rail-road-button" class="tool-icon" type="button" title="Rail/Road: IFC axes" aria-label="Rail/Road" aria-expanded="false" aria-controls="rail-road-panel">
+              <svg viewBox="0 0 448 398" aria-hidden="true" fill-rule="evenodd">
+                <path d="M154 27 L165 27 L171 38 L191 38 L183 27 L194 27 C251 93 237 172 236 258 C235 298 238 338 247 373 Q247 377 242 377 L213 377 Q209 377 209 373 L206 345 L79 345 L71 373 Q70 377 66 377 L35 377 Q30 377 32 371 C67 281 125 202 153 129 C171 84 166 53 154 27 Z M172 46 L196 46 L201 54 L174 54 Z M176 62 L204 62 L208 72 L177 72 Z M178 81 L211 81 L215 92 L177 92 Z M174 104 L216 104 L219 120 L170 120 Z M165 134 L220 134 L221 154 L158 154 Z M150 171 L221 171 L218 197 L136 197 Z M128 216 L216 216 L211 251 L113 251 Z M102 273 L209 273 L206 319 L85 319 Z" />
+                <path d="M222 27 L234 27 C298 78 332 157 356 236 C374 293 395 335 422 371 Q424 377 419 377 L391 377 Q387 377 386 373 C359 310 339 245 321 181 C305 121 270 65 222 27 Z M218 38 L225 38 L230 46 L223 46 Z M229 54 L237 54 L244 65 L235 65 Z M243 76 L250 76 Q252 76 253 79 L258 89 Q258 91 255 91 L247 91 L241 79 Q240 76 243 76 Z M255 104 L263 104 Q265 104 266 107 L271 120 Q272 123 269 123 L259 123 L253 108 Q252 104 255 104 Z M268 137 L277 137 Q280 137 281 140 L286 157 Q287 161 283 161 L272 161 Q270 161 270 158 L264 141 Q263 137 268 137 Z M278 180 L289 180 Q292 180 293 184 L297 207 Q298 212 293 212 L279 212 Q276 212 276 208 L272 184 Q271 180 278 180 Z M284 236 L296 236 Q300 236 301 241 L307 271 Q308 276 303 276 L287 276 Q283 276 283 272 L279 241 Q278 236 284 236 Z M292 304 L309 304 Q314 304 315 310 L327 364 Q329 370 322 370 L301 370 Q296 370 295 365 L286 310 Q285 304 292 304 Z" />
+              </svg>
+            </button>
+            <button id="georeferencing-button" class="tool-icon" type="button" title="Georeferencing: coordinate metadata and reference-point checks" aria-label="Georeferencing" aria-expanded="false" aria-controls="georeferencing-panel">
+              <svg viewBox="0 0 165 197" aria-hidden="true" fill="currentColor" fill-rule="evenodd">
+                <path d="M81.5 25 C53.1 25 30 48.1 30 76.5 C30 88.8 34.7 99.2 41.1 110.1 C55 134 64.3 155.9 72.5 178.8 C73.9 182.8 77.1 185 81.2 185 C85.1 185 88.4 182.7 89.8 178.8 C98 155.9 107.2 134 121.5 110.1 C128.1 99.1 133 88.7 133 76.5 C133 48.1 109.9 25 81.5 25 Z M113.5 76 A32 32 0 1 0 49.5 76 A32 32 0 1 0 113.5 76 Z" />
+              </svg>
+            </button>
             <div id="lab-group">
               <button id="lab-button" class="tool-icon" type="button" title="Lab: experimental tools - rough models, expect rough numbers" aria-label="Lab: experimental tools" aria-haspopup="true" aria-expanded="false" aria-controls="lab-flyout">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M9 2.5h6M10 2.5v6.5L4.5 19a1.7 1.7 0 0 0 1.5 2.5h12a1.7 1.7 0 0 0 1.5-2.5L14 9V2.5M7.3 14.5h9.4" />
+                  <path class="lab-flask" d="M9 2.5h6M10 2.5v6.5L4.5 19a1.7 1.7 0 0 0 1.5 2.5h12a1.7 1.7 0 0 0 1.5-2.5L14 9V2.5M7.3 14.5h9.4" />
+                  <path class="lab-close-arrow" d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </button>
               <div id="lab-flyout" aria-label="Lab tools">
@@ -160,7 +180,7 @@
                     <path d="M15.8 7.4h2.7M15.8 10.4h2.7" />
                   </svg>
                 </button>
-                <button id="outer-shape-button" class="tool-icon" type="button" title="Outer shape test: runs the converter's extractOuterShape on one model and shows the triangles it keeps" aria-label="Outer shape test" aria-expanded="false" aria-controls="outer-shape-panel">
+                <button id="outer-shape-button" class="tool-icon" type="button" title="Outer shape test: runs the converter's extractOuterShape on checked models and shows the triangles it keeps" aria-label="Outer shape test" aria-expanded="false" aria-controls="outer-shape-panel">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12v9M4 7.5l8 4.5 8-4.5" />
                     <path class="outer-shape-icon-removed" d="M12 10.2V3M10.4 12.9L4 16.5M13.6 12.9L20 16.5" />
@@ -199,6 +219,7 @@
           <div id="area-selection-box" hidden></div>
           <div id="selection-menu" role="menu" hidden>
             <button id="selection-zoom" type="button" role="menuitem">Zoom to element</button>
+            <button id="selection-draw-line" type="button" role="menuitem" hidden>Draw line to 3D element</button>
             <button id="selection-select" type="button" role="menuitem">Select</button>
             <button id="selection-isolate" type="button" role="menuitem">Isolate</button>
             <button id="selection-hide" type="button" role="menuitem">Hide</button>
@@ -222,11 +243,12 @@
           <div id="terrain-credit" hidden>
             <a id="terrain-credit-osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a>
             <span id="terrain-credit-swisstopo">&copy; swisstopo</span>
+            <span id="terrain-credit-ign" hidden>&copy; IGN</span>
+            <span id="terrain-credit-bav" hidden>&copy; BAV</span>
           </div>
           <div id="settings-panel" role="dialog" aria-labelledby="settings-title" hidden>
             <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
             <h2 id="settings-title">Settings</h2>
-            <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
             <label><span>Orphaned elements</span><select id="setting-orphaned-elements" title="Orphaned elements are elements that are in the file, but not in the spatial structure of IfcProject">
               <option value="ignore">Ignore</option>
               <option value="ifc-project">Append under IfcProject</option>
@@ -239,11 +261,6 @@
             </div>
             <label><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
             <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
-            <label title="Keep thin geometry visible at a distance. Auto applies only to sparse corridor models; On applies to every model. Independent of sharp edges."><span>Thin-geometry overview</span><select id="setting-overview-mode">
-              <option value="auto">Auto</option>
-              <option value="off">Off</option>
-              <option value="on">On</option>
-            </select></label>
             <div class="settings-show-row">
               <span>Show</span>
               <div class="show-combo">
@@ -266,21 +283,34 @@
           <div id="terrain-panel" role="dialog" aria-labelledby="terrain-title" hidden>
             <button id="terrain-close" class="panel-close" type="button" aria-label="Close terrain settings"></button>
             <h2 id="terrain-title">Terrain</h2>
-            <label><input id="setting-terrain-only-georef" type="checkbox" /> Terrain only for georeferenced models</label>
+            <label><input id="setting-terrain-visible" type="checkbox" checked aria-keyshortcuts="t" /> Terrain visible [t]</label>
+            <div id="terrain-georef-warning" role="status" hidden></div>
             <label><span>Elevation</span><select id="setting-terrain-source" title="Source of the terrain heights">
               <option value="terrarium">AWS Terrain Tiles (world)</option>
               <option value="swisstopo">swisstopo swissALTI3D (CH, LI)</option>
+              <option value="ign">IGN RGE ALTI (France)</option>
             </select></label>
-            <div class="terrain-inline" role="radiogroup" aria-label="Terrain surface">
-              <label><input id="setting-terrain-surface-osm" name="setting-terrain-surface" type="radio" value="osm" /> OpenStreetMap textures</label>
-              <label><input id="setting-terrain-surface-height" name="setting-terrain-surface" type="radio" value="height" /> Height colors</label>
-              <label><input id="setting-terrain-surface-color" name="setting-terrain-surface" type="radio" value="color" /> Single color</label>
-            </div>
+            <label><span>Surface</span><select id="setting-terrain-surface" aria-label="Terrain surface">
+              <option value="osm">OpenStreetMap</option>
+              <option value="swissimage">SWISSIMAGE orthophoto</option>
+              <option value="swissmap">Swiss national map — colour</option>
+              <option value="swissgrey">Swiss national map — grey</option>
+              <option value="height">Height colours</option>
+              <option value="color">Single colour</option>
+            </select></label>
+            <details id="terrain-gis-layers"><summary id="terrain-gis-summary">GIS layers: none</summary><div id="terrain-gis-options" role="group" aria-label="GIS layers"></div></details>
+            <label><span>GIS opacity</span><input id="setting-terrain-gis-opacity" aria-label="GIS opacity" type="range" min="0" max="100" step="1" /><output id="terrain-gis-opacity-value">80%</output></label>
+            <div id="terrain-map-note" class="terrain-attribution"></div>
             <div id="terrain-legend" hidden><span id="terrain-legend-min"></span><span id="terrain-legend-bar"></span><span id="terrain-legend-max"></span></div>
             <label><span>Opacity</span><input id="setting-terrain-map-opacity" type="range" min="0" max="100" step="1" /><output id="setting-terrain-map-opacity-value">100%</output></label>
             <label><span>Color</span><input id="setting-terrain-triangle-color" type="color" title="Color of the Single color surface" /></label>
             <label><input id="setting-terrain-grid-lines" type="checkbox" /> Grid lines</label>
-            <label><span>Max detail</span><input id="setting-terrain-zoom" type="range" min="10" max="19" step="1" title="Finest zoom: OpenStreetMap textures up to this zoom (at most z19). The terrain mesh stops at z15 (AWS Terrain Tiles) or z16 (swisstopo)." /><output id="setting-terrain-zoom-value">z18</output></label>
+            <div class="terrain-gis-actions"><button id="terrain-identify" class="panel-secondary" type="button" aria-pressed="false">Identify</button><span>Selected GIS layers · 5 m radius</span></div>
+            <div id="terrain-identify-status" role="status"></div>
+            <div id="terrain-identify-results"></div>
+            <div class="terrain-attribution">Online Swiss layers: © swisstopo / BAV. Identify sends the clicked location to geo.admin.ch, never IFC geometry.</div>
+            <details id="terrain-advanced"><summary>Terrain extent, detail and placement</summary>
+            <label><span>Max detail</span><input id="setting-terrain-zoom" type="range" min="10" max="20" step="1" title="Finest map zoom: SWISSIMAGE up to z20; national maps and OSM up to z19. GIS overlays up to z18 (enlarged above). Mesh detail is separate." /><output id="setting-terrain-zoom-value">z18</output></label>
             <label><span>Grid size</span><input id="setting-terrain-extent" type="number" min="0" max="10000" step="50" /><span>m</span></label>
             <label><span>Height offset</span><input id="setting-terrain-height-offset" type="number" min="-500" max="500" step="0.5" /><span>m</span></label>
             <div id="terrain-position">Position: no model loaded</div>
@@ -295,6 +325,7 @@
             </div>
             <label><span>Cache folder</span><input id="setting-terrain-cache-dir" type="text" value="Browser cache" disabled /></label>
             <label><span>Cache max</span><input id="setting-terrain-cache-max" type="number" min="100" max="50000" step="100" /><span>MB</span></label>
+            </details>
             <div class="terrain-footer">
               <span id="terrain-cache-size">Cache: ?</span>
               <div class="terrain-actions">
@@ -338,7 +369,7 @@
             <button id="measure-close" class="panel-close" type="button" aria-label="Close measure"></button>
             <h2 id="measure-title">Measure</h2>
             <div class="section-row">
-              <button class="panel-secondary" type="button" data-measure-mode="distance" aria-pressed="true" title="Distance between two points; vertices, edge midpoints and edges snap">Distance</button>
+              <button class="panel-secondary" type="button" data-measure-mode="distance" aria-pressed="true" title="Distance between two surface points; vertices, edge midpoints, edges and perpendicular feet snap">Distance</button>
               <button class="panel-secondary" type="button" data-measure-mode="area" aria-pressed="false" title="Area and perimeter of a planar face">Area</button>
               <button class="panel-secondary" type="button" data-measure-mode="faces" aria-pressed="false" title="Distance between two parallel faces, or the angle between two faces">Face to face</button>
               <button class="panel-secondary" type="button" data-measure-mode="point" aria-pressed="false" title="Model coordinates of a point; vertices, edge midpoints and edges snap">Coordinates</button>
@@ -360,7 +391,9 @@
               <button class="panel-secondary" type="button" data-section-axis="0" title="Plane across the X axis, through the model centre">X</button>
               <button class="panel-secondary" type="button" data-section-axis="1" title="Plane across the Y axis, through the model centre">Y</button>
               <button class="panel-secondary" type="button" data-section-axis="2" title="Horizontal plane through the model centre">Z</button>
+              <button id="section-curve" class="panel-secondary" type="button" aria-pressed="false" title="Show only 3D curves, then click one for a perpendicular section">Curve</button>
             </div>
+            <p id="section-curve-status" class="section-hint" role="status"></p>
             <ul id="section-list"></ul>
             <label class="compare-option" title="Parallel projection: no perspective, true to scale"><input id="section-ortho" type="checkbox" /> Orthographic view</label>
             <div class="section-row">
@@ -380,7 +413,7 @@
               <span id="section-drawing-status" class="section-hint" aria-live="polite"></span>
             </div>
             <div class="section-row">
-              <span class="section-hint">Drag the round handle of a plane to move it.</span>
+              <span id="section-handle-hint" class="section-hint" role="status">Drag a circle to move its plane. Move grip relocates only the circle.</span>
               <button id="section-clear" class="panel-secondary" type="button">Remove all</button>
             </div>
           </div>
@@ -431,7 +464,10 @@
               <select id="clash-a-storey" aria-label="Set A storey" title="Storey"></select>
             </div>
             <div class="clash-set"><span>Set B</span>
-              <select id="clash-b-model" aria-label="Set B model" title="Model"></select>
+              <details id="clash-b-model" class="clash-model-filter">
+                <summary aria-label="Set B models" title="Choose models included in Set B">All models</summary>
+                <div role="group" aria-label="Set B model choices"></div>
+              </details>
               <select id="clash-b-type" aria-label="Set B type" title="Type"></select>
               <select id="clash-b-storey" aria-label="Set B storey" title="Storey"></select>
             </div>
@@ -439,6 +475,8 @@
               <input id="clash-hard" type="checkbox" checked /> Hard clashes, tolerance <input id="clash-tolerance" type="number" min="0" max="1000" step="1" value="10" /> mm</label>
             <label class="compare-option" title="Elements that come closer to each other than this gap">
               <input id="clash-clearance-on" type="checkbox" /> Clearance below <input id="clash-clearance" type="number" min="0" max="10000" step="5" value="50" /> mm</label>
+            <label class="compare-option" title="Only test pairs from different source models; applies to hard clashes and clearance checks.">
+              <input id="clash-exclude-same-model" type="checkbox" /> Exclude elements of the same model</label>
             <div class="section-row">
               <button id="clash-run" class="panel-primary" type="button">Run</button>
               <button id="clash-bcf" class="panel-secondary" type="button" disabled title="One BCF topic per clash, with a viewpoint and a snapshot">Add to BCF</button>
@@ -446,6 +484,22 @@
             <div id="clash-status" class="section-hint" aria-live="polite">Pick two sets and run.</div>
             <ul id="clash-list"></ul>
           </div>
+          <section id="georeferencing-panel" role="region" aria-labelledby="geo-title" hidden></section>
+          <section id="rail-road-panel" role="region" aria-labelledby="rail-road-title" hidden>
+            <button id="rail-road-close" class="panel-close" type="button" aria-label="Close Rail/Road"></button>
+            <div class="rail-road-header">
+              <h2 id="rail-road-title">Rail/Road</h2>
+              <input id="rail-road-filter" type="search" placeholder="Filter axes..." aria-label="Filter axes" />
+              <details id="rail-road-elements" class="rail-type-filter"><summary>Element types</summary><div role="group" aria-label="Element types"></div></details>
+              <details id="rail-road-curves" class="rail-type-filter"><summary>Curve types</summary><div role="group" aria-label="Curve types"></div></details>
+              <button id="rail-road-clear" class="panel-secondary" type="button" disabled>Clear curtain</button>
+            </div>
+            <div class="rail-road-table"><table aria-label="IFC axes">
+              <thead><tr><th>Axis</th><th>Model</th><th>Element type</th><th>Curve types</th><th>IFC ID</th><th>Length (m)</th></tr></thead>
+              <tbody id="rail-road-rows"></tbody>
+            </table></div>
+            <p id="rail-road-status" role="status">Load an IFC model to list its axes.</p>
+          </section>
           <div id="heat-panel" role="region" aria-labelledby="heat-title" hidden>
             <button id="heat-close" class="panel-close" type="button" aria-label="Stop and close the heat flow simulation"></button>
             <div id="heat-side">
@@ -471,9 +525,16 @@
           <div id="outer-shape-panel" role="region" aria-labelledby="outer-shape-title" hidden>
             <button id="outer-shape-close" class="panel-close" type="button" aria-label="Close the outer shape test"></button>
             <h2 id="outer-shape-title">Outer shape</h2>
+            <div class="outer-shape-layout">
+            <div class="outer-shape-controls">
             <div class="outer-shape-inputs">
-              <select id="outer-shape-model" aria-label="Model" title="Model to run on. Other models neither occlude it nor change."></select>
-                <select id="outer-shape-backend" aria-label="Method" title="GPU fast is sampled. CPU hybrid adds ray checks. Both support shape simplification. All materials occlude, including glass.">
+              <details id="outer-shape-model" class="outer-shape-model-filter" title="Checked models receive results. All loaded models contribute to visibility, including unchecked and hidden models.">
+                <summary>0 models selected</summary>
+                <div id="outer-shape-model-choices" role="group" aria-label="Models to compute"></div>
+              </details>
+                <label for="outer-shape-backend">Hidden element removal:</label>
+                <select id="outer-shape-backend" aria-label="Hidden element removal" title="None retains hidden geometry. GPU fast is sampled. CPU hybrid adds ray checks. All materials occlude, including glass.">
+                  <option value="none">None</option>
                   <option value="gpu-raster" selected>GPU fast (sampled)</option>
                   <option value="hybrid">CPU hybrid</option>
                 </select>
@@ -483,23 +544,51 @@
                 <option value="3" selected>Fine: 168 views, 2048 px</option>
               </select>
               <button id="outer-shape-run" class="panel-primary" type="button">Run</button>
+              <button id="outer-shape-keep" class="panel-primary" type="button" title="Keep all computed results in their models and write the reduced shapes into their IFC files for Export." disabled>Keep results</button>
             </div>
             <div class="outer-shape-options">
               <label class="compare-option" title="Keep every triangle of a mesh instance if any triangle is visible from outside. Fully hidden instances still go. Applies after Simplify shapes."><input id="outer-shape-whole-meshes" type="checkbox" checked /> Keep whole meshes</label>
               <label class="compare-option" title="Simplify small dense outdoor objects and thin panels. Close small holes and louvre gaps before visibility; large openings stay. Review the preview before Keep."><input id="outer-shape-simplify" type="checkbox" /> Simplify shapes</label>
               <label title="Maximum projected hole or gap width to close in panels, in metres. Larger values remove more detail; not a minimum object area.">Detail size <input id="outer-shape-detail" type="number" min="0.01" step="0.01" value="0.20" style="width: 5em" aria-label="Detail size in metres" /> m</label>
-              <label class="compare-option" title="Keep result draws the model as one mesh per colour: far fewer draw calls, but its elements can no longer be clicked. The IFC export keeps every element."><input id="outer-shape-merge" type="checkbox" checked /> Merge meshes by colour</label>
+              <label class="compare-option" title="Keep result draws the model as one mesh per colour: far fewer draw calls, but its elements can no longer be clicked. The IFC export keeps every element."><input id="outer-shape-merge" type="checkbox" /> Merge meshes by colour</label>
             </div>
             <div class="outer-shape-inputs">
-              <select id="outer-shape-view" aria-label="Show" title="Show" disabled>
+              <label for="outer-shape-view">Preview:</label>
+              <select id="outer-shape-view" title="Preview mode for all selected models together" disabled>
                 <option value="kept">Outer shape</option>
                 <option value="removed">Removed</option>
                 <option value="model">Model</option>
               </select>
-              <button id="outer-shape-keep" class="panel-primary" type="button" title="Replace the model in the view by this result and write the reduced shape into its IFC for Export. Other models can be loaded afterwards." disabled>Keep result</button>
+            </div>
+            <div class="outer-shape-inputs">
+              <label for="outer-shape-output">Output</label>
+              <select id="outer-shape-output">
+                <option value="glb">Single GLB</option>
+                <option value="ifc">Single IFC</option>
+                <option value="ifc-separate">Separate IFC files</option>
+                <option value="glb-separate">Separate GLB files</option>
+              </select>
+              <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. Separate files are packaged in one ZIP download." disabled>Export kept results</button>
             </div>
             <dl id="outer-shape-stats"></dl>
-            <div id="outer-shape-status" class="section-hint" aria-live="polite">Runs extractOuterShape on all elements of the chosen model (hidden ones too), spaces excluded.</div>
+            <details id="outer-shape-details" hidden><summary>Per-model statistics</summary><div id="outer-shape-model-stats"></div></details>
+            <div id="outer-shape-status" class="section-hint" aria-live="polite">Checks visibility against all loaded models (hidden elements too), spaces excluded. Only checked models receive results. Review the combined preview before keeping the results.</div>
+            </div>
+            <section class="outer-shape-cli" aria-labelledby="outer-shape-cli-title">
+              <h3 id="outer-shape-cli-title">Equivalent CLI input</h3>
+              <p id="outer-shape-cli-note" class="section-hint"></p>
+              <label for="outer-shape-cli-command">Command (PowerShell)</label>
+              <textarea id="outer-shape-cli-command" readonly rows="4" spellcheck="false"></textarea>
+              <button id="outer-shape-cli-copy" class="panel-secondary" type="button">Copy command</button>
+              <span id="outer-shape-cli-copy-status" class="section-hint" role="status"></span>
+              <details>
+                <summary>Configuration file (optional)</summary>
+                <p class="section-hint">Alternatively, save this JSON as outer-shape.json and replace the outer-shape flags with -c 'outer-shape.json'. Explicit CLI flags override matching JSON settings.</p>
+                <label for="outer-shape-cli-config">Configuration (outer-shape.json)</label>
+                <textarea id="outer-shape-cli-config" readonly rows="12" spellcheck="false"></textarea>
+              </details>
+            </section>
+            </div>
           </div>
           <div id="ids-panel" role="dialog" aria-labelledby="ids-title" hidden>
             <button id="ids-close" class="panel-close" type="button" aria-label="Close IDS validation"></button>
@@ -679,6 +768,13 @@
               <span id="load-hint"></span>
             </div>
             <button id="load-cancel" type="button" disabled>Cancel</button>
+          </div>
+          <div id="element-link-notice" role="status" aria-live="polite" hidden>
+            <span class="element-link-spinner" aria-hidden="true"></span>
+            <div>
+              <div id="element-link-notice-message"></div>
+              <div id="element-link-notice-detail" aria-live="off"></div>
+            </div>
           </div>
           <div id="nav-key-hint" role="status" aria-live="polite" hidden>You can use the cursor keys to rotate in 45° steps</div>
           <div id="error-banner" hidden></div>

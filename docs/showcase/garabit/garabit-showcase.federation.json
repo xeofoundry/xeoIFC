@@ -1,0 +1,58 @@
+{
+  "name": "Viaduc de Garabit",
+  "description": "Federated IFC4X3_ADD2 model of the Garabit viaduct (G. Eiffel, 1880-1884), generated with xeoIFC garabit-gen",
+  "crs": {
+    "horizontal": "EPSG:2154 (RGF93 v1 / Lambert-93)",
+    "vertical": "EPSG:5720 (NGF-IGN69)",
+    "conversion": "IfcMapConversionScaled"
+  },
+  "origin": {
+    "easting": 714000.0,
+    "northing": 6430700.0,
+    "height": 800.0,
+    "scale": 0.9992761862
+  },
+  "sources": [
+    "G. Eiffel, Memoire presente a l'appui du projet definitif du viaduc de Garabit (1889), plates 1-19: public domain",
+    "IGN LiDAR HD 2025, RGE ALTI, BD TOPO: Licence Ouverte 2.0 (attribution IGN)",
+    "SNCF Reseau, Viaduc de Garabit, AFGC 2024 (facts only)"
+  ],
+  "licence": "CC BY 4.0 (proposed; attribution chain in SOURCES.md)",
+  "files": [
+    {
+      "url": "garabit-00-railway.ifczip",
+      "load": true,
+      "description": "Alignment (IfcAlignment, clothoids, cant), track and 1500 V DC catenary",
+      "bytes": 231156,
+      "sha256": "30352278dac77fdafaf6c914329265255817d6dd66953a8c20ec79dd455fcabd"
+    },
+    {
+      "url": "garabit-10-masonry.ifczip",
+      "load": true,
+      "description": "Approach viaducts, abutments, pier bases, foundations (9,155 dressed stones)",
+      "bytes": 633427,
+      "sha256": "bf0384f65987fcae987c27d6d9cd0e1e927f1c42dac5b9ffa5d7333d7868a3e8"
+    },
+    {
+      "url": "garabit-20-arch.ifczip",
+      "load": true,
+      "description": "Crescent arch, bracing, hinges, palees, central-deck supports",
+      "bytes": 2566345,
+      "sha256": "6c7b25efc1564ae05ef0302e12cccf001dafaa86c5fd945056ace78880a8ce74"
+    },
+    {
+      "url": "garabit-21-piers.ifczip",
+      "load": true,
+      "description": "Iron piers 1-5 with crowns, feet and tie rods",
+      "bytes": 1619623,
+      "sha256": "a11e0c43631d383c1e9d477201356c5d8f2a48ed7e8f7d4a953dd5ff87cfa652"
+    },
+    {
+      "url": "garabit-22-deck.ifczip",
+      "load": true,
+      "description": "Three lattice box-girder decks, floor, bracing, walkway, bearings",
+      "bytes": 1499742,
+      "sha256": "28919d64567eb959e5816b9c1b8c2845a44c3fdc83b774ea4161ca720e3994cf"
+    }
+  ]
+}
