@@ -530,6 +530,7 @@ export class Viewer {
         wasm.viewer_orbit(this.__wbg_ptr, dx, dy);
     }
     /**
+     * `transparent_opaque` false: instances with a transparent source colour are tested like the others, but hide nothing.
      * @param {Uint32Array} handles
      * @param {number} quality
      * @param {Uint8Array} classes
@@ -538,10 +539,11 @@ export class Viewer {
      * @param {Uint32Array} offsets
      * @param {Uint32Array} targets
      * @param {boolean} keep_whole_meshes
+     * @param {boolean} transparent_opaque
      * @param {Function} on_progress
      * @returns {Promise<GpuOuterShape>}
      */
-    outer_shape_federation_gpu(handles, quality, classes, detail_size, placements, offsets, targets, keep_whole_meshes, on_progress) {
+    outer_shape_federation_gpu(handles, quality, classes, detail_size, placements, offsets, targets, keep_whole_meshes, transparent_opaque, on_progress) {
         const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray8ToWasm0(classes, wasm.__wbindgen_malloc);
@@ -552,7 +554,7 @@ export class Viewer {
         const len3 = WASM_VECTOR_LEN;
         const ptr4 = passArray32ToWasm0(targets, wasm.__wbindgen_malloc);
         const len4 = WASM_VECTOR_LEN;
-        const ret = wasm.viewer_outer_shape_federation_gpu(this.__wbg_ptr, ptr0, len0, quality, ptr1, len1, detail_size, ptr2, len2, ptr3, len3, ptr4, len4, keep_whole_meshes, on_progress);
+        const ret = wasm.viewer_outer_shape_federation_gpu(this.__wbg_ptr, ptr0, len0, quality, ptr1, len1, detail_size, ptr2, len2, ptr3, len3, ptr4, len4, keep_whole_meshes, transparent_opaque, on_progress);
         return ret;
     }
     /**
@@ -1242,7 +1244,7 @@ if (Symbol.dispose) Viewer.prototype[Symbol.dispose] = Viewer.prototype.free;
 /**
  * What the About panel shows for a licence key: `{"state":"licensed"|"evaluation"|"invalid"|"expired","expires":<unix>}`.
  * Loading and viewing never ask for a key; a save or export without a valid one carries the "Evaluation version" text
- * (`worker_set_licence_key`, `worker_export_run`). `now_unix`: seconds, from the page's clock.
+ * (`worker_set_licence_key`, `worker_export_run`, `worker_export_slpk`). `now_unix`: seconds, from the page's clock.
  * @param {string} key
  * @param {number} now_unix
  * @returns {string}
@@ -1418,6 +1420,36 @@ export function worker_export_run(licence_key, now_unix, bounds) {
     var ptr1 = isLikeNone(bounds) ? 0 : passArrayF64ToWasm0(bounds, wasm.__wbindgen_malloc);
     var len1 = WASM_VECTOR_LEN;
     const ret = wasm.worker_export_run(ptr0, len0, now_unix, ptr1, len1);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Run the export over the accumulated documents as one I3S scene layer package. `wkid`: the layer's EPSG code when no
+ * file declares one in IfcProjectedCRS (0 = none; it must equal a declared one), `names` the file name of each
+ * document (the SourceFile attribute), `layer_name` the layer's name. IfcSpace elements are left out; a non-empty
+ * selection of a file limits it to those elements. A refused CRS leaves the documents for another call; any other
+ * outcome uses them up. Without a valid `licence_key` the layer carries the evaluation
+ * marker feature and " - evaluation version" in its name. `on_progress(phase, done, total)`. Returns
+ * `{ chunks: Uint8Array[], warnings: string[], log: string[], summary: string }`: the package in order, and the
+ * summary JSON of the converter's manifest ("i3s").
+ * @param {string} licence_key
+ * @param {number} now_unix_ms
+ * @param {number} wkid
+ * @param {Array<any>} names
+ * @param {string} layer_name
+ * @param {number} circle_segments
+ * @param {Function} on_progress
+ * @returns {any}
+ */
+export function worker_export_slpk(licence_key, now_unix_ms, wkid, names, layer_name, circle_segments, on_progress) {
+    const ptr0 = passStringToWasm0(licence_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(layer_name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_export_slpk(ptr0, len0, now_unix_ms, wkid, names, ptr1, len1, circle_segments, on_progress);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -1701,6 +1733,7 @@ export function worker_outer_shape_federation_gpu(positions, groups, colors, gro
 /**
  * Shared visibility across the federation. Offsets delimit each source model's elements; only target model indices
  * are simplified and retained. Placements hold one column-major matrix per model (geometry is already in viewer space).
+ * `transparent_opaque` false: groups with an alpha below 0.999 are tested like the others, but hide nothing.
  * @param {Float32Array} positions
  * @param {Uint32Array} groups
  * @param {Float32Array} colors
@@ -1714,11 +1747,12 @@ export function worker_outer_shape_federation_gpu(positions, groups, colors, gro
  * @param {number} simplify
  * @param {number} detail_size
  * @param {boolean} keep_whole_meshes
+ * @param {boolean} transparent_opaque
  * @param {boolean} merge
  * @param {Function} on_progress
  * @returns {any}
  */
-export function worker_outer_shape_federation_run(positions, groups, colors, group_element, element_classes, center, placements, offsets, targets, quality, simplify, detail_size, keep_whole_meshes, merge, on_progress) {
+export function worker_outer_shape_federation_run(positions, groups, colors, group_element, element_classes, center, placements, offsets, targets, quality, simplify, detail_size, keep_whole_meshes, transparent_opaque, merge, on_progress) {
     const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
     const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
@@ -1737,7 +1771,7 @@ export function worker_outer_shape_federation_run(positions, groups, colors, gro
     const len7 = WASM_VECTOR_LEN;
     const ptr8 = passArray32ToWasm0(targets, wasm.__wbindgen_malloc);
     const len8 = WASM_VECTOR_LEN;
-    const ret = wasm.worker_outer_shape_federation_run(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, quality, simplify, detail_size, keep_whole_meshes, merge, on_progress);
+    const ret = wasm.worker_outer_shape_federation_run(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, quality, simplify, detail_size, keep_whole_meshes, transparent_opaque, merge, on_progress);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -2118,6 +2152,14 @@ function __wbg_get_imports() {
             const ret = arg0 === undefined;
             return ret;
         },
+        __wbg___wbindgen_string_get_b0ca35b86a603356: function(arg0, arg1) {
+            const obj = arg1;
+            const ret = typeof(obj) === 'string' ? obj : undefined;
+            var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            var len1 = WASM_VECTOR_LEN;
+            getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
+            getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+        },
         __wbg___wbindgen_throw_344f42d3211c4765: function(arg0, arg1) {
             throw new Error(getStringFromWasm0(arg0, arg1));
         },
@@ -2277,6 +2319,10 @@ function __wbg_get_imports() {
         __wbg_getPreferredCanvasFormat_1b8495aeb1d11ab1: function(arg0) {
             const ret = arg0.getPreferredCanvasFormat();
             return (__wbindgen_enum_GpuTextureFormat.indexOf(ret) + 1 || 96) - 1;
+        },
+        __wbg_get_507a50627bffa49b: function(arg0, arg1) {
+            const ret = arg0[arg1 >>> 0];
+            return ret;
         },
         __wbg_get_b2053e9bfdf3ca8e: function(arg0, arg1) {
             const ret = arg0[arg1 >>> 0];
@@ -3384,17 +3430,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 337, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 417, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 376, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 456, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 337, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 417, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },
