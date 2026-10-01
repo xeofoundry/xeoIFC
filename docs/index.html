@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-kQKyCetQ.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-YYuim3ZT.js">
+    <script type="module" crossorigin src="./assets/main-rpTflU3y.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-gzzuyYXC.js">
     <link rel="stylesheet" crossorigin href="./assets/main-CX-nNJvF.css">
   </head>
   <body>
@@ -63,10 +63,12 @@
           <div id="export-settings-panel" role="dialog" aria-labelledby="export-settings-title" hidden>
             <button id="export-settings-close" class="panel-close" type="button" aria-label="Close export settings"></button>
             <h2 id="export-settings-title">Export settings</h2>
-            <label><span>Format</span><select id="export-format"><option value="ifc">IFC (.ifc)</option></select></label>
+            <label><span>Format</span><select id="export-format"><option value="ifc">IFC (.ifc)</option><option value="glb">glTF binary (.glb)</option><option value="slpk">I3S scene layer (.slpk)</option></select></label>
             <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
             <label id="export-separate-row" title="Edited models are not merged into one file, but written to separate IFC files instead."><span>Keep IFC files separate</span><input id="export-separate" type="checkbox" /></label>
             <p id="export-separate-hint" hidden>Separate files use the original model names, with numbered suffixes for duplicates.</p>
+            <label id="export-epsg-row" hidden><span>EPSG code</span><input id="export-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" /></label>
+            <p id="export-epsg-hint" hidden>Leave blank to use the projected CRS declared by the IFC files. Enter its EPSG code if none is declared. All models must use the same CRS; no reprojection is performed.</p>
           </div>
 
           <div id="viewport-tools" aria-label="Viewer tools">
@@ -533,7 +535,7 @@
                 <div id="outer-shape-model-choices" role="group" aria-label="Models to compute"></div>
               </details>
                 <label for="outer-shape-backend">Hidden element removal:</label>
-                <select id="outer-shape-backend" aria-label="Hidden element removal" title="None retains hidden geometry. GPU fast is sampled. CPU hybrid adds ray checks. All materials occlude, including glass.">
+                <select id="outer-shape-backend" aria-label="Hidden element removal" title="None retains hidden geometry. GPU fast is sampled. CPU hybrid adds ray checks.">
                   <option value="none">None</option>
                   <option value="gpu-raster" selected>GPU fast (sampled)</option>
                   <option value="hybrid">CPU hybrid</option>
@@ -548,6 +550,7 @@
             </div>
             <div class="outer-shape-options">
               <label class="compare-option" title="Keep every triangle of a mesh instance if any triangle is visible from outside. Fully hidden instances still go. Applies after Simplify shapes."><input id="outer-shape-whole-meshes" type="checkbox" checked /> Keep whole meshes</label>
+              <label class="compare-option" title="On: every material occludes, including glass. Off: transparent objects hide nothing, so what is seen through them is kept; a transparent object is itself kept only when visible."><input id="outer-shape-transparent-opaque" type="checkbox" checked /> Treat transparent objects as opaque</label>
               <label class="compare-option" title="Simplify small dense outdoor objects and thin panels. Close small holes and louvre gaps before visibility; large openings stay. Review the preview before Keep."><input id="outer-shape-simplify" type="checkbox" /> Simplify shapes</label>
               <label title="Maximum projected hole or gap width to close in panels, in metres. Larger values remove more detail; not a minimum object area.">Detail size <input id="outer-shape-detail" type="number" min="0.01" step="0.01" value="0.20" style="width: 5em" aria-label="Detail size in metres" /> m</label>
               <label class="compare-option" title="Keep result draws the model as one mesh per colour: far fewer draw calls, but its elements can no longer be clicked. The IFC export keeps every element."><input id="outer-shape-merge" type="checkbox" /> Merge meshes by colour</label>
@@ -559,16 +562,19 @@
                 <option value="removed">Removed</option>
                 <option value="model">Model</option>
               </select>
+              <button id="outer-shape-defaults" class="panel-secondary" type="button" title="Set the removal method, quality, options, output and EPSG code back to their defaults. The model selection stays.">All settings to default</button>
             </div>
             <div class="outer-shape-inputs">
               <label for="outer-shape-output">Output</label>
               <select id="outer-shape-output">
-                <option value="glb">Single GLB</option>
-                <option value="ifc">Single IFC</option>
                 <option value="ifc-separate">Separate IFC files</option>
+                <option value="ifc">Single IFC</option>
+                <option value="glb">Single GLB</option>
                 <option value="glb-separate">Separate GLB files</option>
+                <option value="slpk">I3S scene layer (.slpk)</option>
               </select>
-              <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. Separate files are packaged in one ZIP download." disabled>Export kept results</button>
+              <label id="outer-shape-epsg-row" title="EPSG code of the projected CRS of the I3S layer. Leave empty when the IFC files declare it in IfcProjectedCRS; a declared code must be the same." hidden>EPSG <input id="outer-shape-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the I3S layer" /></label>
+              <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. Separate files are packaged in one ZIP download; an I3S scene layer package holds all models, for ArcGIS." disabled>Export kept results</button>
             </div>
             <dl id="outer-shape-stats"></dl>
             <details id="outer-shape-details" hidden><summary>Per-model statistics</summary><div id="outer-shape-model-stats"></div></details>
@@ -582,8 +588,8 @@
               <button id="outer-shape-cli-copy" class="panel-secondary" type="button">Copy command</button>
               <span id="outer-shape-cli-copy-status" class="section-hint" role="status"></span>
               <details>
-                <summary>Configuration file (optional)</summary>
-                <p class="section-hint">Alternatively, save this JSON as outer-shape.json and replace the outer-shape flags with -c 'outer-shape.json'. Explicit CLI flags override matching JSON settings.</p>
+                <summary>Configuration file</summary>
+                <p class="section-hint">Optional, except for the EPSG code of an I3S layer: save this JSON as outer-shape.json and pass -c 'outer-shape.json'; it can replace the outer-shape flags. Explicit CLI flags override matching JSON settings.</p>
                 <label for="outer-shape-cli-config">Configuration (outer-shape.json)</label>
                 <textarea id="outer-shape-cli-config" readonly rows="12" spellcheck="false"></textarea>
               </details>
