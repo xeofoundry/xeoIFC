@@ -1,8 +1,8 @@
-<!-- Generated file: edit the source in the dev repository. sha256:ac90c7b75d2d70af -->
+<!-- Generated file: edit the source in the dev repository. sha256:fb4ab51a3dd419d1 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
-writes glTF 2.0 output (`.glb`, `.gltf`), xeokit `.xkt` or a self-contained `.html` viewer, plus metadata (xeokit-style JSON or a
+writes glTF 2.0 output (`.glb`, `.gltf`), xeokit `.xkt`, I3S `.slpk` or a self-contained `.html` viewer, plus metadata (xeokit-style JSON or a
 metadata IFC) and a manifest JSON, with cxconverter-compatible configuration and output conventions.
 
 It is one host of the xeoIFC toolkit; see the [repository overview](../README.md) for the WebAssembly library, the xeokit loader and the
@@ -31,6 +31,8 @@ https://github.com/xeokit/xeokit-convert
 
 - Mesh deduplication and element sorting to improve output size.
 
+- [Outer-shape extraction](#outer-shape-extraction): remove hidden geometry from a model or a federation of models.
+
 - Metadata export for property sets, element quantities, types, units, and related IFC data.
 
 - Extraction of group and zone associations from the IFC model into the metadata JSON file.
@@ -56,9 +58,10 @@ On Linux the call is the same, without `.exe`.
 Options:
 
 ```text
--i, --input-path      input .ifc or .ifczip path (required)
--o, --output-path     output .glb, .gltf, .xkt or .html path (required)
--m, --metadata-path   metadata output path: .json, or .ifc / .ifczip for a metadata IFC; no metadata is written when omitted
+-i, --input-path      input .ifc/.ifczip file or directory; repeat for several inputs
+-o, --output-path     output .glb, .gltf, .xkt, .slpk or .html path; outer-shape extraction also supports .ifc/.ifczip
+-m, --metadata-path   metadata output path: .json, or .ifc / .ifczip for a metadata IFC; no separate metadata file when omitted
+--extract-outer-shape extract outer geometry; without -o, write out/{name}.outer.ifc for each input
 -c                    configuration JSON path, see configuration.md
 --license-key <key>   license key (overrides the XEO_IFC_LICENSE_KEY environment variable)
 --accept-terms        accept the xeoIFC Testing License and run in evaluation mode without the y/N prompt
@@ -68,6 +71,7 @@ Options:
 
 Input files can be zipped (`.ifczip`), which saves significant disk space. With a license key or `--accept-terms` the converter never
 asks for input, so it can run unattended in scripts and services. The exit code is 0 on success and 1 on any error.
+The output path is required unless outer-shape extraction is enabled.
 
 More documentation:
 
@@ -81,9 +85,98 @@ More documentation:
 | `.glb` | Binary glTF 2.0 in one file. Recommended: smaller and faster to read than `.gltf`. |
 | `.gltf` | The same content as JSON text, plus a `.bin` file with the binary buffers. |
 | `.xkt` | xeokit's native format, written directly (no separate xeokit-convert step). The metadata is embedded. |
+| `.slpk` | I3S 3D Object scene layer package for ArcGIS, with IFC element attributes and property sets embedded. Requires a projected coordinate system in metres. |
 | `.html` | The complete model in one self-contained HTML document with a 3D viewer and a tree view of the project structure. It can be shared and opened in a web browser without a web server and without installing anything. |
+| `.ifc`, `.ifczip` | With outer-shape extraction: the source IFC with reduced geometry, not a metadata-only IFC. See below. |
 
 Output paths are used exactly as given; spaces in file names are kept.
+
+## Outer-shape extraction
+
+`--extract-outer-shape` (alias `--extractOuterShape`) removes geometry hidden from outside the model. It is useful for
+lighter coordination and visualization models without manually selecting individual IFC elements. By default, a mesh
+instance is kept whole if any of its triangles is visible; fully hidden instances can be removed.
+
+Use a converter build whose `--help` lists `--extract-outer-shape`; older downloads may not include these options.
+
+### Single model and federated inputs
+
+Create a reduced GLB:
+
+```powershell
+.\xeoifc.exe -i myModel.ifc -o myModel.outer.glb --extract-outer-shape --accept-terms
+```
+
+Omit `-o` to write `out/myModel.outer.ifc` instead:
+
+```powershell
+.\xeoifc.exe -i myModel.ifc --extract-outer-shape --accept-terms
+```
+
+IFC output keeps the elements, GUIDs, properties, spatial structure and georeferencing. Elements with no retained geometry
+lose their body; partially retained bodies are rewritten from the kept triangles. With the default whole-mesh setting,
+unchanged bodies retain their authored geometry. This is different from `-m model.meta.ifc`, which removes all geometry.
+
+For a federation, repeat `-i` or supply a directory. A directory includes its `.ifc` and `.ifczip` files, not subfolders.
+Visibility is computed jointly, so elements in one input can hide elements in another. Inputs are placed using their
+`IfcMapConversion`; models must be spatially aligned, and different coordinate systems are not reprojected automatically.
+Without `-o`, each input gets its own `out/{name}.outer.ifc`. An explicit multi-input IFC output must use a `{name}` pattern,
+for example `-o 'out/{name}.outer.ifc'`.
+
+Create one SLPK from a folder of models, allowing visibility through transparent objects:
+
+```powershell
+.\xeoifc.exe -i .\models -o out\outer-shape.slpk --extract-outer-shape `
+  --no-outer-shape-transparent-opaque --outer-shape-refine-passes 512 `
+  --outer-shape-unresolved-policy keep --accept-terms
+```
+
+For SLPK, the projected EPSG code comes from the inputs' `IfcProjectedCRS`. If none declares it, supply
+`inputParameters.i3sWkid` in a configuration file passed with `-c`. Choose the code matching the model coordinates;
+setting it does not transform them. SLPK keeps projected coordinates with Z up, rather than the glTF root rotation.
+
+### Visibility settings
+
+| Option | Default | Effect |
+|---|---|---|
+| `--outer-shape-strategy` | `gpu-raster` | GPU visibility sampling with adaptive close-ups and bounded ray recovery. Alternatives: CPU `raster` or `hybrid` (raster plus ray checks). If the GPU backend is unavailable, the CLI warns and falls back to CPU raster. |
+| `--outer-shape-quality` | `fine` for GPU; `standard` for CPU | `fast`, `standard`, `fine` use 32, 70, 168 total views and 512, 1024, 2048 pixels per edge respectively. |
+| `--outer-shape-view-directions` | `0` | Override with 1–4096 sampled directions, plus six fixed axis views. Zero uses the quality preset. |
+| `--outer-shape-resolution` | `0` | Override the depth-buffer edge with 64–4096 pixels. Zero uses the quality preset; GPU close-ups use at least 512 pixels. |
+| `--outer-shape-refine-passes` | `512` | Maximum adaptive GPU close-up passes, from 0 to 4096. Zero disables close-ups and ray recovery. Each pass evaluates multiple views, not just one image. |
+| `--outer-shape-unresolved-policy` | `keep` | GPU-only: preserve unresolved meshes whole (`keep`) or remove them (`drop`). |
+| `--no-outer-shape-keep-whole-meshes` | Whole meshes kept | Retain only triangles found visible instead of promoting a partly visible mesh to its whole geometry. Unresolved meshes still follow the keep/drop policy. |
+| `--no-outer-shape-transparent-opaque` | Transparent objects occlude | With this flag, transparent objects hide nothing behind them. Their appearance is unchanged. |
+
+The close-up budget and unresolved policy apply to the GPU backend. CLI options override the corresponding values under
+`inputParameters` in a configuration file, for example:
+
+```json
+{
+  "inputParameters": {
+    "extractOuterShape": 1,
+    "extractOuterShapeRefinePasses": 512,
+    "extractOuterShapeUnresolvedPolicy": "keep",
+    "extractOuterShapeTransparentOpaque": false
+  }
+}
+```
+
+### Keep or remove unresolved geometry
+
+An unresolved mesh is **not proven hidden**. Small objects, thin surfaces and narrow openings can be missed by sampling.
+
+- **`keep`** is safer against missing elements, but can retain substantial amounts of actually hidden geometry.
+- **`drop`** produces a smaller result, but can remove visible elements that the visibility tests did not resolve.
+- With **`keep`**, lowering the close-up budget can make the file **larger**, not smaller: more uncertain meshes may survive
+  whole. Increasing the budget spends more time trying to resolve them; it does not guarantee complete visibility detection.
+
+The `extractOuterShape refine:` log line and the manifest's `generalMessages` report the actual passes, unresolved meshes
+and triangles kept or dropped, and ray-recovery counts. Use these alongside a visual comparison with the original model.
+
+Extraction is an approximate visibility reduction, **not a watertight exterior solid**. Check thin elements, transparent
+enclosures and recessed geometry before using the result. More views or a higher resolution improve sampling coverage,
+but do not guarantee that every externally visible element is retained.
 
 ## Metadata file types
 
