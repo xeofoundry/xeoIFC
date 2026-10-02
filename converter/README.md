@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:fb4ab51a3dd419d1 -->
+<!-- Generated file: edit the source in the dev repository. sha256:a996b5462f706f35 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
@@ -129,6 +129,14 @@ Create one SLPK from a folder of models, allowing visibility through transparent
 .\xeoifc.exe -i .\models -o out\outer-shape.slpk --extract-outer-shape `
   --no-outer-shape-transparent-opaque --outer-shape-refine-passes 512 `
   --outer-shape-unresolved-policy keep --accept-terms
+```
+
+To select specific files instead of a folder, repeat `-i`. IFC and IFCZIP inputs can be mixed; this creates one combined SLPK:
+
+```powershell
+.\xeoifc.exe -i electrical.ifczip -i wallsAndSlabs.ifc -i windows.ifc -i terrain.ifc `
+  -o out\outer-shape.slpk --extract-outer-shape `
+  --no-outer-shape-transparent-opaque --accept-terms
 ```
 
 For SLPK, the projected EPSG code comes from the inputs' `IfcProjectedCRS`. If none declares it, supply
