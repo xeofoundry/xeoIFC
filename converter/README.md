@@ -1,12 +1,10 @@
-<!-- Generated file: edit the source in the dev repository. sha256:e233ed5394530737 -->
+<!-- Generated file: edit the source in the dev repository. sha256:9673c422d739a320 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
 writes glTF 2.0 output (`.glb`, `.gltf`), xeokit `.xkt`, I3S `.slpk` or a self-contained `.html` viewer, plus metadata (xeokit-style JSON or a
 metadata IFC) and a manifest JSON, with cxconverter-compatible configuration and output conventions.
 
-It is one host of the xeoIFC toolkit; see the [repository overview](../README.md) for the WebAssembly library, the xeokit loader and the
-native library.
 
 ## Contents
 
@@ -22,14 +20,6 @@ native library.
 - [License key](#license-key)
 - [Document API subcommands](#document-api-subcommands)
 
-## Compatibility
-
-xeoIFC targets xeokit-compatible glTF/GLB and metadata output. It is designed as a successor to
-cxconverter, so existing conversion setups can keep using the familiar command-line flags and
-`cxconverter.json` configuration shape.
-
-For xeokit conversion tooling, see:
-https://github.com/xeokit/xeokit-convert
 
 ## Features
 
