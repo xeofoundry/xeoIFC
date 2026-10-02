@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:050fc8974e96ae22 -->
+<!-- Generated file: edit the source in the dev repository. sha256:1ca6fca722242705 -->
 # xeoIFC
 
 Public repository of xeoIFC, the xeoFoundry IFC toolkit.
@@ -12,27 +12,23 @@ It is delivered in four forms:
 1. **Command-line converter** — Windows AMD64, Linux ARM64, Linux AMD64; IFC to glTF/GLB with xeokit metadata, XKT for xeokit,
    and SLPK (I3S) for Esri ArcGIS. The successor to cxconverter.
 2. **Native library** - `xeoifc.dll` / `libxeoifc.so` with a C ABI, for desktop and server applications in C++, C#, Python, Java, ...
-3. **WebAssembly library** - wasm modules with a JavaScript/TypeScript API, for web applications; runs entirely in the browser.
+3. **WebAssembly library** - wasm modules with a JavaScript/TypeScript API, for web applications.
 4. **Loader for xeokit** - loads IFC directly into a xeokit viewer, without server side conversion steps.
 
 The two libraries are the same engine with the same function groups, one for the browser and one for native programs; each
 comes with an open-source demo viewer (xeoIFC Web, xeoIFC Qt). All four forms run on this engine, and the libraries and the
-command-line tool share one document API (JSON ops in, JSON results out) for query, edit, split and merge; see
-[Architecture](#architecture). The same API creates IFC models from scratch; see [Authoring](#authoring).
+command-line tool share one document API (JSON ops in, JSON results out) for query, edit, split and merge. The same API creates IFC models from scratch; see [Authoring](#authoring).
 
 
 ## 1. Command-line converter
 
-The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`), xeokit `.xkt`, Esri `.slpk` (I3S) or a self-contained `.html` viewer, plus
-xeokit-style metadata JSON. It keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
+The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`) with xeokit metadata, xeokit `.xkt`, Esri `.slpk` (I3S) or a self-contained `.html` viewer. It keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
 
 ```powershell
 .\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
 ```
 
-Features, options, output files and license key: [converter/README.md](converter/README.md) -
-[configuration file](converter/configuration.md) - [metadata JSON format](converter/metadata-format.md)
-
+Features, options, output files and license key: [converter/README.md](converter/README.md)
 
 
 

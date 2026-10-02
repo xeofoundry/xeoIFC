@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:24d756c74fc721df -->
+<!-- Generated file: edit the source in the dev repository. sha256:21dc76c294e436c8 -->
 # xeoIFC metadata JSON format
 
 With `-m <path>.json` the [command-line converter](README.md) writes all non-geometric information of the IFC model into one JSON
@@ -109,7 +109,7 @@ is exported as
 | Member | Meaning |
 |---|---|
 | `name`, `description` | From the IFC property; left out when empty. |
-| `ifcPropertyType` | IFC class of the property. Switch off with `exportIfcPropertyTypes`, see [configuration.md](configuration.md). |
+| `ifcPropertyType` | IFC class of the property. Switch off with `exportIfcPropertyTypes`, see [metadata options](README.md#metadata-options). |
 | `ifcValueType` | IFC type of the value. Switch off with `exportIfcValueTypes`. |
 | `value` | The value, as JSON number or string. |
 | `valueType` | Elementary type of `value`, derived from the IFC type definition (`TYPE IfcLengthMeasure = REAL;` gives `"number"`). One of `"number"`, `"string"`, `"boolean"`, `"logical"`, `"enumeration"`, `"array"`. |
