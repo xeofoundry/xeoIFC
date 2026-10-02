@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:1ca6fca722242705 -->
+<!-- Generated file: edit the source in the dev repository. sha256:de3e3a04b055e6ee -->
 # xeoIFC
 
 Public repository of xeoIFC, the xeoFoundry IFC toolkit.
@@ -15,9 +15,9 @@ It is delivered in four forms:
 3. **WebAssembly library** - wasm modules with a JavaScript/TypeScript API, for web applications.
 4. **Loader for xeokit** - loads IFC directly into a xeokit viewer, without server side conversion steps.
 
-The two libraries are the same engine with the same function groups, one for the browser and one for native programs; each
+The two libraries are the same engine with the same function groups, one for the browser and one for native programs. Each
 comes with an open-source demo viewer (xeoIFC Web, xeoIFC Qt). All four forms run on this engine, and the libraries and the
-command-line tool share one document API (JSON ops in, JSON results out) for query, edit, split and merge. The same API creates IFC models from scratch; see [Authoring](#authoring).
+command-line tool share one document API (JSON ops in, JSON results out) for create, query, edit, split and merge.
 
 
 ## 1. Command-line converter
