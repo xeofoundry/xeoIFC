@@ -1,5 +1,7 @@
-<!-- Generated file: edit the source in the dev repository. sha256:b5ade1238b7abdd9 -->
+<!-- Generated file: edit the source in the dev repository. sha256:72b9a45dda9a796d -->
 # One engine, two libraries and a command-line tool
+
+[Back to xeoIFC](../README.md#architecture)
 
 The xeoIFC crates form one Rust stack. It is built as the WebAssembly library (wasm modules with a JavaScript/TypeScript
 API, for the browser), the command-line converter and the native library (`xeoifc.dll` / `libxeoifc.so`, a C ABI for any
