@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-rpTflU3y.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-gzzuyYXC.js">
-    <link rel="stylesheet" crossorigin href="./assets/main-CX-nNJvF.css">
+    <script type="module" crossorigin src="./assets/main-BkTgSl_-.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-BeyDSa5T.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-Dhs7Be1L.css">
   </head>
   <body>
     <div id="open-menu" role="menu" aria-label="Open file" hidden>
       <button type="button" role="menuitem" data-load-mode="replace">Clear viewer and open file</button>
       <button type="button" role="menuitem" data-load-mode="append">Open file and append to scene</button>
+      <div class="open-menu-hint">Or drag&amp;drop files on the viewer</div>
     </div>
     <div id="app">
       <div id="main">
@@ -535,7 +536,7 @@
                 <div id="outer-shape-model-choices" role="group" aria-label="Models to compute"></div>
               </details>
                 <label for="outer-shape-backend">Hidden element removal:</label>
-                <select id="outer-shape-backend" aria-label="Hidden element removal" title="None retains hidden geometry. GPU fast is sampled. CPU hybrid adds ray checks.">
+                <select id="outer-shape-backend" aria-label="Hidden element removal" title="None retains hidden geometry. GPU fast uses sampled visibility with bounded ray rescue. CPU hybrid uses triangle-level ray checks.">
                   <option value="none">None</option>
                   <option value="gpu-raster" selected>GPU fast (sampled)</option>
                   <option value="hybrid">CPU hybrid</option>
@@ -549,6 +550,10 @@
               <button id="outer-shape-keep" class="panel-primary" type="button" title="Keep all computed results in their models and write the reduced shapes into their IFC files for Export." disabled>Keep results</button>
             </div>
             <div class="outer-shape-options">
+              <label title="extractOuterShapeViewDirections: 0 follows the quality preset. A positive value adds this many sampled directions to the 6 fixed axis views.">View directions <input id="outer-shape-view-directions" type="number" min="0" max="4096" step="1" value="0" style="width: 6em" aria-label="Sampled view directions (0 uses preset)" /> (0 = preset; +6 axis views)</label>
+              <label title="extractOuterShapeResolution: square depth-buffer edge in pixels. 0 follows the quality preset; otherwise 64 to 4096. GPU close-up passes use at least 512 pixels.">Resolution <input id="outer-shape-resolution" type="number" min="0" max="4096" step="1" value="0" style="width: 6em" aria-label="Visibility resolution in pixels (0 uses preset)" /> px (0 = preset)</label>
+              <label title="extractOuterShapeRefinePasses: maximum adaptive GPU close-up passes for ambiguous meshes. Default 512; 0 disables close-ups and ray rescue. Higher budgets take longer.">Close-up pass budget (GPU) <input id="outer-shape-refine-passes" type="number" min="0" max="4096" step="1" value="512" style="width: 6em" aria-label="GPU adaptive close-up pass budget" /></label>
+              <label title="extractOuterShapeUnresolvedPolicy: meshes whose visibility is still uncertain after close-up refinement. Keep avoids losing uncertain geometry, but can retain hidden geometry and increase output size.">Unresolved geometry (GPU) <select id="outer-shape-unresolved-policy" aria-label="Unresolved geometry policy"><option value="keep" selected>Keep (safer, larger output)</option><option value="drop">Drop (smaller, may lose elements)</option></select></label>
               <label class="compare-option" title="Keep every triangle of a mesh instance if any triangle is visible from outside. Fully hidden instances still go. Applies after Simplify shapes."><input id="outer-shape-whole-meshes" type="checkbox" checked /> Keep whole meshes</label>
               <label class="compare-option" title="On: every material occludes, including glass. Off: transparent objects hide nothing, so what is seen through them is kept; a transparent object is itself kept only when visible."><input id="outer-shape-transparent-opaque" type="checkbox" checked /> Treat transparent objects as opaque</label>
               <label class="compare-option" title="Simplify small dense outdoor objects and thin panels. Close small holes and louvre gaps before visibility; large openings stay. Review the preview before Keep."><input id="outer-shape-simplify" type="checkbox" /> Simplify shapes</label>

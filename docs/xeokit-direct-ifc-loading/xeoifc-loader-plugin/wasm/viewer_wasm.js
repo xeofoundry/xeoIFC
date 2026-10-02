@@ -541,9 +541,13 @@ export class Viewer {
      * @param {boolean} keep_whole_meshes
      * @param {boolean} transparent_opaque
      * @param {Function} on_progress
+     * @param {number | null} [view_directions]
+     * @param {number | null} [resolution]
+     * @param {number | null} [refine_passes]
+     * @param {boolean | null} [keep_unresolved]
      * @returns {Promise<GpuOuterShape>}
      */
-    outer_shape_federation_gpu(handles, quality, classes, detail_size, placements, offsets, targets, keep_whole_meshes, transparent_opaque, on_progress) {
+    outer_shape_federation_gpu(handles, quality, classes, detail_size, placements, offsets, targets, keep_whole_meshes, transparent_opaque, on_progress, view_directions, resolution, refine_passes, keep_unresolved) {
         const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         const ptr1 = passArray8ToWasm0(classes, wasm.__wbindgen_malloc);
@@ -554,7 +558,7 @@ export class Viewer {
         const len3 = WASM_VECTOR_LEN;
         const ptr4 = passArray32ToWasm0(targets, wasm.__wbindgen_malloc);
         const len4 = WASM_VECTOR_LEN;
-        const ret = wasm.viewer_outer_shape_federation_gpu(this.__wbg_ptr, ptr0, len0, quality, ptr1, len1, detail_size, ptr2, len2, ptr3, len3, ptr4, len4, keep_whole_meshes, transparent_opaque, on_progress);
+        const ret = wasm.viewer_outer_shape_federation_gpu(this.__wbg_ptr, ptr0, len0, quality, ptr1, len1, detail_size, ptr2, len2, ptr3, len3, ptr4, len4, keep_whole_meshes, transparent_opaque, on_progress, isLikeNone(view_directions) ? Number.MAX_SAFE_INTEGER : (view_directions) >> 0, isLikeNone(resolution) ? Number.MAX_SAFE_INTEGER : (resolution) >> 0, isLikeNone(refine_passes) ? Number.MAX_SAFE_INTEGER : (refine_passes) >>> 0, isLikeNone(keep_unresolved) ? 0xFFFFFF : keep_unresolved ? 1 : 0);
         return ret;
     }
     /**
@@ -1750,9 +1754,11 @@ export function worker_outer_shape_federation_gpu(positions, groups, colors, gro
  * @param {boolean} transparent_opaque
  * @param {boolean} merge
  * @param {Function} on_progress
+ * @param {number | null} [view_directions]
+ * @param {number | null} [resolution]
  * @returns {any}
  */
-export function worker_outer_shape_federation_run(positions, groups, colors, group_element, element_classes, center, placements, offsets, targets, quality, simplify, detail_size, keep_whole_meshes, transparent_opaque, merge, on_progress) {
+export function worker_outer_shape_federation_run(positions, groups, colors, group_element, element_classes, center, placements, offsets, targets, quality, simplify, detail_size, keep_whole_meshes, transparent_opaque, merge, on_progress, view_directions, resolution) {
     const ptr0 = passArrayF32ToWasm0(positions, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
     const ptr1 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
@@ -1771,7 +1777,7 @@ export function worker_outer_shape_federation_run(positions, groups, colors, gro
     const len7 = WASM_VECTOR_LEN;
     const ptr8 = passArray32ToWasm0(targets, wasm.__wbindgen_malloc);
     const len8 = WASM_VECTOR_LEN;
-    const ret = wasm.worker_outer_shape_federation_run(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, quality, simplify, detail_size, keep_whole_meshes, transparent_opaque, merge, on_progress);
+    const ret = wasm.worker_outer_shape_federation_run(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, quality, simplify, detail_size, keep_whole_meshes, transparent_opaque, merge, on_progress, isLikeNone(view_directions) ? Number.MAX_SAFE_INTEGER : (view_directions) >> 0, isLikeNone(resolution) ? Number.MAX_SAFE_INTEGER : (resolution) >> 0);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -3430,17 +3436,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 417, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 419, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 456, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 458, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 417, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 419, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },
