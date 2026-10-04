@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:9673c422d739a320 -->
+<!-- Generated file: edit the source in the dev repository. sha256:41030c54919cdff3 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
@@ -8,7 +8,6 @@ metadata IFC) and a manifest JSON, with cxconverter-compatible configuration and
 
 ## Contents
 
-- [Compatibility](#compatibility)
 - [Features](#features)
 - [Run the application](#run-the-application)
 - [Output file types](#output-file-types)
@@ -111,10 +110,10 @@ Create a reduced GLB:
 .\xeoifc.exe -i myModel.ifc -o myModel.outer.glb --extract-outer-shape --accept-terms
 ```
 
-Omit `-o` to write `out/myModel.outer.ifc` instead:
+Write outer shape back into a new IFC file:
 
 ```powershell
-.\xeoifc.exe -i myModel.ifc --extract-outer-shape --accept-terms
+.\xeoifc.exe -i myModel.ifc -o myModel.outer.ifc --extract-outer-shape --accept-terms
 ```
 
 IFC output keeps the elements, GUIDs, properties, spatial structure and georeferencing. Elements with no retained geometry
@@ -122,8 +121,7 @@ lose their body; partially retained bodies are rewritten from the kept triangles
 unchanged bodies retain their authored geometry. This is different from `-m model.meta.ifc`, which removes all geometry.
 
 For a federation, repeat `-i` or supply a directory. A directory includes its `.ifc` and `.ifczip` files, not subfolders.
-Visibility is computed jointly, so elements in one input can hide elements in another. Inputs are placed using their
-`IfcMapConversion`; models must be spatially aligned, and different coordinate systems are not reprojected automatically.
+Visibility is computed jointly, so elements in one input can hide elements in another.
 Without `-o`, each input gets its own `out/{name}.outer.ifc`. An explicit multi-input IFC output must use a `{name}` pattern,
 for example `-o 'out/{name}.outer.ifc'`.
 
@@ -132,7 +130,7 @@ Create one SLPK from a folder of models, allowing visibility through transparent
 ```powershell
 .\xeoifc.exe -i .\models -o out\outer-shape.slpk --extract-outer-shape `
   --no-outer-shape-transparent-opaque --outer-shape-refine-passes 512 `
-  --outer-shape-unresolved-policy keep --accept-terms
+  --outer-shape-unresolved-policy drop --accept-terms
 ```
 
 To select specific files instead of a folder, repeat `-i`. IFC and IFCZIP inputs can be mixed; this creates one combined SLPK:
@@ -156,7 +154,7 @@ setting it does not transform them. SLPK keeps projected coordinates with Z up, 
 | `--outer-shape-view-directions` | `0` | Override with 1–4096 sampled directions, plus six fixed axis views. Zero uses the quality preset. |
 | `--outer-shape-resolution` | `0` | Override the depth-buffer edge with 64–4096 pixels. Zero uses the quality preset; GPU close-ups use at least 512 pixels. |
 | `--outer-shape-refine-passes` | `512` | Maximum adaptive GPU close-up passes, from 0 to 4096. Zero disables close-ups and ray recovery. Each pass evaluates multiple views, not just one image. |
-| `--outer-shape-unresolved-policy` | `keep` | GPU-only: preserve unresolved meshes whole (`keep`) or remove them (`drop`). |
+| `--outer-shape-unresolved-policy` | `drop` | GPU-only: remove undecided meshes by default (`drop`, labelled **Remove** in the viewer); preserve them whole only with explicit `keep`. |
 | `--no-outer-shape-keep-whole-meshes` | Whole meshes kept | Retain only triangles found visible instead of promoting a partly visible mesh to its whole geometry. Unresolved meshes still follow the keep/drop policy. |
 | `--no-outer-shape-transparent-opaque` | Transparent objects occlude | With this flag, transparent objects hide nothing behind them. Their appearance is unchanged. |
 
@@ -168,7 +166,7 @@ The close-up budget and unresolved policy apply to the GPU backend. CLI options 
   "inputParameters": {
     "extractOuterShape": 1,
     "extractOuterShapeRefinePasses": 512,
-    "extractOuterShapeUnresolvedPolicy": "keep",
+    "extractOuterShapeUnresolvedPolicy": "drop",
     "extractOuterShapeTransparentOpaque": false
   }
 }
@@ -176,10 +174,12 @@ The close-up budget and unresolved policy apply to the GPU backend. CLI options 
 
 ### Keep or remove unresolved geometry
 
+**Remove is the default** in the CLI, JSON configuration, shared engine and viewer, including when the close-up budget is exhausted or zero. The CLI/JSON value is `drop`; `keep` remains an explicit opt-in.
+
 An unresolved mesh is **not proven hidden**. Small objects, thin surfaces and narrow openings can be missed by sampling.
 
-- **`keep`** is safer against missing elements, but can retain substantial amounts of actually hidden geometry.
-- **`drop`** produces a smaller result, but can remove visible elements that the visibility tests did not resolve.
+- **`drop` (default; Remove)** produces a smaller result, but can remove visible elements that the visibility tests did not resolve.
+- **`keep` (opt-in)** is safer against missing elements, but can retain substantial amounts of actually hidden geometry.
 - With **`keep`**, lowering the close-up budget can make the file **larger**, not smaller: more uncertain meshes may survive
   whole. Increasing the budget spends more time trying to resolve them; it does not guarantee complete visibility detection.
 

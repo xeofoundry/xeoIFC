@@ -23,36 +23,57 @@
       "url": "garabit-00-railway.ifczip",
       "load": true,
       "description": "Alignment (IfcAlignment, clothoids, cant), track and 1500 V DC catenary",
-      "bytes": 231156,
-      "sha256": "30352278dac77fdafaf6c914329265255817d6dd66953a8c20ec79dd455fcabd"
+      "bytes": 255475,
+      "sha256": "062999362beb70dead4a6eb24f136a91b94efa9da143867068a07a024cad0999"
     },
     {
       "url": "garabit-10-masonry.ifczip",
       "load": true,
-      "description": "Approach viaducts, abutments, pier bases, foundations (9,155 dressed stones)",
-      "bytes": 633427,
-      "sha256": "bf0384f65987fcae987c27d6d9cd0e1e927f1c42dac5b9ffa5d7333d7868a3e8"
+      "description": "Approach viaducts, abutments, pier bases, foundations, dressed stones",
+      "bytes": 699462,
+      "sha256": "95101ca538c3eb27ba6abec0a47ed73f9d771b247488995a8d32b59972919041"
     },
     {
       "url": "garabit-20-arch.ifczip",
       "load": true,
       "description": "Crescent arch, bracing, hinges, palees, central-deck supports",
-      "bytes": 2566345,
-      "sha256": "6c7b25efc1564ae05ef0302e12cccf001dafaa86c5fd945056ace78880a8ce74"
+      "bytes": 2866187,
+      "sha256": "003b2f9b1cef96c4565b1c0cc6ea0e1f24d4943489bef01301c28c9f9985d8ac"
     },
     {
       "url": "garabit-21-piers.ifczip",
       "load": true,
       "description": "Iron piers 1-5 with crowns, feet and tie rods",
-      "bytes": 1619623,
-      "sha256": "a11e0c43631d383c1e9d477201356c5d8f2a48ed7e8f7d4a953dd5ff87cfa652"
+      "bytes": 2341867,
+      "sha256": "c971f6f50b0336a0c73da55034db4491ceb3acb2a4816a20a1381f7487f2b8e1"
     },
     {
       "url": "garabit-22-deck.ifczip",
       "load": true,
       "description": "Three lattice box-girder decks, floor, bracing, walkway, bearings",
-      "bytes": 1499742,
-      "sha256": "28919d64567eb959e5816b9c1b8c2845a44c3fdc83b774ea4161ca720e3994cf"
+      "bytes": 1756680,
+      "sha256": "58512d6599da737f9715afe2d7481f1b03e342df609ad007c97dbfe37d73081d"
+    },
+    {
+      "url": "garabit-40-rivets-piers.ifczip",
+      "load": true,
+      "description": "Rivets and riveted connections of the iron piers",
+      "bytes": 5286323,
+      "sha256": "dc26b5c085fafcaff5e7c971a3109e08d299b5705ea32701e55d09dcb87162ed"
+    },
+    {
+      "url": "garabit-41-rivets-arch.ifczip",
+      "load": true,
+      "description": "Rivets and riveted connections of the arch",
+      "bytes": 7255849,
+      "sha256": "27e1a9347ead4f81a4fc9001edab4cfa305148a78a790182b5840d1ea8c29777"
+    },
+    {
+      "url": "garabit-42-rivets-deck.ifczip",
+      "load": true,
+      "description": "Rivets and riveted connections of the decks",
+      "bytes": 7835908,
+      "sha256": "3c5b46798d50a36a975d2501842d02571a695ba324b4dbcba144058e00da7931"
     }
   ]
 }

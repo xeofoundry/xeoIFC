@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-BkTgSl_-.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-BeyDSa5T.js">
-    <link rel="stylesheet" crossorigin href="./assets/main-Dhs7Be1L.css">
+    <script type="module" crossorigin src="./assets/main-DkvujG0D.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-DRqG6fpp.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-BZ_-aXkB.css">
   </head>
   <body>
     <div id="open-menu" role="menu" aria-label="Open file" hidden>
@@ -144,25 +144,9 @@
                 <path d="M2.5 7.5l3 3.5 5.5-7.5M14.5 3.5l7 7M21.5 3.5l-7 7" />
               </svg>
             </button>
-            <button id="compare-button" class="tool-icon" type="button" title="Compare two revisions" aria-label="Compare two revisions" aria-haspopup="dialog" aria-expanded="false" aria-controls="compare-panel">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3.5 7.5l6-3v12l-6 3zM20.5 7.5l-6-3v12l6 3zM12 2.5v19" />
-              </svg>
-            </button>
             <button id="bcf-button" class="tool-icon" type="button" title="BCF issues" aria-label="BCF issues" aria-haspopup="dialog" aria-expanded="false" aria-controls="bcf-panel">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3.5 4.5h17v12h-9l-4.5 4v-4h-3.5zM12 7.5v4.5M12 14v.2" />
-              </svg>
-            </button>
-            <button id="rail-road-button" class="tool-icon" type="button" title="Rail/Road: IFC axes" aria-label="Rail/Road" aria-expanded="false" aria-controls="rail-road-panel">
-              <svg viewBox="0 0 448 398" aria-hidden="true" fill-rule="evenodd">
-                <path d="M154 27 L165 27 L171 38 L191 38 L183 27 L194 27 C251 93 237 172 236 258 C235 298 238 338 247 373 Q247 377 242 377 L213 377 Q209 377 209 373 L206 345 L79 345 L71 373 Q70 377 66 377 L35 377 Q30 377 32 371 C67 281 125 202 153 129 C171 84 166 53 154 27 Z M172 46 L196 46 L201 54 L174 54 Z M176 62 L204 62 L208 72 L177 72 Z M178 81 L211 81 L215 92 L177 92 Z M174 104 L216 104 L219 120 L170 120 Z M165 134 L220 134 L221 154 L158 154 Z M150 171 L221 171 L218 197 L136 197 Z M128 216 L216 216 L211 251 L113 251 Z M102 273 L209 273 L206 319 L85 319 Z" />
-                <path d="M222 27 L234 27 C298 78 332 157 356 236 C374 293 395 335 422 371 Q424 377 419 377 L391 377 Q387 377 386 373 C359 310 339 245 321 181 C305 121 270 65 222 27 Z M218 38 L225 38 L230 46 L223 46 Z M229 54 L237 54 L244 65 L235 65 Z M243 76 L250 76 Q252 76 253 79 L258 89 Q258 91 255 91 L247 91 L241 79 Q240 76 243 76 Z M255 104 L263 104 Q265 104 266 107 L271 120 Q272 123 269 123 L259 123 L253 108 Q252 104 255 104 Z M268 137 L277 137 Q280 137 281 140 L286 157 Q287 161 283 161 L272 161 Q270 161 270 158 L264 141 Q263 137 268 137 Z M278 180 L289 180 Q292 180 293 184 L297 207 Q298 212 293 212 L279 212 Q276 212 276 208 L272 184 Q271 180 278 180 Z M284 236 L296 236 Q300 236 301 241 L307 271 Q308 276 303 276 L287 276 Q283 276 283 272 L279 241 Q278 236 284 236 Z M292 304 L309 304 Q314 304 315 310 L327 364 Q329 370 322 370 L301 370 Q296 370 295 365 L286 310 Q285 304 292 304 Z" />
-              </svg>
-            </button>
-            <button id="georeferencing-button" class="tool-icon" type="button" title="Georeferencing: coordinate metadata and reference-point checks" aria-label="Georeferencing" aria-expanded="false" aria-controls="georeferencing-panel">
-              <svg viewBox="0 0 165 197" aria-hidden="true" fill="currentColor" fill-rule="evenodd">
-                <path d="M81.5 25 C53.1 25 30 48.1 30 76.5 C30 88.8 34.7 99.2 41.1 110.1 C55 134 64.3 155.9 72.5 178.8 C73.9 182.8 77.1 185 81.2 185 C85.1 185 88.4 182.7 89.8 178.8 C98 155.9 107.2 134 121.5 110.1 C128.1 99.1 133 88.7 133 76.5 C133 48.1 109.9 25 81.5 25 Z M113.5 76 A32 32 0 1 0 49.5 76 A32 32 0 1 0 113.5 76 Z" />
               </svg>
             </button>
             <div id="lab-group">
@@ -173,8 +157,24 @@
                 </svg>
               </button>
               <div id="lab-flyout" aria-label="Lab tools">
+                <button id="compare-button" class="tool-icon" type="button" title="Compare two revisions" aria-label="Compare two revisions" aria-haspopup="dialog" aria-expanded="false" aria-controls="compare-panel">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3.5 7.5l6-3v12l-6 3zM20.5 7.5l-6-3v12l6 3zM12 2.5v19" />
+                  </svg>
+                </button>
                 <button id="model-overview-button" class="tool-icon" type="button" title="Model overview: oriented 3D bounds linked to the file rows; camera unchanged. Small boxes stay at least 5 pixels wide." aria-label="Model overview" aria-pressed="false">
                   <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="square" stroke-linejoin="round"><path d="M6.5 2.5h-4v4M17.5 2.5h4v4M2.5 17.5v4h4M17.5 21.5h4v-4" /><path stroke-width="1" d="M15 5.2l4.5 2V11L15 13l-4.5-2V7.2zM10.5 7.2L15 9.3l4.5-2.1M15 9.3V13M7.2 12.7l3 1.7v3.4l-3 1.7-3-1.7v-3.4zM4.2 14.4l3 1.7 3-1.7M7.2 16.1v3.4" /></svg>
+                </button>
+                <button id="rail-road-button" class="tool-icon" type="button" title="Rail/Road: IFC axes" aria-label="Rail/Road" aria-expanded="false" aria-controls="rail-road-panel">
+                  <svg viewBox="0 0 448 398" aria-hidden="true" fill-rule="evenodd">
+                    <path d="M154 27 L165 27 L171 38 L191 38 L183 27 L194 27 C251 93 237 172 236 258 C235 298 238 338 247 373 Q247 377 242 377 L213 377 Q209 377 209 373 L206 345 L79 345 L71 373 Q70 377 66 377 L35 377 Q30 377 32 371 C67 281 125 202 153 129 C171 84 166 53 154 27 Z M172 46 L196 46 L201 54 L174 54 Z M176 62 L204 62 L208 72 L177 72 Z M178 81 L211 81 L215 92 L177 92 Z M174 104 L216 104 L219 120 L170 120 Z M165 134 L220 134 L221 154 L158 154 Z M150 171 L221 171 L218 197 L136 197 Z M128 216 L216 216 L211 251 L113 251 Z M102 273 L209 273 L206 319 L85 319 Z" />
+                    <path d="M222 27 L234 27 C298 78 332 157 356 236 C374 293 395 335 422 371 Q424 377 419 377 L391 377 Q387 377 386 373 C359 310 339 245 321 181 C305 121 270 65 222 27 Z M218 38 L225 38 L230 46 L223 46 Z M229 54 L237 54 L244 65 L235 65 Z M243 76 L250 76 Q252 76 253 79 L258 89 Q258 91 255 91 L247 91 L241 79 Q240 76 243 76 Z M255 104 L263 104 Q265 104 266 107 L271 120 Q272 123 269 123 L259 123 L253 108 Q252 104 255 104 Z M268 137 L277 137 Q280 137 281 140 L286 157 Q287 161 283 161 L272 161 Q270 161 270 158 L264 141 Q263 137 268 137 Z M278 180 L289 180 Q292 180 293 184 L297 207 Q298 212 293 212 L279 212 Q276 212 276 208 L272 184 Q271 180 278 180 Z M284 236 L296 236 Q300 236 301 241 L307 271 Q308 276 303 276 L287 276 Q283 276 283 272 L279 241 Q278 236 284 236 Z M292 304 L309 304 Q314 304 315 310 L327 364 Q329 370 322 370 L301 370 Q296 370 295 365 L286 310 Q285 304 292 304 Z" />
+                  </svg>
+                </button>
+                <button id="georeferencing-button" class="tool-icon" type="button" title="Georeferencing: coordinate metadata and reference-point checks" aria-label="Georeferencing" aria-expanded="false" aria-controls="georeferencing-panel">
+                  <svg viewBox="0 0 165 197" aria-hidden="true" fill="currentColor" fill-rule="evenodd">
+                    <path d="M81.5 25 C53.1 25 30 48.1 30 76.5 C30 88.8 34.7 99.2 41.1 110.1 C55 134 64.3 155.9 72.5 178.8 C73.9 182.8 77.1 185 81.2 185 C85.1 185 88.4 182.7 89.8 178.8 C98 155.9 107.2 134 121.5 110.1 C128.1 99.1 133 88.7 133 76.5 C133 48.1 109.9 25 81.5 25 Z M113.5 76 A32 32 0 1 0 49.5 76 A32 32 0 1 0 113.5 76 Z" />
+                  </svg>
                 </button>
                 <button id="heat-button" class="tool-icon" type="button" title="Heat flow simulation: finds the heated volume, emits heat rays from a grid of points in it and lets the building elements collect the heat" aria-label="Heat flow simulation" aria-expanded="false" aria-controls="heat-panel">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -252,6 +252,10 @@
           <div id="settings-panel" role="dialog" aria-labelledby="settings-title" hidden>
             <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
             <h2 id="settings-title">Settings</h2>
+            <label title="CAD: left drag rotates, right drag pans. ESRI: left drag pans, right drag rotates. Middle or Shift drag pans; wheel zooms in both styles."><span>Navigation style</span><select id="setting-navigation-style">
+              <option value="cad">CAD</option>
+              <option value="esri">ESRI</option>
+            </select></label>
             <label><span>Orphaned elements</span><select id="setting-orphaned-elements" title="Orphaned elements are elements that are in the file, but not in the spatial structure of IfcProject">
               <option value="ignore">Ignore</option>
               <option value="ifc-project">Append under IfcProject</option>
@@ -292,6 +296,7 @@
               <option value="terrarium">AWS Terrain Tiles (world)</option>
               <option value="swisstopo">swisstopo swissALTI3D (CH, LI)</option>
               <option value="ign">IGN RGE ALTI (France)</option>
+              <option value="usgs">USGS 3DEP (United States)</option>
             </select></label>
             <label><span>Surface</span><select id="setting-terrain-surface" aria-label="Terrain surface">
               <option value="osm">OpenStreetMap</option>
@@ -546,40 +551,52 @@
                 <option value="2">Standard: 70 views, 1024 px</option>
                 <option value="3" selected>Fine: 168 views, 2048 px</option>
               </select>
-              <button id="outer-shape-run" class="panel-primary" type="button">Run</button>
-              <button id="outer-shape-keep" class="panel-primary" type="button" title="Keep all computed results in their models and write the reduced shapes into their IFC files for Export." disabled>Keep results</button>
+              <div class="outer-shape-actions">
+                <button id="outer-shape-run" class="panel-primary" type="button">Run</button>
+                <button id="outer-shape-keep" class="panel-primary" type="button" title="Keep all computed results in their models and write the reduced shapes into their IFC files for Export." disabled>Keep results</button>
+                <button id="outer-shape-defaults" class="panel-secondary" type="button" title="Set the removal method, quality, options, output and EPSG code back to their defaults. The model selection stays.">All settings to default</button>
+              </div>
             </div>
             <div class="outer-shape-options">
-              <label title="extractOuterShapeViewDirections: 0 follows the quality preset. A positive value adds this many sampled directions to the 6 fixed axis views.">View directions <input id="outer-shape-view-directions" type="number" min="0" max="4096" step="1" value="0" style="width: 6em" aria-label="Sampled view directions (0 uses preset)" /> (0 = preset; +6 axis views)</label>
-              <label title="extractOuterShapeResolution: square depth-buffer edge in pixels. 0 follows the quality preset; otherwise 64 to 4096. GPU close-up passes use at least 512 pixels.">Resolution <input id="outer-shape-resolution" type="number" min="0" max="4096" step="1" value="0" style="width: 6em" aria-label="Visibility resolution in pixels (0 uses preset)" /> px (0 = preset)</label>
-              <label title="extractOuterShapeRefinePasses: maximum adaptive GPU close-up passes for ambiguous meshes. Default 512; 0 disables close-ups and ray rescue. Higher budgets take longer.">Close-up pass budget (GPU) <input id="outer-shape-refine-passes" type="number" min="0" max="4096" step="1" value="512" style="width: 6em" aria-label="GPU adaptive close-up pass budget" /></label>
-              <label title="extractOuterShapeUnresolvedPolicy: meshes whose visibility is still uncertain after close-up refinement. Keep avoids losing uncertain geometry, but can retain hidden geometry and increase output size.">Unresolved geometry (GPU) <select id="outer-shape-unresolved-policy" aria-label="Unresolved geometry policy"><option value="keep" selected>Keep (safer, larger output)</option><option value="drop">Drop (smaller, may lose elements)</option></select></label>
+              <label class="outer-shape-sampling-option" title="extractOuterShapeViewDirections: 0 follows the quality preset. A positive value adds this many sampled directions to the 6 fixed axis views."><span>View directions</span> <input id="outer-shape-view-directions" type="number" min="0" max="4096" step="1" value="0" style="width: 6em" aria-label="Sampled view directions (0 uses preset)" /> <span>(0 = preset; +6 axis views)</span></label>
+            </div>
+            <div class="outer-shape-options">
+              <label class="outer-shape-sampling-option" title="extractOuterShapeResolution: square depth-buffer edge in pixels. 0 follows the quality preset; otherwise 64 to 4096. GPU close-up passes use at least 512 pixels."><span>Resolution</span> <input id="outer-shape-resolution" type="number" min="0" max="4096" step="1" value="0" style="width: 6em" aria-label="Visibility resolution in pixels (0 uses preset)" /> <span>px (0 = preset)</span></label>
+            </div>
+            <div class="outer-shape-options">
+              <label class="outer-shape-sampling-option" title="extractOuterShapeRefinePasses: maximum adaptive GPU close-up passes for ambiguous meshes. Default 512; 0 disables close-ups and ray rescue. Higher budgets take longer."><span>Close-up pass budget (GPU)</span> <input id="outer-shape-refine-passes" type="number" min="0" max="4096" step="1" value="512" style="width: 6em" aria-label="GPU adaptive close-up pass budget" /></label>
+            </div>
+            <div class="outer-shape-options">
+              <label class="outer-shape-sampling-option" title="extractOuterShapeUnresolvedPolicy: meshes whose visibility is still uncertain after close-up refinement are removed by default (drop). Remove may lose visible elements; explicitly choose Keep to preserve uncertain meshes, including hidden geometry."><span>Unresolved geometry (GPU)</span> <select id="outer-shape-unresolved-policy" aria-label="Unresolved geometry policy"><option value="drop" selected>Remove (default, may lose elements)</option><option value="keep">Keep (opt-in, larger output)</option></select></label>
+            </div>
+            <div class="outer-shape-options">
               <label class="compare-option" title="Keep every triangle of a mesh instance if any triangle is visible from outside. Fully hidden instances still go. Applies after Simplify shapes."><input id="outer-shape-whole-meshes" type="checkbox" checked /> Keep whole meshes</label>
               <label class="compare-option" title="On: every material occludes, including glass. Off: transparent objects hide nothing, so what is seen through them is kept; a transparent object is itself kept only when visible."><input id="outer-shape-transparent-opaque" type="checkbox" checked /> Treat transparent objects as opaque</label>
               <label class="compare-option" title="Simplify small dense outdoor objects and thin panels. Close small holes and louvre gaps before visibility; large openings stay. Review the preview before Keep."><input id="outer-shape-simplify" type="checkbox" /> Simplify shapes</label>
               <label title="Maximum projected hole or gap width to close in panels, in metres. Larger values remove more detail; not a minimum object area.">Detail size <input id="outer-shape-detail" type="number" min="0.01" step="0.01" value="0.20" style="width: 5em" aria-label="Detail size in metres" /> m</label>
               <label class="compare-option" title="Keep result draws the model as one mesh per colour: far fewer draw calls, but its elements can no longer be clicked. The IFC export keeps every element."><input id="outer-shape-merge" type="checkbox" /> Merge meshes by colour</label>
             </div>
-            <div class="outer-shape-inputs">
-              <label for="outer-shape-view">Preview:</label>
-              <select id="outer-shape-view" title="Preview mode for all selected models together" disabled>
-                <option value="kept">Outer shape</option>
-                <option value="removed">Removed</option>
-                <option value="model">Model</option>
-              </select>
-              <button id="outer-shape-defaults" class="panel-secondary" type="button" title="Set the removal method, quality, options, output and EPSG code back to their defaults. The model selection stays.">All settings to default</button>
-            </div>
-            <div class="outer-shape-inputs">
-              <label for="outer-shape-output">Output</label>
-              <select id="outer-shape-output">
-                <option value="ifc-separate">Separate IFC files</option>
-                <option value="ifc">Single IFC</option>
-                <option value="glb">Single GLB</option>
-                <option value="glb-separate">Separate GLB files</option>
-                <option value="slpk">I3S scene layer (.slpk)</option>
-              </select>
-              <label id="outer-shape-epsg-row" title="EPSG code of the projected CRS of the I3S layer. Leave empty when the IFC files declare it in IfcProjectedCRS; a declared code must be the same." hidden>EPSG <input id="outer-shape-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the I3S layer" /></label>
-              <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. Separate files are packaged in one ZIP download; an I3S scene layer package holds all models, for ArcGIS." disabled>Export kept results</button>
+            <div class="outer-shape-preview-output">
+              <div class="outer-shape-inputs">
+                <label for="outer-shape-view">Preview:</label>
+                <select id="outer-shape-view" title="Preview mode for all selected models together" disabled>
+                  <option value="kept">Outer shape</option>
+                  <option value="removed">Removed</option>
+                  <option value="model">Model</option>
+                </select>
+              </div>
+              <div class="outer-shape-inputs outer-shape-export">
+                <label for="outer-shape-output">Output</label>
+                <select id="outer-shape-output">
+                  <option value="ifc-separate">Separate IFC files</option>
+                  <option value="ifc">Single IFC</option>
+                  <option value="glb">Single GLB</option>
+                  <option value="glb-separate">Separate GLB files</option>
+                  <option value="slpk">I3S scene layer (.slpk)</option>
+                </select>
+                <label id="outer-shape-epsg-row" title="EPSG code of the projected CRS of the I3S layer. Leave empty when the IFC files declare it in IfcProjectedCRS; a declared code must be the same." hidden>EPSG <input id="outer-shape-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the I3S layer" /></label>
+                <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. Separate files are packaged in one ZIP download; an I3S scene layer package holds all models, for ArcGIS." disabled>Export kept results</button>
+              </div>
             </div>
             <dl id="outer-shape-stats"></dl>
             <details id="outer-shape-details" hidden><summary>Per-model statistics</summary><div id="outer-shape-model-stats"></div></details>
@@ -679,7 +696,11 @@
             <ul id="bcf-topics"></ul>
             <div id="bcf-detail"></div>
           </div>
-          <div id="welcome-drop-zone"><div>Drop files here</div><div class="drop-formats">(.ifc/.ifczip/.stp/.jt/.glb/.rvm/.las/.laz/LandXML .xml)</div></div>
+          <div id="welcome-drop-zone">
+            <div>Drop files here</div>
+            <div class="drop-formats">(.ifc/.ifczip/.stp/.jt/.glb/.rvm/.las/.laz/LandXML .xml)</div>
+            <div class="drop-privacy">Fully browser-based &mdash; no server upload.</div>
+          </div>
           <div id="welcome-panel">
             <h1 class="brand-title" aria-label="xeoIFC">
               <img class="brand-icon" src="./xeokit-icon.svg?v=2" alt="" aria-hidden="true" />

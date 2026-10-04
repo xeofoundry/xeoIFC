@@ -531,6 +531,7 @@ export class Viewer {
     }
     /**
      * `transparent_opaque` false: instances with a transparent source colour are tested like the others, but hide nothing.
+     * Omitted `keep_unresolved` defaults to false: remove undecided meshes; true explicitly opts into keeping them.
      * @param {Uint32Array} handles
      * @param {number} quality
      * @param {Uint8Array} classes

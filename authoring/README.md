@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:66ac6207858f77e8 -->
+<!-- Generated file: edit the source in the dev repository. sha256:6baafde799dd1651 -->
 # Authoring
 
 [Back to xeoIFC](../README.md#authoring)
@@ -7,7 +7,24 @@
 > validate generated IFC models before production use.
 
 xeoIFC can read and render IFC files, but also write and edit them: the document API creates projects, storeys, elements with geometry, openings,
-materials, colours and property sets, and the command-line tool runs such scripts. Generating an IFC file is easy enough to be
+materials, colours and property sets, and the command-line tool runs such scripts.
+
+## Garabit viaduct
+
+The Garabit viaduct shows detailed infrastructure authoring in IFC4.3: a federated model of the railway, masonry,
+steel arch, piers and deck. Individual steel plates, angles, bracing and connection components are modelled rather
+than represented only as simplified beams. Historical engineering drawings and photographic references guide the reconstruction.
+
+<a href="https://xeofoundry.github.io/xeoIFC/showcase/garabit/">
+  <img width="900" alt="Detailed IFC model of the Garabit viaduct showing individual steel plates, bracing and connections - click for the live model" src="../docs/showcase/garabit/xeoIFC-authoring-Garabit-Viaduct.jpg" />
+</a>
+
+Open the [live model and reconstruction notes](https://xeofoundry.github.io/xeoIFC/showcase/garabit/) to inspect the
+federated model and its sources. This is a reconstruction under refinement, not an as-built survey or a structural verification.
+
+## Villa
+
+Generating an IFC file is easy enough to be
 done with a prompt. This one was given to Claude Code (model Fable 5.1) with the `xeoifc` command-line tool at hand:
 
 > "myVilla.png" take the picture of this villa and create an IFC model, including terrain around, high details, including

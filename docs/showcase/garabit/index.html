@@ -98,7 +98,7 @@
 
     <h2>1. The model</h2>
 
-    <p>This is xeoIFC Web with the five main files of the federation and the French national terrain (IGN RGE ALTI) around
+    <p>This is xeoIFC Web with the five main files and three rivet files of the federation and the French national terrain (IGN RGE ALTI) around
         them. Rotate, zoom and pan with the mouse, click a rivet line, a lattice bar or a dressed stone to see what it is and
         where its dimensions come from.</p>
 
@@ -116,7 +116,7 @@
     </figure>
 
     <div class="wide"><table>
-        <tr><th>Files</th><td>IFC4X3_ADD2, 9 federated files and one combined file, 238 MB (6.6 MB zipped without the rivets and the terrain)</td></tr>
+        <tr><th>Files</th><td>IFC4X3_ADD2, 9 federated files and one combined file, 208 MB (28.3 MB zipped including rivets, without the terrain)</td></tr>
         <tr><th>Railway</th><td>IfcAlignment fitted to the IGN LiDAR HD survey: straight, circular arcs and clothoids in plan
             (4.7 cm RMS on the viaduct), vertical curves, cant; rails and guard rails swept along the alignment; 1,134 sleepers
             on linear placements; the track supports of the metal deck; 1500 V DC overhead line on the arched portals of the deck</td></tr>
@@ -177,12 +177,23 @@
 
     <h2>4. Files and licence</h2>
 
-    <p>The five main files are next to this page: <a href="garabit-00-railway.ifczip">railway</a>,
-        <a href="garabit-10-masonry.ifczip">masonry</a>, <a href="garabit-20-arch.ifczip">arch</a>,
-        <a href="garabit-21-piers.ifczip">piers</a>, <a href="garabit-22-deck.ifczip">decks</a>, listed in
-        <a href="garabit-showcase.federation.json">garabit-showcase.federation.json</a>. The complete federation, with the
-        three rivet files and a terrain file for other viewers, is published separately with its manifest
-        <code>garabit.federation.json</code>.</p>
+    <p>Download the IFCZIP files individually:</p>
+    <h3>Main model files</h3>
+    <ul>
+        <li><a href="garabit-00-railway.ifczip" download>Railway &mdash; garabit-00-railway.ifczip</a></li>
+        <li><a href="garabit-10-masonry.ifczip" download>Masonry &mdash; garabit-10-masonry.ifczip</a></li>
+        <li><a href="garabit-20-arch.ifczip" download>Arch &mdash; garabit-20-arch.ifczip</a></li>
+        <li><a href="garabit-21-piers.ifczip" download>Piers &mdash; garabit-21-piers.ifczip</a></li>
+        <li><a href="garabit-22-deck.ifczip" download>Decks &mdash; garabit-22-deck.ifczip</a></li>
+    </ul>
+    <h3>Rivet files</h3>
+    <ul>
+        <li><a href="garabit-40-rivets-piers.ifczip" download>Pier rivets &mdash; garabit-40-rivets-piers.ifczip</a></li>
+        <li><a href="garabit-41-rivets-arch.ifczip" download>Arch rivets &mdash; garabit-41-rivets-arch.ifczip</a></li>
+        <li><a href="garabit-42-rivets-deck.ifczip" download>Deck rivets &mdash; garabit-42-rivets-deck.ifczip</a></li>
+    </ul>
+    <p>All eight files are listed in <a href="garabit-showcase.federation.json" download>garabit-showcase.federation.json</a>
+        and load in the viewer above. The separate terrain IFC is not loaded here; the viewer uses IGN terrain instead.</p>
 
     <p>The model is offered under CC BY 4.0. Please credit "Viaduc de Garabit model: xeoFoundry, from G. Eiffel (1889) and IGN
         LiDAR HD / RGE ALTI (Licence Ouverte 2.0)".</p>
