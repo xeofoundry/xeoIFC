@@ -194,6 +194,6 @@
   </g>
 
   <g font-size="11" fill="#8B949E">
-    <text x="40" y="760">Rust workspace: one Cargo build produces the WebAssembly library, the CLI and the native library from the same crates; reference hosts: xeoIFC Web and xeoIFC Qt (both MIT).</text>
+    <text x="40" y="760">Rust workspace: one Cargo build produces the WebAssembly library, the CLI and the native library from the same crates; reference hosts: xeoIFC Web and xeoIFC Qt (MIT).</text>
   </g>
 </svg>

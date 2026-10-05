@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:295d72aeaf791ace -->
+<!-- Generated file: edit the source in the dev repository. sha256:bb49b63680bc998d -->
 # WebAssembly library
 
 [Back to xeoIFC](../README.md#1-webassembly-library)
@@ -25,6 +25,10 @@ model in the [full viewer](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Ac
 
 xeoIFC Web is a browser IFC viewer powered by the xeoIFC WebAssembly library. The
 [showcase page](https://xeofoundry.github.io/xeoIFC/showcase/) shows the calls it makes.
+
+Download **xeoifc-wasm.zip** from [Releases](https://github.com/xeofoundry/xeoIFC/releases/) to integrate the library into
+your own application. It contains prebuilt WASM modules, generated JavaScript bindings, TypeScript declarations, package
+metadata, the library licence, third-party notices and an integration README. The viewer application is not included.
 
 <br/>
 
