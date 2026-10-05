@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-CTMQHvEM.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-DRqG6fpp.js">
-    <link rel="stylesheet" crossorigin href="./assets/main-Dc2ffCK7.css">
+    <script type="module" crossorigin src="./assets/main-BEm6q0xT.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-BtJHeQUN.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-BTUF8PYM.css">
   </head>
   <body>
     <div id="open-menu" role="menu" aria-label="Open file" hidden>
@@ -156,49 +156,73 @@
                   <path class="lab-close-arrow" d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </button>
-              <div id="lab-flyout" aria-label="Lab tools">
-                <button id="compare-button" class="tool-icon" type="button" title="Compare two revisions" aria-label="Compare two revisions" aria-haspopup="dialog" aria-expanded="false" aria-controls="compare-panel">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M3.5 7.5l6-3v12l-6 3zM20.5 7.5l-6-3v12l6 3zM12 2.5v19" />
-                  </svg>
-                </button>
-                <button id="model-overview-button" class="tool-icon" type="button" title="Model overview: oriented 3D bounds linked to the file rows; camera unchanged. Small boxes stay at least 5 pixels wide." aria-label="Model overview" aria-pressed="false">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="square" stroke-linejoin="round"><path d="M6.5 2.5h-4v4M17.5 2.5h4v4M2.5 17.5v4h4M17.5 21.5h4v-4" /><path stroke-width="1" d="M15 5.2l4.5 2V11L15 13l-4.5-2V7.2zM10.5 7.2L15 9.3l4.5-2.1M15 9.3V13M7.2 12.7l3 1.7v3.4l-3 1.7-3-1.7v-3.4zM4.2 14.4l3 1.7 3-1.7M7.2 16.1v3.4" /></svg>
-                </button>
-                <button id="rail-road-button" class="tool-icon" type="button" title="Rail/Road: IFC axes" aria-label="Rail/Road" aria-expanded="false" aria-controls="rail-road-panel">
-                  <svg viewBox="0 0 448 398" aria-hidden="true" fill-rule="evenodd">
-                    <path d="M154 27 L165 27 L171 38 L191 38 L183 27 L194 27 C251 93 237 172 236 258 C235 298 238 338 247 373 Q247 377 242 377 L213 377 Q209 377 209 373 L206 345 L79 345 L71 373 Q70 377 66 377 L35 377 Q30 377 32 371 C67 281 125 202 153 129 C171 84 166 53 154 27 Z M172 46 L196 46 L201 54 L174 54 Z M176 62 L204 62 L208 72 L177 72 Z M178 81 L211 81 L215 92 L177 92 Z M174 104 L216 104 L219 120 L170 120 Z M165 134 L220 134 L221 154 L158 154 Z M150 171 L221 171 L218 197 L136 197 Z M128 216 L216 216 L211 251 L113 251 Z M102 273 L209 273 L206 319 L85 319 Z" />
-                    <path d="M222 27 L234 27 C298 78 332 157 356 236 C374 293 395 335 422 371 Q424 377 419 377 L391 377 Q387 377 386 373 C359 310 339 245 321 181 C305 121 270 65 222 27 Z M218 38 L225 38 L230 46 L223 46 Z M229 54 L237 54 L244 65 L235 65 Z M243 76 L250 76 Q252 76 253 79 L258 89 Q258 91 255 91 L247 91 L241 79 Q240 76 243 76 Z M255 104 L263 104 Q265 104 266 107 L271 120 Q272 123 269 123 L259 123 L253 108 Q252 104 255 104 Z M268 137 L277 137 Q280 137 281 140 L286 157 Q287 161 283 161 L272 161 Q270 161 270 158 L264 141 Q263 137 268 137 Z M278 180 L289 180 Q292 180 293 184 L297 207 Q298 212 293 212 L279 212 Q276 212 276 208 L272 184 Q271 180 278 180 Z M284 236 L296 236 Q300 236 301 241 L307 271 Q308 276 303 276 L287 276 Q283 276 283 272 L279 241 Q278 236 284 236 Z M292 304 L309 304 Q314 304 315 310 L327 364 Q329 370 322 370 L301 370 Q296 370 295 365 L286 310 Q285 304 292 304 Z" />
-                  </svg>
-                </button>
-                <button id="georeferencing-button" class="tool-icon" type="button" title="Georeferencing: coordinate metadata and reference-point checks" aria-label="Georeferencing" aria-expanded="false" aria-controls="georeferencing-panel">
-                  <svg viewBox="0 0 165 197" aria-hidden="true" fill="currentColor" fill-rule="evenodd">
-                    <path d="M81.5 25 C53.1 25 30 48.1 30 76.5 C30 88.8 34.7 99.2 41.1 110.1 C55 134 64.3 155.9 72.5 178.8 C73.9 182.8 77.1 185 81.2 185 C85.1 185 88.4 182.7 89.8 178.8 C98 155.9 107.2 134 121.5 110.1 C128.1 99.1 133 88.7 133 76.5 C133 48.1 109.9 25 81.5 25 Z M113.5 76 A32 32 0 1 0 49.5 76 A32 32 0 1 0 113.5 76 Z" />
-                  </svg>
-                </button>
-                <button id="heat-button" class="tool-icon" type="button" title="Heat flow simulation: finds the heated volume, emits heat rays from a grid of points in it and lets the building elements collect the heat" aria-label="Heat flow simulation" aria-expanded="false" aria-controls="heat-panel">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M10.3 14.4V5.9a1.7 1.7 0 0 1 3.4 0v8.5" />
-                    <circle cx="12" cy="17.6" r="3.7" />
-                    <path d="M15.8 7.4h2.7M15.8 10.4h2.7" />
-                  </svg>
-                </button>
-                <button id="outer-shape-button" class="tool-icon" type="button" title="Outer shape test: runs the converter's extractOuterShape on checked models and shows the triangles it keeps" aria-label="Outer shape test" aria-expanded="false" aria-controls="outer-shape-panel">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12v9M4 7.5l8 4.5 8-4.5" />
-                    <path class="outer-shape-icon-removed" d="M12 10.2V3M10.4 12.9L4 16.5M13.6 12.9L20 16.5" />
-                  </svg>
-                </button>
-                <button id="script-button" class="tool-icon" type="button" title="Script editor (beta)" aria-label="Script editor (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8.5 7.5L4 12l4.5 4.5M15.5 7.5L20 12l-4.5 4.5M13.5 5l-3 14" />
-                  </svg>
-                </button>
-                <button id="ai-button" class="tool-icon" type="button" title="AI assistant (beta)" aria-label="AI assistant (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M10 3.5l1.9 5.1 5.1 1.9-5.1 1.9L10 17.5l-1.9-5.1L3 10.5l5.1-1.9zM18 14.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" />
-                  </svg>
-                </button>
+              <div id="lab-flyout" aria-label="Lab tools" inert>
+                <div class="lab-tool-row">
+                  <span id="compare-description" class="lab-tool-description">Compare revisions</span>
+                  <button id="compare-button" class="tool-icon" aria-describedby="compare-description" type="button" title="Compare two revisions" aria-label="Compare two revisions" aria-haspopup="dialog" aria-expanded="false" aria-controls="compare-panel">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3.5 7.5l6-3v12l-6 3zM20.5 7.5l-6-3v12l6 3zM12 2.5v19" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="lab-tool-row">
+                  <span id="model-overview-description" class="lab-tool-description">Show model bounds</span>
+                  <button id="model-overview-button" class="tool-icon" aria-describedby="model-overview-description" type="button" title="Model overview: oriented 3D bounds linked to the file rows; camera unchanged. Small boxes stay at least 5 pixels wide." aria-label="Model overview" aria-pressed="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="square" stroke-linejoin="round"><path d="M6.5 2.5h-4v4M17.5 2.5h4v4M2.5 17.5v4h4M17.5 21.5h4v-4" /><path stroke-width="1" d="M15 5.2l4.5 2V11L15 13l-4.5-2V7.2zM10.5 7.2L15 9.3l4.5-2.1M15 9.3V13M7.2 12.7l3 1.7v3.4l-3 1.7-3-1.7v-3.4zM4.2 14.4l3 1.7 3-1.7M7.2 16.1v3.4" /></svg>
+                  </button>
+                </div>
+                <div class="lab-tool-row">
+                  <span id="rail-road-description" class="lab-tool-description">Inspect rail/road axes</span>
+                  <button id="rail-road-button" class="tool-icon" aria-describedby="rail-road-description" type="button" title="Rail/Road: IFC axes" aria-label="Rail/Road" aria-expanded="false" aria-controls="rail-road-panel">
+                    <svg viewBox="0 0 448 398" aria-hidden="true" fill-rule="evenodd">
+                      <path d="M154 27 L165 27 L171 38 L191 38 L183 27 L194 27 C251 93 237 172 236 258 C235 298 238 338 247 373 Q247 377 242 377 L213 377 Q209 377 209 373 L206 345 L79 345 L71 373 Q70 377 66 377 L35 377 Q30 377 32 371 C67 281 125 202 153 129 C171 84 166 53 154 27 Z M172 46 L196 46 L201 54 L174 54 Z M176 62 L204 62 L208 72 L177 72 Z M178 81 L211 81 L215 92 L177 92 Z M174 104 L216 104 L219 120 L170 120 Z M165 134 L220 134 L221 154 L158 154 Z M150 171 L221 171 L218 197 L136 197 Z M128 216 L216 216 L211 251 L113 251 Z M102 273 L209 273 L206 319 L85 319 Z" />
+                      <path d="M222 27 L234 27 C298 78 332 157 356 236 C374 293 395 335 422 371 Q424 377 419 377 L391 377 Q387 377 386 373 C359 310 339 245 321 181 C305 121 270 65 222 27 Z M218 38 L225 38 L230 46 L223 46 Z M229 54 L237 54 L244 65 L235 65 Z M243 76 L250 76 Q252 76 253 79 L258 89 Q258 91 255 91 L247 91 L241 79 Q240 76 243 76 Z M255 104 L263 104 Q265 104 266 107 L271 120 Q272 123 269 123 L259 123 L253 108 Q252 104 255 104 Z M268 137 L277 137 Q280 137 281 140 L286 157 Q287 161 283 161 L272 161 Q270 161 270 158 L264 141 Q263 137 268 137 Z M278 180 L289 180 Q292 180 293 184 L297 207 Q298 212 293 212 L279 212 Q276 212 276 208 L272 184 Q271 180 278 180 Z M284 236 L296 236 Q300 236 301 241 L307 271 Q308 276 303 276 L287 276 Q283 276 283 272 L279 241 Q278 236 284 236 Z M292 304 L309 304 Q314 304 315 310 L327 364 Q329 370 322 370 L301 370 Q296 370 295 365 L286 310 Q285 304 292 304 Z" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="lab-tool-row">
+                  <span id="georeferencing-description" class="lab-tool-description">Check georeferencing</span>
+                  <button id="georeferencing-button" class="tool-icon" aria-describedby="georeferencing-description" type="button" title="Georeferencing: coordinate metadata and reference-point checks" aria-label="Georeferencing" aria-expanded="false" aria-controls="georeferencing-panel">
+                    <svg viewBox="0 0 165 197" aria-hidden="true" fill="currentColor" fill-rule="evenodd">
+                      <path d="M81.5 25 C53.1 25 30 48.1 30 76.5 C30 88.8 34.7 99.2 41.1 110.1 C55 134 64.3 155.9 72.5 178.8 C73.9 182.8 77.1 185 81.2 185 C85.1 185 88.4 182.7 89.8 178.8 C98 155.9 107.2 134 121.5 110.1 C128.1 99.1 133 88.7 133 76.5 C133 48.1 109.9 25 81.5 25 Z M113.5 76 A32 32 0 1 0 49.5 76 A32 32 0 1 0 113.5 76 Z" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="lab-tool-row">
+                  <span id="heat-description" class="lab-tool-description">Simulate heat flow</span>
+                  <button id="heat-button" class="tool-icon" aria-describedby="heat-description" type="button" title="Heat flow simulation: finds the heated volume, emits heat rays from a grid of points in it and lets the building elements collect the heat" aria-label="Heat flow simulation" aria-expanded="false" aria-controls="heat-panel">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10.3 14.4V5.9a1.7 1.7 0 0 1 3.4 0v8.5" />
+                      <circle cx="12" cy="17.6" r="3.7" />
+                      <path d="M15.8 7.4h2.7M15.8 10.4h2.7" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="lab-tool-row">
+                  <span id="outer-shape-description" class="lab-tool-description">Extract outer shape</span>
+                  <button id="outer-shape-button" class="tool-icon" aria-describedby="outer-shape-description" type="button" title="Outer shape test: runs the converter's extractOuterShape on checked models and shows the triangles it keeps" aria-label="Outer shape test" aria-expanded="false" aria-controls="outer-shape-panel">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12v9M4 7.5l8 4.5 8-4.5" />
+                      <path class="outer-shape-icon-removed" d="M12 10.2V3M10.4 12.9L4 16.5M13.6 12.9L20 16.5" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="lab-tool-row">
+                  <span id="script-description" class="lab-tool-description">Edit scripts (beta)</span>
+                  <button id="script-button" class="tool-icon" aria-describedby="script-description" type="button" title="Script editor (beta)" aria-label="Script editor (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8.5 7.5L4 12l4.5 4.5M15.5 7.5L20 12l-4.5 4.5M13.5 5l-3 14" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="lab-tool-row">
+                  <span id="ai-description" class="lab-tool-description">Ask AI (beta)</span>
+                  <button id="ai-button" class="tool-icon" aria-describedby="ai-description" type="button" title="AI assistant (beta)" aria-label="AI assistant (beta)" aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-panel">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10 3.5l1.9 5.1 5.1 1.9-5.1 1.9L10 17.5l-1.9-5.1L3 10.5l5.1-1.9zM18 14.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -267,7 +291,11 @@
               <button id="setting-background-default" class="panel-secondary settings-default-button" type="button">Restore default</button>
             </div>
             <label><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
-            <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
+            <div class="settings-background-row">
+              <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
+              <button id="setting-sharp-edges-compute" class="panel-secondary settings-default-button" type="button" disabled
+                title="Sharp-edge lines are skipped on load for models over 2,000,000 triangles. Computes them for the last loaded model.">Compute edges now</button>
+            </div>
             <div class="settings-show-row">
               <span>Show</span>
               <div class="show-combo">

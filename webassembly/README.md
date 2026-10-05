@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:a5aacd574f843489 -->
+<!-- Generated file: edit the source in the dev repository. sha256:295d72aeaf791ace -->
 # WebAssembly library
 
 [Back to xeoIFC](../README.md#1-webassembly-library)
@@ -23,9 +23,8 @@ Click the image for the [live version of this view](https://xeofoundry.github.io
 xeoIFC Web, with the running viewer in place of the screenshot and this model (Viadotto Acerno, IFC 4.3) loaded. Or open the
 model in the [full viewer](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
 
-xeoIFC Web is an open-source (MIT) browser IFC viewer: about 16,600 lines of TypeScript on the xeoIFC WebAssembly library. The
-[showcase page](https://xeofoundry.github.io/xeoIFC/showcase/) shows the calls it makes. Download  `xeoifc-web-source.zip` (source code with the prebuilt library): [https://github.com/xeofoundry/xeoIFC/releases/](https://github.com/xeofoundry/xeoIFC/releases/)
-(a Vite project: `npm install`, `npm run dev`; no Rust needed).
+xeoIFC Web is a browser IFC viewer powered by the xeoIFC WebAssembly library. The
+[showcase page](https://xeofoundry.github.io/xeoIFC/showcase/) shows the calls it makes.
 
 <br/>
 

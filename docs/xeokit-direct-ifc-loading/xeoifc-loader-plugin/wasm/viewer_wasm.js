@@ -1582,8 +1582,9 @@ export function worker_load_chunk(chunk) {
  * "parse", "geom", "pack") and `on_snapshot(Uint8Array)` with a packed
  * preview of the elements finished so far. Returns
  * `{ packed: Uint8Array, tree: string|undefined, groupings: string, sourceId: number, heapMB: number,
- * edgesAvailable: boolean, lineLayers: Float32Array[], lineOwners: Uint32Array[] }`: `lineLayers` holds the
- * drafting line segments per layer, `lineOwners` the entity id of each segment.
+ * edgesAvailable: boolean, edgesDeferred: boolean, lineLayers: Float32Array[], lineOwners: Uint32Array[] }`: `lineLayers`
+ * holds the drafting line segments per layer, `lineOwners` the entity id of each segment. `edgesDeferred`: the scene is
+ * over the sharp-edge triangle budget and stays for `worker_sharp_edges(true)`.
  * @param {Function} on_progress
  * @param {Function} on_snapshot
  * @returns {any}
@@ -2100,11 +2101,15 @@ export function worker_set_load_profiling(enabled) {
 }
 
 /**
- * Compute dark structural edge lines after the model is visible.
+ * Compute dark structural edge lines after the model is visible. `force` (the user asked for them) lifts the triangle
+ * budget and the heap gate; over its own line budget it keeps the edges of the largest instances. Returns
+ * `{ edges?, edgeElements?, edgeTotal, deferred, heapMB }`: `deferred` means an unforced pass went over a budget and the
+ * scene stays for a forced one, `edgeTotal` is the segment count of the whole scene after a forced pass.
+ * @param {boolean} force
  * @returns {any}
  */
-export function worker_sharp_edges() {
-    const ret = wasm.worker_sharp_edges();
+export function worker_sharp_edges(force) {
+    const ret = wasm.worker_sharp_edges(force);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }

@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:72b9a45dda9a796d -->
+<!-- Generated file: edit the source in the dev repository. sha256:a8ca480994bc3a76 -->
 # One engine, two libraries and a command-line tool
 
 [Back to xeoIFC](../README.md#architecture)
@@ -27,7 +27,7 @@ still drives the engine without a session.
 > without a copy, the scene is built and the store pruned through the document, and the tree, property and georeference
 > queries read the document's kept engine indexes. Its IFC export runs the split-and-merge writer over session documents,
 > so the output is the same as from the CLI and the C ABI. The C ABI exposes the same wire plus background load jobs
-> (progress and preview callbacks), the native renderer and the export. Each library has an open-source (MIT) reference
+> (progress and preview callbacks), the native renderer and the export. Each library has a reference
 > host that uses nothing but the library: xeoIFC Web (TypeScript) and xeoIFC Qt (C++ with Qt Widgets).
 
 ## Load path in a viewer host
@@ -118,8 +118,7 @@ canvas.onclick = async (e) => {
 
 - Built by `npm run wasm` (wasm-pack, one module per format).
 - xeoIFC Web (`web/`) is the reference host: about 16,600 lines of TypeScript that use nothing but these modules;
-  `src/worker.ts` is its whole bridge to the engine. It is open source (MIT) and ships as `xeoifc-web-source.zip` with the
-  prebuilt modules.
+  `src/worker.ts` is its whole bridge to the engine.
 - The xeokit loader (`@xeofoundry/xeoifc-loader-plugin`) is a second host: its worker calls the load, query and release
   functions and turns the packed scene into a xeokit `SceneModel`; it does not use the `Viewer`. Its build of the module
   draws the "Evaluation version" text into every scene.
@@ -209,7 +208,7 @@ xeoifc_job_free(job);
 | Clock and randomness | installed from JS (Date.now, Math.random) | std | std |
 | Security | bytes in, bytes out; no filesystem | filesystem roots, permissions | filesystem roots, permissions; bytes-only use needs no roots |
 | Licence key | worker_set_licence_key; the key argument of worker_export_run | --license-key, XEO_IFC_LICENSE_KEY, config file | xeoifc_set_licence_key |
-| Reference host | xeoIFC Web (TypeScript, MIT); the xeokit loader | - | xeoIFC Qt (C++, MIT) |
+| Reference host | xeoIFC Web (TypeScript); the xeokit loader | - | xeoIFC Qt (C++, MIT) |
 
 ---
 

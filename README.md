@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:de3e3a04b055e6ee -->
+<!-- Generated file: edit the source in the dev repository. sha256:0ccac3193d9660ab -->
 # xeoIFC
 
 Public repository of xeoIFC, the xeoFoundry IFC toolkit.
@@ -16,7 +16,7 @@ It is delivered in four forms:
 4. **Loader for xeokit** - loads IFC directly into a xeokit viewer, without server side conversion steps.
 
 The two libraries are the same engine with the same function groups, one for the browser and one for native programs. Each
-comes with an open-source demo viewer (xeoIFC Web, xeoIFC Qt). All four forms run on this engine, and the libraries and the
+comes with a demo viewer (xeoIFC Web, xeoIFC Qt). All four forms run on this engine, and the libraries and the
 command-line tool share one document API (JSON ops in, JSON results out) for create, query, edit, split and merge.
 
 
