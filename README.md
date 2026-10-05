@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:0ccac3193d9660ab -->
+<!-- Generated file: edit the source in the dev repository. sha256:5ca519b9c1fc7316 -->
 # xeoIFC
 
 Public repository of xeoIFC, the xeoFoundry IFC toolkit.
@@ -18,6 +18,8 @@ It is delivered in four forms:
 The two libraries are the same engine with the same function groups, one for the browser and one for native programs. Each
 comes with a demo viewer (xeoIFC Web, xeoIFC Qt). All four forms run on this engine, and the libraries and the
 command-line tool share one document API (JSON ops in, JSON results out) for create, query, edit, split and merge.
+
+Example use cases: [xeoIFC showcase](https://xeofoundry.github.io/xeoIFC/showcase/).
 
 
 ## 1. Command-line converter

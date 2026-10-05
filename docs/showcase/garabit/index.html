@@ -102,8 +102,31 @@
         them. Rotate, zoom and pan with the mouse, click a rivet line, a lattice bar or a dressed stone to see what it is and
         where its dimensions come from.</p>
 
-    <iframe id="viewer" src="../../?load=showcase/garabit/garabit-showcase.federation.json&amp;embed=1&amp;terrain=ign&amp;terrainSurface=osm"
+    <!-- Saved perspective view: the arch springing and piers, looking from the same side as the image below. -->
+    <iframe id="viewer" src="../../?load=showcase/garabit/garabit-showcase.federation.json&amp;embed=1&amp;terrain=ign&amp;terrainSurface=osm#view=eyJzIjpbLTc1LjEzOTQsNTIuMjExLC0zNy4xNDE3LDEzOS43NTQsLTEuODU3MiwwLjQxMzMsMC4xMTM1LDAuMzg1MywwLjkxNThdLCJvIjowLCJwIjpbXX0"
             title="xeoIFC Web with the Garabit viaduct" allow="fullscreen" allowfullscreen></iframe>
+    <script id="showcase-camera">
+        document.getElementById('viewer').addEventListener('load', (event) => {
+            const viewerWindow = event.currentTarget.contentWindow;
+            const viewerDocument = viewerWindow.document;
+            const welcome = viewerDocument.getElementById('welcome-panel');
+            if (!welcome) return;
+
+            // The viewer restores #view after the first file, but its final federation fit can replace it.
+            // Once loading starts (welcome hides), cancel that fit through the existing input hook.
+            // This neutral document-level key has no shortcut and does not move/focus the camera.
+            // Keep this workaround here: other viewers must retain their normal automatic framing.
+            const preserveView = () => {
+                if (!welcome.hidden) return;
+                observer.disconnect();
+                viewerDocument.dispatchEvent(new viewerWindow.KeyboardEvent('keydown', { key: 'Unidentified' }));
+            };
+            const observer = new viewerWindow.MutationObserver(preserveView);
+            observer.observe(welcome, { attributes: true, attributeFilter: ['hidden'] });
+            viewerWindow.addEventListener('pagehide', () => observer.disconnect(), { once: true });
+            preserveView();
+        });
+    </script>
 
     <div class="under-viewer">
         <span>Move the pointer to the left edge of the viewer to open the model tree and the properties.</span>
@@ -111,7 +134,7 @@
     </div>
 
     <figure>
-        <img src="garabit-detail.jpg" alt="The arch springing beside pier 4, the lattice deck and the overhead line" width="1540" height="1000">
+        <img src="garabit-by-xeoIFC.png" alt="The arch springing beside pier 4, the lattice deck and the overhead line" width="1540" height="1000">
         <figcaption>The arch springs from the base of pier 4. Every plate and angle of the built-up members is its own element.</figcaption>
     </figure>
 
