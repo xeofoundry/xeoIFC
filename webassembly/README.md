@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:bb49b63680bc998d -->
+<!-- Generated file: edit the source in the dev repository. sha256:a5b6b2b2485bd460 -->
 # WebAssembly library
 
 [Back to xeoIFC](../README.md#1-webassembly-library)
@@ -15,16 +15,16 @@ https://xeofoundry.github.io/xeoIFC/
 
 Drag&Drop `.ifc` or `.ifczip` files from your machine to render them locally in the browser (no upload of any IFC data).
 
-<a href="https://xeofoundry.github.io/xeoIFC/showcase/">
+<a href="https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-web/">
   <img width="900" alt="xeoIFC Web showing the Viadotto Acerno bridge - click for the live version of this view" src="https://github.com/user-attachments/assets/c5272d82-81b3-41b8-8290-16657814b002" />
 </a>
 
-Click the image for the [live version of this view](https://xeofoundry.github.io/xeoIFC/showcase/): the showcase page of
+Click the image for the [live version of this view](https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-web/): the showcase page of
 xeoIFC Web, with the running viewer in place of the screenshot and this model (Viadotto Acerno, IFC 4.3) loaded. Or open the
 model in the [full viewer](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
 
 xeoIFC Web is a browser IFC viewer powered by the xeoIFC WebAssembly library. The
-[showcase page](https://xeofoundry.github.io/xeoIFC/showcase/) shows the calls it makes.
+[showcase page](https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-web/) shows the calls it makes.
 
 Download **xeoifc-wasm.zip** from [Releases](https://github.com/xeofoundry/xeoIFC/releases/) to integrate the library into
 your own application. It contains prebuilt WASM modules, generated JavaScript bindings, TypeScript declarations, package
