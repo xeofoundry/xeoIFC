@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-DWZf_Nc4.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-DyH4m9_a.js">
-    <link rel="stylesheet" crossorigin href="./assets/main-Dhs4yz2G.css">
+    <script type="module" crossorigin src="./assets/main-97_B2SK4.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-B7eJqEvS.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-DTl65SmO.css">
   </head>
   <body>
     <div id="open-menu" role="menu" aria-label="Open file" hidden>
@@ -638,10 +638,12 @@
             <dl id="outer-shape-stats"></dl>
             <details id="outer-shape-details" hidden><summary>Per-model statistics</summary><div id="outer-shape-model-stats"></div></details>
             <div id="outer-shape-status" class="section-hint" aria-live="polite">Checks visibility against all loaded models (hidden elements too), spaces excluded. Only checked models receive results. Review the combined preview before keeping the results.</div>
+            <div id="outer-shape-stalled" class="section-hint" role="status" hidden>No progress for over a minute. Browser performance restrictions (background tab, GPU or memory limits) may be halting the computation. The <a href="https://github.com/xeofoundry/xeoIFC/blob/main/converter/README.md" target="_blank" rel="noopener">xeoIFC CLI</a> runs the same extraction without them: see "Equivalent CLI input" below.</div>
             </div>
             <section class="outer-shape-cli" aria-labelledby="outer-shape-cli-title">
               <h3 id="outer-shape-cli-title">Equivalent CLI input</h3>
-              <p id="outer-shape-cli-note" class="section-hint"></p>
+              <p class="section-hint">The <a href="https://github.com/xeofoundry/xeoIFC/blob/main/converter/README.md" target="_blank" rel="noopener">xeoIFC command-line converter</a> runs the same extraction as a native program, without the memory and GPU limits of a browser.</p>
+              <ul id="outer-shape-cli-note" class="section-hint"></ul>
               <label for="outer-shape-cli-command">Command (PowerShell)</label>
               <textarea id="outer-shape-cli-command" readonly rows="4" spellcheck="false"></textarea>
               <button id="outer-shape-cli-copy" class="panel-secondary" type="button">Copy command</button>
