@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:8b3b9ca5d6c30590 -->
+<!-- Generated file: edit the source in the dev repository. sha256:fd574539837474a4 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
@@ -173,6 +173,29 @@ if not exist "%DIR%\out" mkdir "%DIR%\out"
   --accept-terms %* --outer-shape-unresolved-policy drop
 exit /b %ERRORLEVEL%
 ```
+
+Linux version:
+
+```bash
+#!/usr/bin/env bash
+XEOIFC="/opt/xeoifc/xeoifc"
+DIR="$PWD"
+
+OUTER_SHAPE_OPTIONS=()
+if [ -t 0 ]; then
+  read -r -n 1 -t 5 -p "Treat transparent objects as opaque? [Y/N, default Y in 5 s] " ANSWER
+  echo
+  case "$ANSWER" in [nN]) OUTER_SHAPE_OPTIONS=(--no-outer-shape-transparent-opaque) ;; esac
+fi
+
+mkdir -p "$DIR/out"
+"$XEOIFC" -i "$DIR" -o "$DIR/out/outer-shape.slpk" \
+  --extract-outer-shape "${OUTER_SHAPE_OPTIONS[@]}" \
+  --accept-terms "$@" --outer-shape-unresolved-policy drop
+```
+
+Save it as `extract-outer-shape-to-i3s.sh`, change `XEOIFC` to the location of your executable and make it executable
+with `chmod +x extract-outer-shape-to-i3s.sh`. Run it from the folder containing the models.
 
 The script asks whether transparent objects are treated as opaque. `Y` keeps the converter default: glazing and other
 transparent objects hide what lies behind them. `N` adds `--no-outer-shape-transparent-opaque`, so geometry seen through
