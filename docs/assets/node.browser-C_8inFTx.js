@@ -1,1 +1,0 @@
-import{A as o}from"./index-BD_4eAYM.js";import"./main-BcuiTid3.js";import"./viewer_wasm-DyH4m9_a.js";function n(e){return new Proxy({},{get(i,t){if(typeof t!="symbol")throw new o(`\`${e}.${t}\` is not available in this environment; it needs a Node.js-compatible runtime`)}})}const m=n("fs"),f=n("path");export{m as fs,f as path};
