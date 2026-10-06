@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:41030c54919cdff3 -->
+<!-- Generated file: edit the source in the dev repository. sha256:60a13507b4d05d58 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
@@ -12,6 +12,7 @@ metadata IFC) and a manifest JSON, with cxconverter-compatible configuration and
 - [Run the application](#run-the-application)
 - [Output file types](#output-file-types)
 - [Outer-shape extraction](#outer-shape-extraction)
+  - [Scripted folder conversion to SLPK](#scripted-folder-conversion-to-slpk)
 - [Metadata file types](#metadata-file-types)
 - [Manifest file](#manifest-file)
 - [Units and coordinate system](#units-and-coordinate-system)
@@ -143,7 +144,60 @@ To select specific files instead of a folder, repeat `-i`. IFC and IFCZIP inputs
 
 For SLPK, the projected EPSG code comes from the inputs' `IfcProjectedCRS`. If none declares it, supply
 `inputParameters.i3sWkid` in a configuration file passed with `-c`. Choose the code matching the model coordinates;
-setting it does not transform them. SLPK keeps projected coordinates with Z up, rather than the glTF root rotation.
+setting it does not transform them. Without a declared code and without `i3sWkid`, the layer is placed from the IfcSite
+latitude, longitude and elevation (EPSG:2056 in Switzerland, else the WGS84 UTM zone). SLPK keeps projected coordinates with Z up, rather than the glTF root rotation.
+
+### Scripted folder conversion to SLPK
+
+A Windows batch script can process all `.ifc` and `.ifczip` files in the current working folder in one conversion.
+The files form one federation: geometry in one file can hide geometry in another. Subfolders are not scanned, and the
+result is **one combined SLPK**, not a separate package for each input file. Passing the directory to `-i` replaces the
+need for a `for` loop over individual files.
+
+Save this portable version of `extract-outer-shape-to-i3s.cmd` next to your converter, for example in
+`C:\tools\xeoifc`, and change `XEOIFC` to the location of your executable:
+
+```bat
+@echo off
+setlocal
+set "XEOIFC=C:\tools\xeoifc\xeoifc.exe"
+set "DIR=%CD%"
+
+if not exist "%DIR%\out" mkdir "%DIR%\out"
+"%XEOIFC%" -i "%DIR%" -o "%DIR%\out\outer-shape.slpk" ^
+  --extract-outer-shape --no-outer-shape-transparent-opaque ^
+  --accept-terms %* --outer-shape-unresolved-policy drop
+exit /b %ERRORLEVEL%
+```
+
+Run it from **Command Prompt**, after changing to the folder containing the models. The script uses that working folder,
+not the folder in which the script is stored:
+
+```bat
+cd /d "C:\models\campus"
+call "C:\tools\xeoifc\extract-outer-shape-to-i3s.cmd"
+```
+
+The result is `C:\models\campus\out\outer-shape.slpk`. Transparent objects do not occlude geometry behind them.
+As in the original script, the final `--outer-shape-unresolved-policy drop` forces unresolved GPU geometry to be removed;
+this can remove visible elements that sampling did not resolve. Check the output against the original models.
+
+Additional arguments are forwarded through `%*`. If the inputs do not declare an EPSG code, save a `wkid.json` in the
+model folder, using the projected CRS that matches the model coordinates (2056 is an example, not a coordinate conversion):
+
+```json
+{"inputParameters":{"i3sWkid":2056}}
+```
+
+Then run, for example:
+
+```bat
+call "C:\tools\xeoifc\extract-outer-shape-to-i3s.cmd" -c "wkid.json" --outer-shape-quality fine
+```
+
+For licensed conversion, set `XEO_IFC_LICENSE_KEY` in the environment before running the script; do not embed a key in a
+shared batch file. Without a key, `--accept-terms` accepts the testing license and runs in evaluation mode. This version
+omits the original script's `pause` and returns the converter's exit code, so it can be called from another script or job.
 
 ### Visibility settings
 
