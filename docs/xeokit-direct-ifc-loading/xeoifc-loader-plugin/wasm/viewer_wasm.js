@@ -1042,6 +1042,20 @@ export class Viewer {
         wasm.viewer_set_sharp_edges_visible(this.__wbg_ptr, visible);
     }
     /**
+     * `set_sharp_edges` for the registered model `source` instead of the last uploaded one; it replaces the model's
+     * lines. False for an unknown model.
+     * @param {number} source
+     * @param {Float32Array} data
+     * @param {Uint32Array} elements
+     * @returns {boolean}
+     */
+    set_source_sharp_edges(source, data, elements) {
+        const ptr0 = passArray32ToWasm0(elements, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_set_source_sharp_edges(this.__wbg_ptr, source, data, ptr0, len0);
+        return ret !== 0;
+    }
+    /**
      * Upload non-pickable terrain guide lines, as xyz xyz pairs.
      * @param {Float32Array} data
      * @param {number} r
@@ -2101,10 +2115,12 @@ export function worker_set_load_profiling(enabled) {
 }
 
 /**
- * Compute dark structural edge lines after the model is visible. `force` (the user asked for them) lifts the triangle
- * budget and the heap gate; over its own line budget it keeps the edges of the largest instances. Returns
- * `{ edges?, edgeElements?, edgeTotal, deferred, heapMB }`: `deferred` means an unforced pass went over a budget and the
- * scene stays for a forced one, `edgeTotal` is the segment count of the whole scene after a forced pass.
+ * Compute dark structural edge lines of every model loaded since the last pass, after they are visible. The budgets
+ * count over all of them. `force` (the user asked for the lines) lifts the triangle budget and the heap gate; over its
+ * own line budget it keeps the edges of the largest instances. Returns
+ * `{ sources, edges, edgeElements, edgeTotal, deferred, heapMB }`: `edges[i]` and `edgeElements[i]` belong to model
+ * `sources[i]`, `deferred` means an unforced pass went over a budget and the scenes stay for a forced one, `edgeTotal`
+ * is the segment count of the whole scenes after a forced pass.
  * @param {boolean} force
  * @returns {any}
  */

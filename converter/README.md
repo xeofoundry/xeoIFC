@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:60a13507b4d05d58 -->
+<!-- Generated file: edit the source in the dev repository. sha256:8b3b9ca5d6c30590 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
@@ -163,12 +163,21 @@ setlocal
 set "XEOIFC=C:\tools\xeoifc\xeoifc.exe"
 set "DIR=%CD%"
 
+set "OUTER_SHAPE_OPTIONS="
+choice /c YN /n /t 5 /d Y /m "Treat transparent objects as opaque? [Y/N, default Y in 5 s] "
+if errorlevel 2 if not errorlevel 3 set "OUTER_SHAPE_OPTIONS=--no-outer-shape-transparent-opaque"
+
 if not exist "%DIR%\out" mkdir "%DIR%\out"
 "%XEOIFC%" -i "%DIR%" -o "%DIR%\out\outer-shape.slpk" ^
-  --extract-outer-shape --no-outer-shape-transparent-opaque ^
+  --extract-outer-shape %OUTER_SHAPE_OPTIONS% ^
   --accept-terms %* --outer-shape-unresolved-policy drop
 exit /b %ERRORLEVEL%
 ```
+
+The script asks whether transparent objects are treated as opaque. `Y` keeps the converter default: glazing and other
+transparent objects hide what lies behind them. `N` adds `--no-outer-shape-transparent-opaque`, so geometry seen through
+them is kept. Without an answer within 5 seconds, or when the script runs without a console, it continues with the
+default (`Y`).
 
 Run it from **Command Prompt**, after changing to the folder containing the models. The script uses that working folder,
 not the folder in which the script is stored:
@@ -178,7 +187,7 @@ cd /d "C:\models\campus"
 call "C:\tools\xeoifc\extract-outer-shape-to-i3s.cmd"
 ```
 
-The result is `C:\models\campus\out\outer-shape.slpk`. Transparent objects do not occlude geometry behind them.
+The result is `C:\models\campus\out\outer-shape.slpk`.
 As in the original script, the final `--outer-shape-unresolved-policy drop` forces unresolved GPU geometry to be removed;
 this can remove visible elements that sampling did not resolve. Check the output against the original models.
 
