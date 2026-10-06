@@ -1,26 +1,34 @@
 <!-- Generated file: edit the source in the dev repository. sha256:5ca519b9c1fc7316 -->
-# xeoIFC
 
-Public repository of xeoIFC, the xeoFoundry IFC toolkit.
+# xeoIFC - the xeoFoundry IFC toolkit.
 
-Try xeoIFC Web, the WebAssembly demo viewer:
-https://xeofoundry.github.io/xeoIFC/
+> [!TIP]
+> Quick start: open the [live demo](https://xeofoundry.github.io/xeoIFC/) to try xeoIFC in your browser (powered by WebAssembly).
 
-xeoIFC is a Rust engine for reading, querying, tessellating, converting and writing IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3).
+
+###   
+**xeoIFC is a Rust engine for reading, querying, tessellating, converting and writing IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3).**
 It is delivered in four forms:
 
-1. **Command-line converter** — Windows AMD64, Linux ARM64, Linux AMD64; IFC to glTF/GLB with xeokit metadata, XKT for xeokit,
-   and SLPK (I3S) for Esri ArcGIS. The successor to cxconverter.
+1. **Command-line tool** - The successor to [cxconverter](https://github.com/Creoox/creoox-ifc2gltfcxconverter), offering better geometry quality and far more capabilities. It covers the standard IFC to glTF/GLB/XKT workflow with [xeokit](https://github.com/xeokit/xeokit-sdk) metadata, and also supports SLPK (I3S) for Esri ArcGIS and raw IFC metadata.
 2. **Native library** - `xeoifc.dll` / `libxeoifc.so` with a C ABI, for desktop and server applications in C++, C#, Python, Java, ...
 3. **WebAssembly library** - wasm modules with a JavaScript/TypeScript API, for web applications.
 4. **Loader for xeokit** - loads IFC directly into a xeokit viewer, without server side conversion steps.
 
-The two libraries are the same engine with the same function groups, one for the browser and one for native programs. Each
-comes with a demo viewer (xeoIFC Web, xeoIFC Qt). All four forms run on this engine, and the libraries and the
-command-line tool share one document API (JSON ops in, JSON results out) for create, query, edit, split and merge.
+```mermaid
+flowchart TD
+    E["xeoIFC engine (Rust)<br/>read, query, tessellate, convert, write"]
+    E --> CLI["1. Command-line tool<br/>xeoifc.exe"]
+    E --> NAT["2. Native library<br/>xeoifc.dll / libxeoifc.so"]
+    E --> WASM["3. WebAssembly library<br/>wasm + JS/TS API"]
+    WASM --> XL["4. Loader for xeokit<br/>XeoIFCLoaderPlugin"]
+    CLI --> U1["Batch conversion<br/>on a server or in CI"]
+    NAT --> U2["Desktop and server apps<br/>C++, C#, Python, Java"]
+    WASM --> U3["Web apps that process<br/>IFC in the browser"]
+    XL --> U4["xeokit viewers that load<br/>IFC with no conversion step"]
+```
 
 Example use cases: [xeoIFC showcase](https://xeofoundry.github.io/xeoIFC/showcase/).
-
 
 ## 1. Command-line converter
 
@@ -30,14 +38,30 @@ The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.g
 .\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
 ```
 
+```mermaid
+flowchart LR
+    IFC[".ifc / .ifczip"] --> CLI["xeoifc CLI"]
+    CLI --> GLB[".glb / .gltf<br/>+ xeokit metadata"] --> V1["xeokit, three.js,<br/>other glTF viewers"]
+    CLI --> XKT[".xkt"] --> V2["xeokit viewer"]
+    CLI --> SLPK[".slpk (I3S)"] --> V3["Esri ArcGIS"]
+    CLI --> HTML[".html"] --> V4["Any web browser,<br/>no server needed"]
+```
+
 Features, options, output files and license key: [converter/README.md](converter/README.md)
-
-
 
 ## 2. Native library
 
 `xeoifc.dll` (`libxeoifc.so` on Linux) exposes the engine through a C ABI for desktop and server applications in C++, C#,
 Python, Java and other languages.
+
+```mermaid
+flowchart LR
+    IFC[".ifc / .ifczip"] --> LIB["xeoifc.dll / libxeoifc.so<br/>C ABI"]
+    LIB --> D["Desktop app<br/>C++ / Qt, C#"]
+    LIB --> S["Server or pipeline<br/>Python, Java"]
+    D --> R1["View, query and<br/>edit models"]
+    S --> R2["Convert, validate and<br/>extract data at scale"]
+```
 
 Library details, examples and the Qt demo viewer: [Native library](native/README.md).
 
@@ -46,8 +70,16 @@ Library details, examples and the Qt demo viewer: [Native library](native/README
 The WebAssembly library is the xeoIFC engine for web applications: wasm modules with JavaScript bindings and TypeScript
 declarations. IFC files are processed in the browser; nothing is uploaded.
 
-Library details, demo viewer, features and downloads: [WebAssembly library](webassembly/README.md).
+```mermaid
+flowchart LR
+    U["User drops<br/>.ifc file"] --> B
+    subgraph B["Browser"]
+        W["xeoIFC wasm module"] --> APP["Your web app<br/>(JS / TS)"]
+    end
+    APP --> R["Viewer, property query,<br/>model edit, export"]
+```
 
+Library details, demo viewer, features and downloads: [WebAssembly library](webassembly/README.md).
 
 ## 4. Loader for xeokit (XeoIFCLoaderPlugin)
 
@@ -56,14 +88,26 @@ the plugin runs xeoIFC in a Web Worker, unpacks its geometry buffer into a xeoki
 object tree and queries property sets from the loaded model. It loads `.ifc` and `.ifczip` files (no upload of
 any data).
 
+```mermaid
+flowchart LR
+    IFC[".ifc / .ifczip"] --> WK
+    subgraph Browser
+        WK["Web Worker<br/>xeoIFC wasm"] -- geometry buffer --> SM["xeokit SceneModel"]
+        WK -- object tree --> MM["xeokit MetaModel"]
+        SM --> V["xeokit Viewer"]
+        MM --> V
+    end
+```
+
 Documentation and live examples:
-https://xeofoundry.github.io/xeoIFC/xeokit-direct-ifc-loading/
+[https://xeofoundry.github.io/xeoIFC/xeokit-direct-ifc-loading/](https://xeofoundry.github.io/xeoIFC/xeokit-direct-ifc-loading/)
 
 The examples: a xeokit viewer that loads dropped files, and metadata from IFC for geometry from XKT.
 
 ## Authoring
 
-**New and experimental:** IFC authoring is still under active development.
+> [!WARNING]
+> New and experimental: IFC authoring is still under active development.
 
 The document API creates IFC models from scratch, including geometry, materials and property sets. The command-line tool
 runs authoring scripts. See [Authoring](authoring/README.md) for examples, screenshots and code.
