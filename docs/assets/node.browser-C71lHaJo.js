@@ -1,1 +1,0 @@
-import{A as o}from"./index-B90kgOC5.js";import"./main-BoapqcPW.js";import"./viewer_wasm-D_BtmCf6.js";function n(e){return new Proxy({},{get(i,t){if(typeof t!="symbol")throw new o(`\`${e}.${t}\` is not available in this environment; it needs a Node.js-compatible runtime`)}})}const m=n("fs"),f=n("path");export{m as fs,f as path};

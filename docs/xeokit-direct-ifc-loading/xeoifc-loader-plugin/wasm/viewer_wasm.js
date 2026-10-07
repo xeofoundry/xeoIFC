@@ -2230,6 +2230,12 @@ function __wbg_get_imports() {
             const ret = arg0.call(arg1, arg2);
             return ret;
         }, arguments); },
+        __wbg_clearBuffer_700f6bba0d974e6c: function(arg0, arg1, arg2) {
+            arg0.clearBuffer(arg1, arg2);
+        },
+        __wbg_clearBuffer_b67061873f997b6a: function(arg0, arg1, arg2, arg3) {
+            arg0.clearBuffer(arg1, arg2, arg3);
+        },
         __wbg_configure_3d64c677c7d68a15: function() { return handleError(function (arg0, arg1) {
             arg0.configure(arg1);
         }, arguments); },
@@ -2298,6 +2304,12 @@ function __wbg_get_imports() {
             const len1 = WASM_VECTOR_LEN;
             getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
             getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+        },
+        __wbg_destroy_6601bc024448d3c7: function(arg0) {
+            arg0.destroy();
+        },
+        __wbg_destroy_b5b39f25f0799295: function(arg0) {
+            arg0.destroy();
         },
         __wbg_dispatchWorkgroups_0cf298d736b85a78: function(arg0, arg1, arg2, arg3) {
             arg0.dispatchWorkgroups(arg1 >>> 0, arg2 >>> 0, arg3 >>> 0);
