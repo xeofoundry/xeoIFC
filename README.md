@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:fcf3d4413907b1b4 -->
+<!-- Generated file: edit the source in the dev repository. sha256:80eddc35c1500d0a -->
 
 # xeoIFC - the xeoFoundry IFC toolkit.
 
@@ -63,7 +63,7 @@ flowchart LR
     S --> R2["Convert, validate and<br/>extract data at scale"]
 ```
 
-Library details, examples and the Qt demo viewer: [Native library](native/README.md).
+Library details, examples and the Qt and gpui demo viewers: [Native library](native/README.md).
 
 ## 3. WebAssembly library
 
@@ -124,3 +124,6 @@ ISC, Zlib and similar permissive licences, among them `laz` for LAZ point clouds
 `earcutr` and `delaunator`), plus code derived from jcadlib and csg.js. The full list with all licence
 texts ships as `THIRD-PARTY-NOTICES.txt` in every release package and with xeoIFC Web:
 [THIRD-PARTY-NOTICES.txt](https://xeofoundry.github.io/xeoIFC/THIRD-PARTY-NOTICES.txt)
+
+The xeoIFC gpui packages add `THIRD-PARTY-NOTICES-gpui.txt` for the Rust crates of that application (gpui and its
+dependencies, under Apache-2.0, MIT and similar permissive licences).

@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
-    <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-97_B2SK4.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-B7eJqEvS.js">
-    <link rel="stylesheet" crossorigin href="./assets/main-DTl65SmO.css">
+    <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
+    <script type="module" crossorigin src="./assets/main-BoapqcPW.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-D_BtmCf6.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-C9hgy-1O.css">
   </head>
   <body>
     <div id="open-menu" role="menu" aria-label="Open file" hidden>
@@ -285,6 +285,7 @@
           <div id="settings-panel" role="dialog" aria-labelledby="settings-title" hidden>
             <button id="settings-close" class="panel-close" type="button" aria-label="Close settings"></button>
             <h2 id="settings-title">Settings</h2>
+            <h3 class="settings-group">Navigation and loading</h3>
             <label title="CAD: left drag rotates, right drag pans. ESRI: left drag pans, right drag rotates. Middle or Shift drag pans; wheel zooms in both styles."><span>Navigation style</span><select id="setting-navigation-style">
               <option value="cad">CAD</option>
               <option value="esri">ESRI</option>
@@ -294,16 +295,21 @@
               <option value="ifc-project">Append under IfcProject</option>
               <option value="ifc-site">Append under first IfcSite</option>
             </select></label>
+            <label title="IFC geometry is either already faceted (IfcFacetedBrep, IfcTriangulatedFaceSet, IfcPolygonalFaceSet, polylines) or curved (circle and arc profiles, IfcCircle, trimmed curves, arcs in IfcIndexedPolyCurve, revolved solids, cylinders, cones, spheres, advanced B-reps). Faceted geometry is shown as stored; curved geometry is converted to several straight segments on load.&#10;&#10;Full circle: this number of points, evenly spaced (default 18, range 4 to 64).&#10;Arc: its share of the circle, rounded up, with at least 3 segments; a 90 degree arc at 18 gets 5. Arcs with a large radius get more segments so that the deviation from the true curve stays small.&#10;&#10;Higher values give rounder shapes, but more triangles. Applied to the next load."><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
+            <h3 class="settings-group">Display</h3>
             <div class="settings-background-row">
               <label for="setting-background-color">Viewer background</label>
               <input id="setting-background-color" type="color" />
               <button id="setting-background-default" class="panel-secondary settings-default-button" type="button">Restore default</button>
             </div>
-            <label><span>Number of points per circle</span><input id="setting-circle-points" type="number" min="4" max="64" step="1" /></label>
-            <div class="settings-background-row">
-              <label><input id="setting-sharp-edges" type="checkbox" /> Render with extra lines at sharp mesh edges</label>
+            <label title="Some models give IfcSpace an opaque colour. Spaces without a transparency in the model are drawn with this transparency (percent). 0 keeps the model's colours."><span>Transparency override for IfcSpace</span><input id="setting-space-transparency" type="number" min="0" max="100" step="5" /></label>
+            <div class="settings-check-row">
+              <label><input id="setting-antialiasing" type="checkbox" /> Smooth edges (anti-aliasing)</label>
+            </div>
+            <div class="settings-check-row">
+              <label><input id="setting-sharp-edges" type="checkbox" /> Lines at sharp mesh edges</label>
               <button id="setting-sharp-edges-compute" class="panel-secondary settings-default-button" type="button" disabled
-                title="Sharp-edge lines are skipped on load for models over 2,000,000 triangles. Computes them for the last loaded model.">Compute edges now</button>
+                title="Sharp-edge lines are skipped on load for models over 40,000,000 triangles. Computes them for the last loaded model.">Compute edges now</button>
             </div>
             <div class="settings-show-row">
               <span>Show</span>
@@ -321,6 +327,7 @@
                 </div>
               </div>
             </div>
+            <h3 class="settings-group">Licence</h3>
             <label title="Without a valid key exported files carry an 'Evaluation version' text; the key is kept in this browser"><span>Licence key</span><input id="licence-key" type="password" autocomplete="off" spellcheck="false" /></label>
             <div id="licence-status" aria-live="polite"></div>
           </div>
@@ -632,19 +639,22 @@
                   <option value="slpk">I3S scene layer (.slpk)</option>
                 </select>
                 <label id="outer-shape-epsg-row" title="EPSG code of the projected CRS of the I3S layer. Leave empty when the IFC files declare it in IfcProjectedCRS; a declared code must be the same." hidden>EPSG <input id="outer-shape-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the I3S layer" /></label>
-                <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. Separate files are packaged in one ZIP download; an I3S scene layer package holds all models, for ArcGIS." disabled>Export kept results</button>
+                <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. A result that is not kept yet is kept first. Separate files are packaged in one ZIP download; an I3S scene layer package holds all models, for ArcGIS." disabled>Export results</button>
               </div>
             </div>
+            <div id="outer-shape-export-hint" class="section-hint" aria-live="polite"></div>
             <dl id="outer-shape-stats"></dl>
             <details id="outer-shape-details" hidden><summary>Per-model statistics</summary><div id="outer-shape-model-stats"></div></details>
             <div id="outer-shape-status" class="section-hint" aria-live="polite">Checks visibility against all loaded models (hidden elements too), spaces excluded. Only checked models receive results. Review the combined preview before keeping the results.</div>
+            <div id="outer-shape-progress-row" hidden><progress id="outer-shape-progress" max="1"></progress><span id="outer-shape-elapsed" class="section-hint"></span></div>
+            <div id="outer-shape-slow" class="section-hint" role="status" hidden>Close-up passes re-test small objects that the main views could not decide. To finish sooner, cancel and lower "Close-up pass budget (GPU)"; objects left undecided then follow "Unresolved geometry (GPU)".</div>
             <div id="outer-shape-stalled" class="section-hint" role="status" hidden>No progress for over a minute. Browser performance restrictions (background tab, GPU or memory limits) may be halting the computation. The <a href="https://github.com/xeofoundry/xeoIFC/blob/main/converter/README.md" target="_blank" rel="noopener">xeoIFC CLI</a> runs the same extraction without them: see "Equivalent CLI input" below.</div>
             </div>
             <section class="outer-shape-cli" aria-labelledby="outer-shape-cli-title">
               <h3 id="outer-shape-cli-title">Equivalent CLI input</h3>
-              <p class="section-hint">The <a href="https://github.com/xeofoundry/xeoIFC/blob/main/converter/README.md" target="_blank" rel="noopener">xeoIFC command-line converter</a> runs the same extraction as a native program, without the memory and GPU limits of a browser.</p>
+              <p class="section-hint">For large models, run this extraction with the <a href="https://github.com/xeofoundry/xeoIFC/blob/main/converter/README.md" target="_blank" rel="noopener">xeoIFC command-line converter</a>: a native program without the memory and GPU limits of a browser.</p>
               <ul id="outer-shape-cli-note" class="section-hint"></ul>
-              <label for="outer-shape-cli-command">Command (PowerShell)</label>
+              <label for="outer-shape-cli-command">Command</label>
               <textarea id="outer-shape-cli-command" readonly rows="4" spellcheck="false"></textarea>
               <button id="outer-shape-cli-copy" class="panel-secondary" type="button">Copy command</button>
               <span id="outer-shape-cli-copy-status" class="section-hint" role="status"></span>
@@ -849,6 +859,6 @@
           <div id="error-banner" hidden></div>
         </div>
       </div>
-    </div>
+    </div>
   </body>
 </html>

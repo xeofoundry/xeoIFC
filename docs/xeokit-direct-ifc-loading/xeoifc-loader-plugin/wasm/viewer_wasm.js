@@ -532,6 +532,9 @@ export class Viewer {
     /**
      * `transparent_opaque` false: instances with a transparent source colour are tested like the others, but hide nothing.
      * Omitted `keep_unresolved` defaults to false: remove undecided meshes; true explicitly opts into keeping them.
+     * `on_progress(fraction, stage, done, total, pending)` returns false to cancel. Stage 0 = shape simplification,
+     * 1 = views (`done` of `total`), 2 = close-up passes (`done` of at most `total`, `pending` elements undecided),
+     * 3 = ray checks (`done` of `total`).
      * @param {Uint32Array} handles
      * @param {number} quality
      * @param {Uint8Array} classes
@@ -824,6 +827,12 @@ export class Viewer {
         return ret;
     }
     /**
+     * @param {boolean} on
+     */
+    set_antialiasing(on) {
+        wasm.viewer_set_antialiasing(this.__wbg_ptr, on);
+    }
+    /**
      * Rail/Road axis segments in document metres and the model's upload placement; empty data clears it.
      * @param {Float64Array} data
      * @param {Float64Array} placement
@@ -1054,6 +1063,13 @@ export class Viewer {
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.viewer_set_source_sharp_edges(this.__wbg_ptr, source, data, ptr0, len0);
         return ret !== 0;
+    }
+    /**
+     * Transparency (percent) for the `IfcSpace` elements the model draws opaque; 0 keeps the model's colours.
+     * @param {number} percent
+     */
+    set_space_transparency(percent) {
+        wasm.viewer_set_space_transparency(this.__wbg_ptr, percent);
     }
     /**
      * Upload non-pickable terrain guide lines, as xyz xyz pairs.
@@ -2116,11 +2132,11 @@ export function worker_set_load_profiling(enabled) {
 
 /**
  * Compute dark structural edge lines of every model loaded since the last pass, after they are visible. The budgets
- * count over all of them. `force` (the user asked for the lines) lifts the triangle budget and the heap gate; over its
- * own line budget it keeps the edges of the largest instances. Returns
+ * count over all of them. Over the line budget the pass keeps the edges of the largest instances, up to
+ * `EDGE_FORCED_LINE_BUDGET`. `force` (the user asked for the lines) lifts the triangle budget and the heap gate. Returns
  * `{ sources, edges, edgeElements, edgeTotal, deferred, heapMB }`: `edges[i]` and `edgeElements[i]` belong to model
- * `sources[i]`, `deferred` means an unforced pass went over a budget and the scenes stay for a forced one, `edgeTotal`
- * is the segment count of the whole scenes after a forced pass.
+ * `sources[i]`, `deferred` means an unforced pass went over the triangle budget and the scenes stay for a forced one,
+ * `edgeTotal` is the segment count of the whole scenes after a pass of the largest instances.
  * @param {boolean} force
  * @returns {any}
  */
@@ -2194,6 +2210,10 @@ function __wbg_get_imports() {
         __wbg__wbg_cb_unref_fffb441def202758: function(arg0) {
             arg0._wbg_cb_unref();
         },
+        __wbg_apply_3ac86a26fdb56c05: function() { return handleError(function (arg0, arg1, arg2) {
+            const ret = arg0.apply(arg1, arg2);
+            return ret;
+        }, arguments); },
         __wbg_beginComputePass_705eb14eefc2b94e: function(arg0, arg1) {
             const ret = arg0.beginComputePass(arg1);
             return ret;
@@ -2726,6 +2746,10 @@ function __wbg_get_imports() {
         },
         __wbg_now_86c0d4ba3fa605b8: function() {
             const ret = Date.now();
+            return ret;
+        },
+        __wbg_of_d1905c2e39225d15: function(arg0, arg1, arg2, arg3, arg4) {
+            const ret = Array.of(arg0, arg1, arg2, arg3, arg4);
             return ret;
         },
         __wbg_onSubmittedWorkDone_1460145eecea40ef: function(arg0) {
@@ -3458,17 +3482,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 419, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 421, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 458, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 460, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 419, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 421, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },

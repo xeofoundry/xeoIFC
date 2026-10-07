@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:a8ca480994bc3a76 -->
+<!-- Generated file: edit the source in the dev repository. sha256:c0c2f4f37254af92 -->
 # One engine, two libraries and a command-line tool
 
 [Back to xeoIFC](../README.md#architecture)
@@ -191,6 +191,8 @@ xeoifc_job_free(job);
 - xeoIFC Qt (`apps/xeoifc-qt`, MIT) is the reference host: a C++ Qt Widgets application in which the DLL parses, tessellates and
   renders into a native child window while the Qt side owns the ribbon, tree, properties and dialogs. It uses no
   Rust and no engine crate directly, so it doubles as the compatibility test of the header.
+- xeoIFC gpui (`apps/xeoifc-gpui`, MIT) is the same host in Rust with gpui, also on the C header only: the DLL renders into a
+  child window of the gpui window, which is transparent to the mouse so that gpui keeps all input.
 - Rust hosts do not need the C layer: they link `ifc-session`, `ifc-geom` and `viewer-render` directly and make the
   same calls (the in-tree `crates/viewer/qt` cxx-qt viewer does).
 - The DLL carries the whole engine, so a native host has no wasm 4 GiB cap and no prune requirement; `retainFull`

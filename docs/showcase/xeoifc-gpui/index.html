@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeoIFC showcase - a Rust desktop IFC viewer on xeoifc.dll, with gpui</title>
+    <link rel="icon" href="../../xeokit-icon.svg"/>
+    <style>
+        /* Same README look as ../index.html. */
+        :root {
+            color-scheme: light dark;
+            --ground: #ffffff;
+            --ink: #1f2328;
+            --muted: #59636e;
+            --line: #d1d9e0;
+            --link: #0969da;
+            --code: #eff1f3;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ground: #0d1117;
+                --ink: #f0f6fc;
+                --muted: #9198a1;
+                --line: #3d444d;
+                --link: #4493f8;
+                --code: #262c36;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: var(--ground);
+            margin: 0;
+        }
+
+        main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
+
+        h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 24px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h3 { font-size: 1.25em; font-weight: 600; margin: 24px 0 16px; }
+
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 85%;
+            background: var(--code);
+            border-radius: 6px;
+        }
+
+        code { padding: .2em .4em; }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; }
+        pre code { padding: 0; background: none; font-size: 100%; }
+
+        figure { margin: 0 0 16px; }
+        figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+        figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+        table { border-collapse: collapse; margin: 0 0 16px; }
+        th, td { border: 1px solid var(--line); padding: 6px 13px; text-align: left; vertical-align: top; }
+        td.number { text-align: right; white-space: nowrap; }
+        td code { overflow-wrap: anywhere; }
+
+        /* Wide tables scroll inside the page on narrow screens, like the code blocks. */
+        .wide { overflow-x: auto; margin: 0 0 16px; }
+        .wide table { margin: 0; }
+
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    </style>
+</head>
+<body>
+<main>
+    <h1>A Rust desktop IFC viewer on xeoifc.dll, with gpui</h1>
+
+    <p>xeoIFC gpui is a desktop IFC viewer for Windows without Qt. It is about 1,700 lines of Rust with
+        <a href="https://www.gpui.rs/">gpui</a>, the UI framework of the Zed editor, and the gpui-component widgets, and its
+        source code is open (MIT licence).</p>
+
+    <p>The IFC work is done by <code>xeoifc.dll</code>, the native library of xeoIFC, through the same plain C header that the
+        <a href="../xeoifc-qt/">Qt viewer</a> uses. There is no Rust crate of the library: the application declares the C
+        functions it calls. This page shows how a gpui window hosts the 3D view of the library, and the calls in Rust.</p>
+
+    <h2>1. The application</h2>
+
+    <figure>
+        <a href="xeoifc-gpui.png"><img src="xeoifc-gpui.png" width="1282" height="832"
+            alt="xeoIFC gpui with the Duplex model: toolbar, model tree, 3D view with a section plane, properties panel"></a>
+        <figcaption>xeoIFC gpui with the <a href="../../Duplex.ifc">Duplex</a> model. The tree, the toolbar and the properties are
+            gpui elements; the 3D view is drawn by the library.</figcaption>
+    </figure>
+
+    <ul>
+        <li>Open <code>.ifc</code> and <code>.ifczip</code> files (IFC 2x3, IFC 4, IFC 4.3) and LandXML from the file dialog, by drag
+            and drop or from the command line. Several files load into one scene, placed by their georeference.</li>
+        <li>Rotate about the point under the cursor, pan and zoom. Click an element to select it.</li>
+        <li>Model tree by spatial structure, class, type and material, with a filter and a visibility box per row; attributes and
+            property sets of the selected element.</li>
+        <li>Find elements by entity id, GlobalId or a regular expression over names.</li>
+        <li>Hide, isolate and show all.</li>
+        <li>Section planes along X, Y and Z with a 2D view of the section.</li>
+    </ul>
+
+    <p>The <a href="../xeoifc-qt/">Qt viewer</a> does more: IFC export (split and merge), sections along rail and road axes,
+        the georeferencing inspector and reload of changed files. The library functions for these are the same.</p>
+
+    <h2>2. Download</h2>
+
+    <p>From the <a href="https://github.com/xeofoundry/xeoIFC/releases/">releases page</a>:</p>
+    <ul>
+        <li><code>xeoifc-gpui-windows-amd64.zip</code>: the application ready to run. Unpack it and start
+            <code>xeoifc-gpui.exe</code>.</li>
+        <li><code>xeoifc-gpui-source.zip</code>: the Cargo project with the source code (MIT licence), <code>xeoifc.h</code>,
+            <code>xeoifc.dll</code> with its import library for Windows x64, a README with the build steps, the licence texts
+            and the notices of the open-source parts.</li>
+    </ul>
+
+    <h2>3. How a gpui window hosts the 3D view</h2>
+
+    <p>On Windows gpui draws with its own Direct3D 11 renderer and cannot show a texture of another renderer. The library
+        renders with wgpu into a native window that you give it. So the application creates a child window of the gpui window,
+        gives it to the library, and keeps it on the bounds of a gpui element.</p>
+
+    <pre><code>// gpui::Window implements raw_window_handle::HasWindowHandle: the HWND of the gpui window.
+let parent = match HasWindowHandle::window_handle(window).map(|handle| handle.as_raw()) {
+    Ok(RawWindowHandle::Win32(handle)) =&gt; HWND(handle.hwnd.get() as *mut _),
+    _ =&gt; panic!("the gpui window has no HWND"),
+};
+let child = CreateWindowExW(WINDOW_EX_STYLE(0), w!("XeoIfcViewport"), None, WS_CHILD | WS_CLIPSIBLINGS,
+                            0, 0, 1, 1, Some(parent), None, Some(instance.into()), None)?;
+
+// The library draws into the child window with its own surface (sizes are physical pixels).
+let viewer = xeoifc_viewer_create(child.0 as u64, null_mut(), width, height, &amp;mut error);</code></pre>
+
+    <p>Three details make it work:</p>
+    <ul>
+        <li><b>Mouse input stays with gpui.</b> The child window answers <code>WM_NCHITTEST</code> with
+            <code>HTTRANSPARENT</code>, so Windows sends the mouse messages to the gpui window. The gpui element under the 3D view
+            gets them like any other element and calls the camera functions of the library.</li>
+        <li><b>No DirectComposition.</b> <code>main</code> sets <code>GPUI_DISABLE_DIRECT_COMPOSITION=true</code> before gpui
+            starts. With DirectComposition the gpui surface covers the child window.</li>
+        <li><b>Nothing over the 3D view.</b> gpui cannot draw on top of a child window. The application has no popup, menu or
+            tooltip that could reach into the view; its panels sit beside the view and push it.</li>
+    </ul>
+
+    <p>A gpui <code>canvas</code> element reports its bounds on every layout, and the child window follows:</p>
+
+    <pre><code>canvas(
+    move |bounds, window, cx| {
+        let scale = window.scale_factor();
+        this.update(cx, |this, _| this.place(bounds, scale));   // SetWindowPos + xeoifc_viewer_resize
+    },
+    |_, _, _, _| {},
+)</code></pre>
+
+    <pre><code>// Left drag: rotate about the surface point under the cursor. Positions are physical pixels in the 3D view.
+fn mouse_down(&amp;mut self, event: &amp;MouseDownEvent, _: &amp;mut Window, _: &amp;mut Context&lt;Self&gt;) {
+    let (x, y) = self.physical_u32(event.position);
+    viewer.anchor_pick(x, y);                                    // xeoifc_viewer_anchor_pick
+    ...
+}
+fn mouse_move(&amp;mut self, event: &amp;MouseMoveEvent, _: &amp;mut Window, _: &amp;mut Context&lt;Self&gt;) {
+    ...
+    viewer.orbit(dx * Z_ROTATION_SPEED, dy * ROTATION_SPEED);    // xeoifc_viewer_orbit
+}</code></pre>
+
+    <p>The same pattern works for any renderer that takes a native window handle.</p>
+
+    <h2>4. The library from Rust</h2>
+
+    <p>The library has a plain C interface: functions, opaque handles, and UTF-8 JSON strings in and out.
+        <code>src/ffi.rs</code> declares the 57 functions that the application uses, and <code>src/engine.rs</code> wraps them in
+        three types that free what the library returns: <code>Session</code>, <code>LoadJob</code> and <code>Viewer</code>.</p>
+
+    <pre><code>#[link(name = "xeoifc.dll", kind = "dylib")]
+unsafe extern "C" {
+    pub fn xeoifc_session_new() -&gt; *mut XeoIfcSession;
+    pub fn xeoifc_load_start(session: *mut XeoIfcSession, path: *const c_char, options_json: *const c_char,
+                             callbacks: *const XeoIfcLoadCallbacks) -&gt; *mut XeoIfcJob;
+    pub fn xeoifc_job_poll(session: *mut XeoIfcSession, job: *mut XeoIfcJob, status_json: *mut *mut c_char) -&gt; c_int;
+    pub fn xeoifc_viewer_frame(viewer: *mut XeoIfcViewer) -&gt; c_int;
+    ...
+}</code></pre>
+
+    <h3>Load a file in the background</h3>
+
+    <p>A load job reads and tessellates the file on its own thread inside the library. A gpui task polls it every 30 ms on the
+        main thread and gives the result to the renderer.</p>
+
+    <pre><code>cx.spawn(async move |this, cx| {
+    loop {
+        cx.background_executor().timer(Duration::from_millis(30)).await;
+        if this.update(cx, |this, cx| this.poll(cx)).is_err() { break; }
+    }
+}).detach();
+
+match self.session.poll(&amp;job) {                          // xeoifc_job_poll: 0 running, 1 done, 2 failed, 3 cancelled
+    Poll::Running { phase, done, total } =&gt; { /* status line */ }
+    Poll::Done(status) =&gt; {
+        let pack = job.take_pack();                       // the tessellated model
+        let scene = viewer.set_scene(&amp;pack, add, placement.as_ref());
+        let tree = ModelTree::build(&amp;status["tree"], &amp;status["groupings"]);
+        ...
+    }
+    ...
+}</code></pre>
+
+    <h3>Find elements</h3>
+
+    <p>The document API is one function, <code>xeoifc_call</code>: a JSON request in, a JSON response out.</p>
+
+    <pre><code>let out = self.session.call("query.select", json!({ "text": "name ~ \"M_Fixed\"", "includeRefs": true, "limit": 100000 }), &amp;doc_id);
+// {"ok":true,"result":{"count":40,"refs":["#6426","#6497",..],..},..}
+let found: Vec&lt;ElementRef&gt; = ...;
+viewer.fit_elements(&amp;found);                              // xeoifc_viewer_fit_elements
+viewer.set_selection(&amp;found);                             // xeoifc_viewer_set_selection</code></pre>
+
+    <h3>Section planes</h3>
+
+    <pre><code>// Four floats per plane: unit normal and -dot(point, normal); at most six planes.
+viewer.set_clip_planes(&amp;[0.0, 1.0, 0.0, -7.07]);          // xeoifc_viewer_set_clip_planes
+viewer.view_section(Some(&amp;[x, y, z, 0.0, 1.0, 0.0]));     // a 2D view straight at the section</code></pre>
+
+    <p>What the library can do, with load times: <a href="../xeoifc-qt/">the Qt viewer page</a>.</p>
+
+    <h2>5. Build it yourself</h2>
+
+    <p>You need 64-bit Windows 10 or 11, the Rust stable toolchain with the MSVC target, and the Visual Studio 2022 or 2026 Build
+        Tools with a Windows SDK. In release builds gpui compiles its shaders with <code>fxc.exe</code> of the Windows SDK, so
+        build from a Visual Studio developer prompt. In the unpacked <code>xeoifc-gpui-source.zip</code>:</p>
+
+    <pre><code>cargo run --release -- model.ifc</code></pre>
+
+    <p>The first build compiles gpui and about 400 other crates and takes several minutes. The build links
+        <code>sdk\lib\windows-x64\xeoifc.dll.lib</code> and copies <code>xeoifc.dll</code> next to the exe.
+        <code>Cargo.toml</code> pins gpui to an exact version: gpui has no stable release yet and its API changes between
+        versions.</p>
+
+    <p>Linux and macOS are not supported. gpui runs there, but the application has only the Windows child window; on Linux the
+        library needs an X11 window, as in the <a href="../xeoifc-qt/">Qt viewer</a>.</p>
+
+    <h2>6. Licence</h2>
+
+    <p>xeoIFC gpui is open source under the MIT licence. You can use, change and distribute it, also in commercial products.
+        gpui, gpui-component and the other Rust crates in the executable have their own licences (Apache-2.0, MIT and similar);
+        <code>THIRD-PARTY-NOTICES-gpui.txt</code> in both zips lists them with their texts.</p>
+
+    <p><code>xeoifc.dll</code> is not open source. It is licensed under the
+        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>sdk/LICENSE.txt</code> in the source zip): you
+        can use and redistribute it unmodified, in binary form and free of charge, solely for testing and evaluation. For
+        commercial or production use, contact <a href="https://xeofoundry.com">xeoFoundry</a>. All functions work without a
+        licence key. Without a key, each IFC file that the library writes gets one more element: an
+        <code>IfcBuildingElementProxy</code> with the text "xeoIFC evaluation version" next to the model. A licence key from
+        <a href="https://xeofoundry.com">xeoFoundry</a> removes it; enter it under Settings.</p>
+
+    <footer>
+        <a href="../">All showcases</a> -
+        More: <a href="../xeoifc-web/">a browser IFC viewer on the WebAssembly library</a> - <a href="../xeoifc-qt/">a desktop IFC
+        viewer with Qt</a> - <a href="../villa/">a villa from one picture</a> -
+        <a href="../garabit/">the Garabit viaduct from Eiffel's drawings</a> - <a href="../integrate/">build on xeoIFC</a> -
+        Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
+        Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
+    </footer>
+</main>
+</body>
+</html>
