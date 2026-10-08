@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xeoIFC showcase - a C# desktop IFC viewer on xeoifc.dll, with WPF</title>
+    <link rel="icon" href="../../xeokit-icon.svg"/>
+    <style>
+        /* Same README look as ../index.html. */
+        :root {
+            color-scheme: light dark;
+            --ground: #ffffff;
+            --ink: #1f2328;
+            --muted: #59636e;
+            --line: #d1d9e0;
+            --link: #0969da;
+            --code: #eff1f3;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ground: #0d1117;
+                --ink: #f0f6fc;
+                --muted: #9198a1;
+                --line: #3d444d;
+                --link: #4493f8;
+                --code: #262c36;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--ink);
+            background: var(--ground);
+            margin: 0;
+        }
+
+        main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
+
+        h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h2 { font-size: 1.5em; font-weight: 600; margin: 24px 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+        h3 { font-size: 1.25em; font-weight: 600; margin: 24px 0 16px; }
+
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 85%;
+            background: var(--code);
+            border-radius: 6px;
+        }
+
+        code { padding: .2em .4em; }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; }
+        pre code { padding: 0; background: none; font-size: 100%; }
+
+        figure { margin: 0 0 16px; }
+        figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; }
+        figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+        footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    </style>
+</head>
+<body>
+<main>
+    <h1>A C# desktop IFC viewer on xeoifc.dll, with WPF</h1>
+
+    <p>xeoIFC WPF is a desktop IFC viewer for Windows in C#. It has the features and the layout of the
+        <a href="../xeoifc-qt/">Qt viewer</a>, in about 6,500 lines of C# and XAML with WPF on .NET 10, without a NuGet package.
+        Its source code is open (MIT licence).</p>
+
+    <p>The IFC work is done by <code>xeoifc.dll</code>, the native library of xeoIFC, through the same plain C header that the
+        Qt viewer uses. There is no .NET assembly of the library: one source file declares the functions of the header for
+        P/Invoke. This page shows how a WPF window hosts the 3D view of the library, and the calls in C#.</p>
+
+    <h2>1. The application</h2>
+
+    <figure>
+        <a href="xeoifc-wpf.png"><img src="xeoifc-wpf.png" width="1557" height="1018"
+            alt="xeoIFC WPF with the Duplex model: tabs, 3D view cut by a section plane, tool buttons, model tree, properties and the section panel"></a>
+        <figcaption>xeoIFC WPF with the <a href="../../Duplex.ifc">Duplex</a> model, cut by a section plane. The tabs, the tree,
+            the properties and the section panel are WPF controls; the 3D view is drawn by the library.</figcaption>
+    </figure>
+
+    <ul>
+        <li>Open <code>.ifc</code> and <code>.ifczip</code> files (IFC 2x3, IFC 4, IFC 4.3) and LandXML from the file dialog, the
+            recent list, by drag and drop or from the command line. Several files load in parallel into one scene, placed by
+            their georeference.</li>
+        <li>Rotate about the point under the cursor, pan and zoom. Click an element, or drag a rectangle to select many.</li>
+        <li>Model tree by spatial structure, class, type and material, with a search field and a visibility box per row;
+            attributes and property sets of the selected element.</li>
+        <li>Find elements by entity id, GlobalId or name.</li>
+        <li>Hide, isolate and make transparent.</li>
+        <li>Sharp edges and drafting lines: axes, footprints, plan lines, annotations and grids.</li>
+        <li>Section planes along X, Y and Z or across a rail or road axis, with a 2D view of the section.</li>
+        <li>The rail and road axes of a model, and a check of its georeferencing against reference points.</li>
+        <li>Write the selection, or several loaded files, to one new IFC file (split and merge).</li>
+        <li>Reload files that change on disk, with the same view.</li>
+    </ul>
+
+    <h2>2. Download</h2>
+
+    <p>From the <a href="https://github.com/xeofoundry/xeoIFC/releases/">releases page</a>:</p>
+    <ul>
+        <li><code>xeoifc-wpf-windows-amd64.zip</code>: the application ready to run. It needs the
+            <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> (x64) or a newer one. Unpack
+            the zip and start <code>xeoifc-wpf.exe</code>.</li>
+        <li><code>xeoifc-wpf-source.zip</code>: the .NET project with the source code (MIT licence), <code>xeoifc.h</code>,
+            <code>xeoifc.dll</code> for Windows x64, a README with the build steps, the licence texts and the notices of the
+            open-source parts in the library.</li>
+    </ul>
+
+    <h2>3. How a WPF window hosts the 3D view</h2>
+
+    <p>WPF draws a window with its own renderer. The library renders with wgpu into a native window that you give it. WPF has
+        a class for this case: an <code>HwndHost</code> element owns a native child window and keeps it on its place in the
+        layout. The application creates the child window there and gives it to the library.</p>
+
+    <pre><code>public sealed class ViewportHost : HwndHost
+{
+    protected override HandleRef BuildWindowCore(HandleRef hwndParent)
+    {
+        _hwnd = Win32.CreateViewportWindow(hwndParent.Handle);   // CreateWindowExW: WS_CHILD, no background brush
+        return new HandleRef(this, _hwnd);
+    }
+    ...
+}
+
+// At the first WM_SIZE of the child window. The library draws into it with its own surface (sizes are physical pixels).
+_viewer = Viewer.Create(_hwnd, width, height, out var error);    // xeoifc_viewer_create
+CompositionTarget.Rendering += OnRendering;                       // every WPF frame: xeoifc_viewer_frame</code></pre>
+
+    <p>Three details make it work:</p>
+    <ul>
+        <li><b>Mouse input in the window procedure.</b> <code>HwndHost</code> passes the messages of the child window to its
+            <code>WndProc</code> method. The positions there are physical pixels in the 3D view, the unit of the library, on
+            every monitor scale. The keyboard stays with WPF: the element can have the focus and gets the key events.</li>
+        <li><b>One call per frame.</b> <code>CompositionTarget.Rendering</code> calls <code>xeoifc_viewer_frame</code>, which
+            draws only when something changed. Hover and wheel zoom read back from the GPU, so the last position of each is
+            applied there once per frame, not once per mouse message.</li>
+        <li><b>A second window over the 3D view.</b> WPF cannot draw on top of a native child window. The tool buttons, the
+            console, the welcome card, the drop zones and the selection rectangle are in a window of their own: without a
+            border, transparent per pixel, owned by the main window and kept on the screen rectangle of the 3D view. Its fully
+            transparent pixels pass the mouse on to the view below.</li>
+    </ul>
+
+    <pre><code>protected override nint WndProc(nint hwnd, int msg, nint wParam, nint lParam, ref bool handled)
+{
+    int x = Win32.LoWord(lParam), y = Win32.HiWord(lParam);
+    var keys = (int)wParam;
+    switch (msg)
+    {
+        case Win32.WM_SIZE:
+            var (w, h) = ((uint)(lParam &amp; 0xFFFF), (uint)((lParam &gt;&gt; 16) &amp; 0xFFFF));
+            EnsureViewer(w, h);
+            if (w &gt; 0 &amp;&amp; h &gt; 0) _viewer?.Resize(w, h);               // xeoifc_viewer_resize
+            Placed?.Invoke();
+            break;
+        case Win32.WM_LBUTTONDOWN:
+            Press(Button.Left, x, y, (keys &amp; Win32.MK_SHIFT) != 0);  // xeoifc_viewer_anchor_pick: rotate about this point
+            break;
+        case Win32.WM_MOUSEMOVE:
+            Move(x, y);                                              // xeoifc_viewer_orbit or xeoifc_viewer_pan_to
+            break;
+        ...
+    }
+    return base.WndProc(hwnd, msg, wParam, lParam, ref handled);
+}</code></pre>
+
+    <pre><code>&lt;Window x:Class="XeoIfcWpf.ViewOverlay" ...
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
+        ShowInTaskbar="False" ShowActivated="False" Focusable="False" ...&gt;</code></pre>
+
+    <pre><code>// MainWindow: the overlay stays above its owner and follows the native window of the 3D view.
+_overlay.Owner = this;
+Viewport.Placed += GlueOverlay;
+
+// ViewOverlay: physical pixels, so it is exact on every monitor scale.
+public void Glue(nint viewport)
+{
+    if (_hwnd == 0 || viewport == 0 || !Win32.GetWindowRect(viewport, out var r))
+    {
+        return;
+    }
+    Win32.SetWindowPos(_hwnd, 0, r.Left, r.Top, r.Width, r.Height,
+                       Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE | Win32.SWP_NOOWNERZORDER);
+}</code></pre>
+
+    <p>The overlay has the window style <code>WS_EX_NOACTIVATE</code>, so a click on a tool button leaves the main window
+        active. The same pattern works for any renderer that takes a native window handle.</p>
+
+    <h2>4. The library from C#</h2>
+
+    <p>The library has a plain C interface: functions, opaque handles, and UTF-8 JSON strings in and out.
+        <code>Interop/Native.cs</code> declares the 87 functions of the header with <code>LibraryImport</code>, and
+        <code>Interop/XeoIfc.cs</code> wraps them in three classes that free what the library returns: <code>Session</code>,
+        <code>LoadJob</code> and <code>Viewer</code>. The two files do not use WPF; you can copy them into your own .NET
+        project.</p>
+
+    <pre><code>internal static unsafe partial class Native
+{
+    private const string Lib = "xeoifc";
+
+    [LibraryImport(Lib)] public static partial nint xeoifc_session_new();
+    [LibraryImport(Lib, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial nint xeoifc_call(nint session, string requestJson);
+    [LibraryImport(Lib, StringMarshalling = StringMarshalling.Utf8)]
+    public static partial nint xeoifc_load_start(nint session, string path, string? optionsJson, XeoIfcLoadCallbacks* callbacks);
+    [LibraryImport(Lib)] public static partial int xeoifc_job_poll(nint session, nint job, out nint statusJson);
+    [LibraryImport(Lib)] public static partial int xeoifc_viewer_frame(nint viewer);
+    ...
+}
+
+/// &lt;summary&gt;A string of the library as a .NET string; gives the memory back.&lt;/summary&gt;
+public static string? String(nint s)
+{
+    if (s == 0) return null;
+    var text = Marshal.PtrToStringUTF8(s);
+    Native.xeoifc_free_string(s);
+    return text;
+}</code></pre>
+
+    <h3>Load a file in the background</h3>
+
+    <p>A load job reads and tessellates the file on its own thread inside the library, and calls back on that thread. The
+        callbacks are static C# methods that only store the last progress. A <code>DispatcherTimer</code> polls the job every
+        30 ms on the GUI thread and gives the result to the renderer.</p>
+
+    <pre><code>_self = GCHandle.Alloc(this);
+var callbacks = new Native.XeoIfcLoadCallbacks
+{
+    User = (void*)GCHandle.ToIntPtr(_self),
+    Progress = &amp;OnProgress,
+    Snapshot = snapshots ? &amp;OnSnapshot : null,
+};
+_job = Native.xeoifc_load_start(session.Raw, path, options.ToJsonString(), &amp;callbacks);
+
+// The two callbacks run on the job thread. An exception must not cross into the DLL.
+[UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+private static void OnProgress(void* user, byte* phase, uint done, uint total)
+{
+    try
+    {
+        if (GCHandle.FromIntPtr((nint)user).Target is LoadJob job)
+        {
+            Volatile.Write(ref job._progress, new ProgressNote(Marshal.PtrToStringUTF8((nint)phase) ?? "", done, total));
+        }
+    }
+    catch { }
+}</code></pre>
+
+    <pre><code>var code = Native.xeoifc_job_poll(_session.Raw, _job, out var status);   // 0 running, 1 done, 2 failed, 3 cancelled
+...
+case 1: Finished?.Invoke(Take.Object(status)); break;
+
+// MainWindow, when the job has finished:
+using (var pack = job.TakePack())                                         // the tessellated model, in the memory of the library
+{
+    scene = pack == null ? -1 : viewer.SetScene(pack, _hub.Models.Count == 0 ? 0 : 1, placement);
+}
+...
+Tree.AddModel(model, tree, Parse(status["groupings"]));</code></pre>
+
+    <h3>Find elements</h3>
+
+    <p>The document API is one function, <code>xeoifc_call</code>: a JSON request in, a JSON response out.</p>
+
+    <pre><code>// A page holds 10,000 results at most: follow the cursor to the end.
+string? cursor = null;
+do
+{
+    var args = new JsonObject { ["text"] = text, ["includeRefs"] = true, ["limit"] = 10000 };   // text: name ~ "M_Fixed"
+    if (cursor != null) args["cursor"] = cursor;
+    var reply = _hub.Session.Call("query.select", args, model.DocId);
+    ...
+    var result = reply["result"];                                 // {"count":40,"refs":["#6293","#6412",..],..}
+    foreach (var entry in result?["refs"] as JsonArray ?? [])
+    {
+        if (entry?.ToString() is ['#', .. var number] &amp;&amp; uint.TryParse(number, out var entity))
+            found.Add(new ElementRef(model.Scene, entity));
+    }
+    cursor = result?["nextCursor"]?.ToString();
+}
+while (!string.IsNullOrEmpty(cursor));</code></pre>
+
+    <pre><code>FindPage.Found += elements =&gt; Viewport.Viewer?.FitElements(AsSpan(elements));   // xeoifc_viewer_fit_elements</code></pre>
+
+    <h3>Section planes</h3>
+
+    <pre><code>// A plane is its unit normal and -dot(point, normal).
+var values = _planes.SelectMany(p =&gt; new[] { p.Normal.X, p.Normal.Y, p.Normal.Z, -Vector3.Dot(p.Point, p.Normal) }).ToArray();
+viewer.SetClipPlanes(values);                                     // xeoifc_viewer_set_clip_planes, at most six planes
+
+// A 2D view straight at the section.
+_viewport.Viewer?.ViewSection([plane.Point.X, plane.Point.Y, plane.Point.Z, plane.Normal.X, plane.Normal.Y, plane.Normal.Z]);</code></pre>
+
+    <p>What the library can do, with load times: <a href="../xeoifc-qt/">the Qt viewer page</a>.</p>
+
+    <h2>5. Build it yourself</h2>
+
+    <p>You need 64-bit Windows 10 or 11 and the <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 SDK</a>.
+        The project uses no NuGet packages. In the unpacked <code>xeoifc-wpf-source.zip</code>:</p>
+
+    <pre><code>dotnet run -c Release -- model.ifc</code></pre>
+
+    <p>The build copies <code>sdk\lib\windows-x64\xeoifc.dll</code> next to the exe. Visual Studio 2026 opens
+        <code>xeoifc-wpf.csproj</code> directly. This command writes the application as one file, which runs on the .NET
+        Desktop Runtime of the machine:</p>
+
+    <pre><code>dotnet publish -c Release -p:PublishSingleFile=true -o publish</code></pre>
+
+    <p>Linux and macOS are not supported, because WPF runs on Windows only. The <a href="../xeoifc-qt/">Qt viewer</a> runs on
+        Linux.</p>
+
+    <h2>6. Licence</h2>
+
+    <p>xeoIFC WPF is open source under the MIT licence. You can use, change and distribute it, also in commercial products.
+        The xeokit logo files in <code>Resources/</code> and the logo shape in <code>Styles.xaml</code> are not covered by the
+        MIT licence. The application uses no third-party packages, and .NET is not in the zips.</p>
+
+    <p><code>xeoifc.dll</code> is not open source. It is licensed under the
+        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>sdk/LICENSE.txt</code> in the source zip): you
+        can use and redistribute it unmodified, in binary form and free of charge, solely for testing and evaluation. For
+        commercial or production use, contact <a href="https://xeofoundry.com">xeoFoundry</a>. All functions work without a
+        licence key. Without a key, each IFC file that the library writes gets one more element: an
+        <code>IfcBuildingElementProxy</code> with the text "xeoIFC evaluation version" next to the model. A licence key from
+        <a href="https://xeofoundry.com">xeoFoundry</a> removes it; enter it on the Settings tab.</p>
+
+    <footer>
+        <a href="../">All showcases</a> -
+        More: <a href="../xeoifc-web/">a browser IFC viewer on the WebAssembly library</a> - <a href="../xeoifc-qt/">a desktop IFC
+        viewer with Qt</a> - <a href="../xeoifc-gpui/">a Rust desktop viewer with gpui</a> - <a href="../villa/">a villa from one
+        picture</a> - <a href="../garabit/">the Garabit viaduct from Eiffel's drawings</a> -
+        <a href="../integrate/">build on xeoIFC</a> -
+        Back to the repository: <a href="https://github.com/xeofoundry/xeoIFC">github.com/xeofoundry/xeoIFC</a> -
+        Powered by xeoFoundry - <a href="https://xeofoundry.com">www.xeofoundry.com</a>
+    </footer>
+</main>
+</body>
+</html>

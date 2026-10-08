@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:8111acd46ec25c9a -->
+<!-- Generated file: edit the source in the dev repository. sha256:55a4e27802e383ba -->
 # Native library
 
 [Back to xeoIFC](../README.md#4-native-library)
@@ -29,3 +29,12 @@ xeoIFC gpui is an open-source (MIT) desktop IFC viewer for Windows without Qt: a
 framework of the Zed editor, on `xeoifc.dll`. Click the image for the [showcase page](https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-gpui/)
 that shows how a gpui window hosts the 3D view of the library, or download `xeoifc-gpui-windows-amd64.zip` (ready to run) or
 `xeoifc-gpui-source.zip` (the Cargo project with the library) from the releases page.
+
+<a href="https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-wpf/">
+  <img width="900" alt="xeoIFC WPF, an open-source desktop IFC viewer in C# on xeoifc.dll, with the Duplex model - click for the showcase page" src="../docs/showcase/xeoifc-wpf/xeoifc-wpf.png" />
+</a>
+
+xeoIFC WPF is an open-source (MIT) desktop IFC viewer for Windows in C#: about 6,500 lines of C# and XAML with WPF on .NET 10,
+on `xeoifc.dll` through P/Invoke, with the features of xeoIFC Qt. Click the image for the [showcase page](https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-wpf/)
+that shows how a WPF window hosts the 3D view of the library, or download `xeoifc-wpf-windows-amd64.zip` (ready to run, needs
+the .NET 10 Desktop Runtime) or `xeoifc-wpf-source.zip` (the .NET project with the library) from the releases page.

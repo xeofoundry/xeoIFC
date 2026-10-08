@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:80eddc35c1500d0a -->
+<!-- Generated file: edit the source in the dev repository. sha256:7f0d0c211077def2 -->
 
 # xeoIFC - the xeoFoundry IFC toolkit.
 
@@ -63,7 +63,7 @@ flowchart LR
     S --> R2["Convert, validate and<br/>extract data at scale"]
 ```
 
-Library details, examples and the Qt and gpui demo viewers: [Native library](native/README.md).
+Library details, examples and the Qt, gpui and WPF demo viewers: [Native library](native/README.md).
 
 ## 3. WebAssembly library
 

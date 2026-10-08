@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:c0c2f4f37254af92 -->
+<!-- Generated file: edit the source in the dev repository. sha256:4b925737a3616b86 -->
 # One engine, two libraries and a command-line tool
 
 [Back to xeoIFC](../README.md#architecture)
@@ -193,6 +193,8 @@ xeoifc_job_free(job);
   Rust and no engine crate directly, so it doubles as the compatibility test of the header.
 - xeoIFC gpui (`apps/xeoifc-gpui`, MIT) is the same host in Rust with gpui, also on the C header only: the DLL renders into a
   child window of the gpui window, which is transparent to the mouse so that gpui keeps all input.
+- xeoIFC WPF (`apps/xeoifc-wpf`, MIT) is the same host in C# with WPF, on the C header through P/Invoke: the DLL renders into
+  the child window of an `HwndHost`, and a transparent owned window carries the controls that lie over the 3D view.
 - Rust hosts do not need the C layer: they link `ifc-session`, `ifc-geom` and `viewer-render` directly and make the
   same calls (the in-tree `crates/viewer/qt` cxx-qt viewer does).
 - The DLL carries the whole engine, so a native host has no wasm 4 GiB cap and no prune requirement; `retainFull`
