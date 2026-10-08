@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:55a4e27802e383ba -->
+<!-- Generated file: edit the source in the dev repository. sha256:63e2002ad64a35c4 -->
 # Native library
 
 [Back to xeoIFC](../README.md#4-native-library)
@@ -25,7 +25,7 @@ makes and measured load times, or download the `xeoifc-qt-source.zip` package wi
   <img width="900" alt="xeoIFC gpui, an open-source desktop IFC viewer in Rust on xeoifc.dll, with the Duplex model - click for the showcase page" src="../docs/showcase/xeoifc-gpui/xeoifc-gpui.png" />
 </a>
 
-xeoIFC gpui is an open-source (MIT) desktop IFC viewer for Windows without Qt: about 1,700 lines of Rust with gpui, the UI
+xeoIFC gpui is an open-source (MIT) desktop IFC viewer for Windows without Qt: about 1,900 lines of Rust with gpui, the UI
 framework of the Zed editor, on `xeoifc.dll`. Click the image for the [showcase page](https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-gpui/)
 that shows how a gpui window hosts the 3D view of the library, or download `xeoifc-gpui-windows-amd64.zip` (ready to run) or
 `xeoifc-gpui-source.zip` (the Cargo project with the library) from the releases page.

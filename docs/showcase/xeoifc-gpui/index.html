@@ -77,9 +77,9 @@
 <main>
     <h1>A Rust desktop IFC viewer on xeoifc.dll, with gpui</h1>
 
-    <p>xeoIFC gpui is a desktop IFC viewer for Windows without Qt. It is about 1,700 lines of Rust with
+    <p>xeoIFC gpui is a desktop IFC viewer for Windows without Qt. It is about 1,900 lines of Rust with
         <a href="https://www.gpui.rs/">gpui</a>, the UI framework of the Zed editor, and the gpui-component widgets, and its
-        source code is open (MIT licence).</p>
+        source code is open (MIT licence). Its window has the layout of the <a href="../xeoifc-qt/">Qt viewer</a>.</p>
 
     <p>The IFC work is done by <code>xeoifc.dll</code>, the native library of xeoIFC, through the same plain C header that the
         <a href="../xeoifc-qt/">Qt viewer</a> uses. There is no Rust crate of the library: the application declares the C
@@ -88,10 +88,11 @@
     <h2>1. The application</h2>
 
     <figure>
-        <a href="xeoifc-gpui.png"><img src="xeoifc-gpui.png" width="1282" height="832"
-            alt="xeoIFC gpui with the Duplex model: toolbar, model tree, 3D view with a section plane, properties panel"></a>
-        <figcaption>xeoIFC gpui with the <a href="../../Duplex.ifc">Duplex</a> model. The tree, the toolbar and the properties are
-            gpui elements; the 3D view is drawn by the library.</figcaption>
+        <a href="xeoifc-gpui.png"><img src="xeoifc-gpui.png" width="1557" height="1018"
+            alt="xeoIFC gpui with the Duplex model: tabs in the title bar, 3D view cut by a section plane, tool buttons, model tree, properties and the section panel"></a>
+        <figcaption>xeoIFC gpui with the <a href="../../Duplex.ifc">Duplex</a> model, cut by a section plane. The title bar with
+            its tabs, the tool buttons, the tree, the properties and the section panel are gpui elements; the 3D view is drawn
+            by the library.</figcaption>
     </figure>
 
     <ul>
@@ -144,7 +145,8 @@ let viewer = xeoifc_viewer_create(child.0 as u64, null_mut(), width, height, &am
         <li><b>No DirectComposition.</b> <code>main</code> sets <code>GPUI_DISABLE_DIRECT_COMPOSITION=true</code> before gpui
             starts. With DirectComposition the gpui surface covers the child window.</li>
         <li><b>Nothing over the 3D view.</b> gpui cannot draw on top of a child window. The application has no popup, menu or
-            tooltip that could reach into the view; its panels sit beside the view and push it.</li>
+            tooltip that could reach into the view; its panels sit beside the view and push it. The tool buttons, which lie
+            over the view in the Qt viewer, stand in a column beside it that has the colour of the view.</li>
     </ul>
 
     <p>A gpui <code>canvas</code> element reports its bounds on every layout, and the child window follows:</p>
