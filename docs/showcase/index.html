@@ -38,15 +38,18 @@
         main { max-width: 900px; margin: 0 auto; padding: 32px 16px 48px; }
         h1 { font-size: 2em; font-weight: 600; margin: 0 0 16px; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
         h2 { font-size: 1.25em; font-weight: 600; margin: 0 0 8px; }
+        h2.section { font-size: 1.5em; margin: 32px 0 0; }
+        h2.section + .examples { margin-top: 16px; }
         p { margin: 0 0 16px; }
         a { color: var(--link); text-decoration: none; }
         a:hover { text-decoration: underline; }
         a:focus-visible { outline: 2px solid var(--link); outline-offset: 4px; }
         .intro { max-width: 720px; color: var(--muted); }
         .examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
-        .example { display: flex; flex-direction: column; padding: 20px; border: 1px solid var(--line); border-radius: 6px; }
-        .example p { color: var(--muted); }
-        .example .links { margin: auto 0 0; padding-top: 8px; }
+        .example { display: flow-root; padding: 20px; border: 1px solid var(--line); border-radius: 6px; }
+        .example p { color: var(--muted); margin: 0; }
+        .example img { float: left; width: 140px; aspect-ratio: 16 / 10; object-fit: cover; margin: 4px 16px 4px 0;
+            border: 1px solid var(--line); border-radius: 6px; }
         footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
         @media (max-width: 600px) { .examples { grid-template-columns: 1fr; } }
     </style>
@@ -55,63 +58,78 @@
 <main>
     <h1>xeoIFC showcase</h1>
     <p class="intro">Viewers, integrations and models built on xeoIFC. Choose an example to try it and read how it works.</p>
-    <p>Have an IFC file to explore? <a href="../">Open the browser viewer</a> and load it directly from your computer.</p>
 
     <div class="examples">
         <article class="example">
-            <h2><a href="xeoifc-web/">Browser viewer</a></h2>
+            <a href="xeoifc-web/">
+                <h2>WebAssembly viewer for the browser</h2>
+            </a>
             <p>Explore the Viadotto Acerno bridge in xeoIFC Web. See how the WebAssembly library loads models, renders them,
                 picks elements and queries their properties.</p>
-            <p class="links"><a href="xeoifc-web/">Live demo and library examples</a></p>
         </article>
 
         <article class="example">
-            <h2><a href="../xeokit-direct-ifc-loading/">xeokit integration</a></h2>
+            <a href="../xeokit-direct-ifc-loading/">
+                <h2>xeokit integration</h2>
+            </a>
             <p>Load IFC and IFCZIP files directly into a xeokit viewer with the xeoIFC loader plugin, without a server-side
                 conversion step.</p>
-            <p class="links"><a href="../xeokit-direct-ifc-loading/">Documentation and examples</a></p>
         </article>
 
         <article class="example">
-            <h2><a href="xeoifc-qt/">Qt desktop viewer</a></h2>
+            <a href="xeoifc-qt/">
+                <h2>Qt desktop viewer</h2>
+                <img src="thumbs/xeoifc-qt.jpg" alt="" loading="lazy">
+            </a>
             <p>A desktop IFC viewer built on the native xeoIFC library. Explore its API calls, load-time measurements and
                 integration with Qt.</p>
-            <p class="links"><a href="xeoifc-qt/">Desktop viewer showcase</a></p>
         </article>
 
         <article class="example">
-            <h2><a href="xeoifc-gpui/">Rust desktop viewer with gpui</a></h2>
+            <a href="xeoifc-gpui/">
+                <h2>Rust desktop viewer with gpui</h2>
+                <img src="thumbs/xeoifc-gpui.jpg" alt="" loading="lazy">
+            </a>
             <p>A desktop IFC viewer in Rust on the native xeoIFC library, without Qt. See how a gpui window hosts the 3D view
                 of the library, and the library calls in Rust.</p>
-            <p class="links"><a href="xeoifc-gpui/">gpui viewer showcase</a></p>
         </article>
 
         <article class="example">
-            <h2><a href="xeoifc-wpf/">C# desktop viewer with WPF</a></h2>
+            <a href="xeoifc-wpf/">
+                <h2>C# desktop viewer with WPF</h2>
+                <img src="thumbs/xeoifc-wpf.jpg" alt="" loading="lazy">
+            </a>
             <p>A desktop IFC viewer in C# on the native xeoIFC library, with the features of the Qt viewer. See how a WPF
                 window hosts the 3D view of the library, and the library calls in C#.</p>
-            <p class="links"><a href="xeoifc-wpf/">WPF viewer showcase</a></p>
         </article>
 
         <article class="example">
-            <h2><a href="garabit/">Garabit viaduct</a></h2>
-            <p>Inspect the detailed IFC reconstruction of Eiffel's viaduct, from its steel plates and connections to the
-                surrounding terrain.</p>
-            <p class="links"><a href="garabit/">Live model and reconstruction notes</a></p>
-        </article>
-
-        <article class="example">
-            <h2><a href="villa/">A villa from one picture</a></h2>
-            <p>A furnished villa, pool, garden and terrain generated as IFC by a script. Compare the model with the picture
-                and follow the authoring example.</p>
-            <p class="links"><a href="villa/">Live model and authoring script</a></p>
-        </article>
-
-        <article class="example">
-            <h2><a href="integrate/">Build on xeoIFC</a></h2>
+            <a href="integrate/">
+                <h2>Build on xeoIFC</h2>
+            </a>
             <p>Choose a platform and start with an integration recipe: browser, xeokit, C, C# or Python. Find the library
                 packages and a guide to the shared document API.</p>
-            <p class="links"><a href="integrate/">Platforms and integration recipes</a></p>
+        </article>
+    </div>
+
+    <h2 class="section">IFC authoring with xeoIFC</h2>
+    <div class="examples">
+        <article class="example">
+            <a href="garabit/">
+                <h2>Garabit viaduct</h2>
+                <img src="thumbs/garabit.jpg" alt="" loading="lazy">
+            </a>
+            <p>Inspect the detailed IFC reconstruction of Eiffel's viaduct, from its steel plates and connections to the
+                surrounding terrain.</p>
+        </article>
+
+        <article class="example">
+            <a href="villa/">
+                <h2>A villa from one picture</h2>
+                <img src="thumbs/villa.jpg" alt="" loading="lazy">
+            </a>
+            <p>A furnished villa, pool, garden and terrain generated as IFC by a script. Compare the model with the picture
+                and follow the authoring example.</p>
         </article>
     </div>
 
