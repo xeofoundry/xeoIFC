@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:9df2202ae6efb342 -->
+<!-- Generated file: edit the source in the dev repository. sha256:4c2d51b2549d196f -->
 <h1 align="center">
   <a href="https://xeofoundry.github.io/xeoIFC/">
     <picture>
@@ -32,10 +32,9 @@ see <a href="https://xeofoundry.github.io/xeoIFC/showcase/garabit/">showcase</a>
 **[Licence and contact](#licence-and-pricing)**
 -->
 
-xeoIFC reads, queries, tessellates, converts and writes IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3). It is one Rust
-engine by [xeoFoundry](https://xeofoundry.com).
+xeoIFC reads, queries, tessellates, converts and writes IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3).
 
-- **Proven on real projects.** 95 GB of real-world IFC: > 2.2k files converted in under 19 minutes on one
+- **Proven on real projects.** 95 GB of real-world IFC: > 2.2k files converted in under 20 minutes on one
   workstation (xeoIFC 1.0.21, October 2026).
 - **IFC 4.3 infrastructure.** Alignments, sectioned solids and georeferenced models, as in the
   [Viadotto Acerno bridge](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
