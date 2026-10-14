@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:4c2d51b2549d196f -->
+<!-- Generated file: edit the source in the dev repository. sha256:2fb85bbcc47729a3 -->
 <h1 align="center">
   <a href="https://xeofoundry.github.io/xeoIFC/">
     <picture>
@@ -69,7 +69,7 @@ Example use cases: [xeoIFC showcase](https://xeofoundry.github.io/xeoIFC/showcas
 
 ## 1. Command-line converter
 
-The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`) with xeokit metadata, xeokit `.xkt`, Esri `.slpk` (I3S) or a self-contained `.html` viewer. It keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
+The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.gltf`) with xeokit metadata, xeokit `.xkt`, or Esri `.slpk` (I3S). It keeps the cxconverter command-line flags and `cxconverter.json` configuration shape.
 
 ```powershell
 .\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
@@ -81,7 +81,6 @@ flowchart LR
     CLI --> GLB[".glb / .gltf<br/>+ xeokit metadata"] --> V1["xeokit, three.js,<br/>other glTF viewers"]
     CLI --> XKT[".xkt"] --> V2["xeokit viewer"]
     CLI --> SLPK[".slpk (I3S)"] --> V3["Esri ArcGIS"]
-    CLI --> HTML[".html"] --> V4["Any web browser,<br/>no server needed"]
 ```
 
 Features, options, output files and license key: [converter/README.md](converter/README.md)
