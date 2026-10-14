@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:7bb04f1b9bbe1f8b -->
+<!-- Generated file: edit the source in the dev repository. sha256:e3f171a4cf6d634a -->
 <h1 align="center">
   <a href="https://xeofoundry.github.io/xeoIFC/">
     <picture>
@@ -10,13 +10,13 @@
 
 <h3 align="center">The IFC toolkit for browser, desktop and server</h3>
 
-<p align="center">
+<!--p align="center">
   IFC 2x3 to IFC 4.3<br>
   IFC to GLB, XKT, SLPK and HTML
-</p>
+</p-->
 
 <p align="center">
-  <a href="https://xeofoundry.github.io/xeoIFC/showcase/garabit/"><img src="docs/showcase/readme/xeoIFC-bridge-example.jpg"
+  <a href="https://xeofoundry.github.io/xeoIFC/showcase/garabit/"><img src="docs/showcase/readme/Garabit-viaduct-bearing-xeoIFC.webp"
   width="100%" alt="xeoIFC viewer with the Garabit viaduct: a bearing of the arch, cut by a section plane, with the element tree and the property panel"></a>
 </p>
 

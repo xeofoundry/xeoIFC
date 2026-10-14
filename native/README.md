@@ -1,7 +1,7 @@
-<!-- Generated file: edit the source in the dev repository. sha256:63e2002ad64a35c4 -->
+<!-- Generated file: edit the source in the dev repository. sha256:264c597d4935281d -->
 # Native library
 
-[Back to xeoIFC](../README.md#4-native-library)
+[Back to xeoIFC](../README.md#2-native-library)
 
 `xeoifc.dll` (`libxeoifc.so` on Linux) exposes the whole engine through one plain C header, `xeoifc.h`. Any program that
 can call C loads it: C++, C# (P/Invoke), Python (ctypes), Delphi, Java (JNA); desktop GUI applications and headless server processes

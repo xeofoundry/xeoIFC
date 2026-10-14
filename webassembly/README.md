@@ -1,7 +1,7 @@
-<!-- Generated file: edit the source in the dev repository. sha256:ce10c46cac28de7a -->
+<!-- Generated file: edit the source in the dev repository. sha256:289ea498207d1fba -->
 # WebAssembly library
 
-[Back to xeoIFC](../README.md#1-webassembly-library)
+[Back to xeoIFC](../README.md#3-webassembly-library)
 
 The WebAssembly library is the xeoIFC engine for web applications: wasm modules with JavaScript bindings and TypeScript
 declarations. IFC files are processed in the browser; nothing is uploaded. A Web Worker calls its engine functions: load (the
