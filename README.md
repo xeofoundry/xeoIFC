@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:e3f171a4cf6d634a -->
+<!-- Generated file: edit the source in the dev repository. sha256:9df2202ae6efb342 -->
 <h1 align="center">
   <a href="https://xeofoundry.github.io/xeoIFC/">
     <picture>
@@ -26,18 +26,24 @@ see <a href="https://xeofoundry.github.io/xeoIFC/showcase/garabit/">showcase</a>
 > [!TIP]
 > Quick start: open the [live demo](https://xeofoundry.github.io/xeoIFC/) to try xeoIFC in your browser (powered by WebAssembly).
 
+
+<!--
 **[Showcase](https://xeofoundry.github.io/xeoIFC/showcase/)** · **[Downloads](https://github.com/xeofoundry/xeoIFC/releases/)** ·
 **[Licence and contact](#licence-and-pricing)**
+-->
 
 xeoIFC reads, queries, tessellates, converts and writes IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3). It is one Rust
 engine by [xeoFoundry](https://xeofoundry.com).
 
-- **Proven on real projects.** 95 GB of real-world IFC: 2,277 of 2,279 files converted in under 19 minutes on one
+- **Proven on real projects.** 95 GB of real-world IFC: > 2.2k files converted in under 19 minutes on one
   workstation (xeoIFC 1.0.21, October 2026).
 - **IFC 4.3 infrastructure.** Alignments, sectioned solids and georeferenced models, as in the
   [Viadotto Acerno bridge](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
-- **Private by design.** In the browser the files are processed locally with WebAssembly and WebGPU; nothing is
+
+<!--- **Private by design.** In the browser the files are processed locally with WebAssembly and WebGPU; nothing is
   uploaded.
+-->
+
 - **One engine, every platform.** Browser, Windows x64, Linux x64 and arm64.
 
 xeoIFC is delivered in four forms:
