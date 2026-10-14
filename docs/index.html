@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-DGrWu9j9.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-BXU4S97A.js">
+    <script type="module" crossorigin src="./assets/main-BhWk1yec.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-ts2Xcyh1.js">
     <link rel="stylesheet" crossorigin href="./assets/main-C9hgy-1O.css">
   </head>
   <body>
@@ -68,8 +68,13 @@
             <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
             <label id="export-separate-row" title="Edited models are not merged into one file, but written to separate IFC files instead."><span>Keep IFC files separate</span><input id="export-separate" type="checkbox" /></label>
             <p id="export-separate-hint" hidden>Separate files use the original model names, with numbered suffixes for duplicates.</p>
-            <label id="export-epsg-row" hidden><span>EPSG code</span><input id="export-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" /></label>
-            <p id="export-epsg-hint" hidden>Leave blank to use the projected CRS declared by the IFC files. Enter its EPSG code if none is declared. All models must use the same CRS; no reprojection is performed.</p>
+            <label id="export-i3s-mode-row" hidden><span>Referencing</span><select id="export-i3s-mode"><option value="global">Global (WGS 84)</option><option value="local">Local (projected CRS)</option></select></label>
+            <label id="export-i3s-crs-row" hidden><span>Layer EPSG code</span><input id="export-i3s-crs" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" /></label>
+            <p id="export-i3s-hint" hidden></p>
+            <p id="export-i3s-declared" hidden></p>
+            <label id="export-epsg-row" hidden><span>Model EPSG code</span><input id="export-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" /></label>
+            <p id="export-epsg-hint" hidden>Only for files that declare no CRS in IfcProjectedCRS: the projected CRS their coordinates are in. It names the coordinates, it does not transform them. Blank places such files from IfcSite latitude/longitude.</p>
+            <p id="export-i3s-help" hidden><a href="https://github.com/xeofoundry/xeoIFC/blob/main/esri/README.md" target="_blank" rel="noopener">Esri ArcGIS export: referencing, CRS and placement checks</a></p>
           </div>
 
           <div id="viewport-tools" aria-label="Viewer tools">
@@ -638,7 +643,10 @@
                   <option value="glb-separate">Separate GLB files</option>
                   <option value="slpk">I3S scene layer (.slpk)</option>
                 </select>
-                <label id="outer-shape-epsg-row" title="EPSG code of the projected CRS of the I3S layer. Leave empty when the IFC files declare it in IfcProjectedCRS; a declared code must be the same." hidden>EPSG <input id="outer-shape-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the I3S layer" /></label>
+                <label id="outer-shape-i3s-mode-row" title="Global: WGS 84, for a global ArcGIS scene with world basemaps and elevation; the vertices are transformed from the CRS the IFC files declare. Local: a projected CRS, for a local scene in that CRS." hidden>Referencing <select id="outer-shape-i3s-mode" aria-label="Referencing of the I3S layer"><option value="global">Global (WGS 84)</option><option value="local">Local</option></select></label>
+                <label id="outer-shape-i3s-crs-row" title="EPSG code of the local layer's projected CRS, pre-filled with the one most IFC files declare. Blank keeps the declared CRS; 3857 is Web Mercator. Files in other CRSs are transformed." hidden>Layer EPSG <input id="outer-shape-i3s-crs" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the local I3S layer" /></label>
+                <label id="outer-shape-epsg-row" title="Only for IFC files that declare no CRS in IfcProjectedCRS: the projected CRS their coordinates are in. It names the coordinates, it does not transform them; a declared code must be the same. Blank places such files from IfcSite latitude/longitude." hidden>Model EPSG <input id="outer-shape-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the model coordinates" /></label>
+                <a id="outer-shape-i3s-help" href="https://github.com/xeofoundry/xeoIFC/blob/main/esri/README.md" target="_blank" rel="noopener" title="Esri ArcGIS export: referencing, CRS and placement checks" hidden>Esri export help</a>
                 <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. A result that is not kept yet is kept first. Separate files are packaged in one ZIP download; an I3S scene layer package holds all models, for ArcGIS." disabled>Export results</button>
               </div>
             </div>
@@ -660,7 +668,7 @@
               <span id="outer-shape-cli-copy-status" class="section-hint" role="status"></span>
               <details>
                 <summary>Configuration file</summary>
-                <p class="section-hint">Optional, except for the EPSG code of an I3S layer: save this JSON as outer-shape.json and pass -c 'outer-shape.json'; it can replace the outer-shape flags. Explicit CLI flags override matching JSON settings.</p>
+                <p class="section-hint">Optional, except for the referencing and EPSG codes of an I3S layer: save this JSON as outer-shape.json and pass -c 'outer-shape.json'; it can replace the outer-shape flags. Explicit CLI flags override matching JSON settings.</p>
                 <label for="outer-shape-cli-config">Configuration (outer-shape.json)</label>
                 <textarea id="outer-shape-cli-config" readonly rows="12" spellcheck="false"></textarea>
               </details>

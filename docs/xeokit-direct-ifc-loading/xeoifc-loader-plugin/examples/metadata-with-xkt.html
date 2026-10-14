@@ -61,14 +61,17 @@
     });
     sceneModel.on("loaded", () => viewer.cameraFlight.jumpTo(sceneModel));
 
-    // 3. Properties: on demand from the IFC retained inside the engine
+    // 3. Properties: on demand from the IFC retained inside the engine. Names and values are file content: they go
+    // into the page escaped, as text, never as markup.
+    const text = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
     viewer.cameraControl.on("picked", async (pickResult) => {
         const objectId = pickResult.entity.id;
         const metaObject = viewer.metaScene.metaObjects[objectId];
         const propertySets = await xeoIFCLoader.getProperties(objectId);
-        const rows = propertySets.map(({pset, props}) => `<tr><th colspan="2" align="left">${pset}</th></tr>`
-            + props.map(({name, value, unit}) => `<tr><td>${name}</td><td>${value ?? ""} ${unit ?? ""}</td></tr>`).join("")).join("");
-        document.getElementById("properties").innerHTML = `<b>${metaObject ? metaObject.name : objectId}</b> ${metaObject ? metaObject.type : ""}<table>${rows}</table>`;
+        const rows = propertySets.map(({pset, props}) => `<tr><th colspan="2" align="left">${text(pset)}</th></tr>`
+            + props.map(({name, value, unit}) => `<tr><td>${text(name)}</td><td>${text(value)} ${text(unit)}</td></tr>`).join("")).join("");
+        const title = `<b>${text(metaObject ? metaObject.name : objectId)}</b> ${text(metaObject ? metaObject.type : "")}`;
+        document.getElementById("properties").innerHTML = `${title}<table>${rows}</table>`;
     });
 
     window.viewer = viewer;

@@ -14,6 +14,7 @@
 //   {type: "release", sourceId, isStep}                (no response; frees that one model)
 //   {type: "clear"}                                    (no response; frees every model)
 //   any failure                                      -> {id, type: "error", message}
+//   an engine trap, and every request after it       -> {id, type: "error", message, fatal: true}   (replace the worker)
 
 import initIfc, {worker_load_begin, worker_load_chunk, worker_load_finish, worker_metadata_finish, worker_properties, worker_release_model, worker_clear_models} from "../wasm/viewer_wasm.js";
 import initStep, {step_load, step_properties, step_release_model, step_clear_models} from "../wasm/viewer_wasm_step.js";
@@ -115,8 +116,17 @@ onmessage = ({data: msg}) => {
     queue = queue.then(() => handle(msg));
 };
 
+// A wasm trap (panic, out of memory) or stack overflow unwinds nothing: the engine's state stays locked and every later
+// call into this instance would trap as well. Holds the message of the trap; the plugin replaces the worker.
+let trapped = null;
+const isTrap = (e) => e instanceof WebAssembly.RuntimeError || /call stack|too much recursion/i.test(String(e));
+
 async function handle(msg) {
     const id = msg.id;
+    if (trapped) {
+        postMessage({id, type: "error", message: trapped, fatal: true});
+        return;
+    }
     try {
         if (msg.type === "load") {
             const onProgress = (phase, done, total) => postMessage({id, type: "progress", phase, done, total});
@@ -154,6 +164,9 @@ async function handle(msg) {
             }
         }
     } catch (e) {
-        postMessage({id, type: "error", message: String(e)});
+        if (isTrap(e)) {
+            trapped = String(e);
+        }
+        postMessage({id, type: "error", message: String(e), fatal: !!trapped});
     }
 }

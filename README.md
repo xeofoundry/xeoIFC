@@ -1,16 +1,48 @@
-<!-- Generated file: edit the source in the dev repository. sha256:7f0d0c211077def2 -->
+<!-- Generated file: edit the source in the dev repository. sha256:7bb04f1b9bbe1f8b -->
+<h1 align="center">
+  <a href="https://xeofoundry.github.io/xeoIFC/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/showcase/readme/xeoIFC-logo-on-dark.svg">
+      <img src="docs/showcase/readme/xeoIFC-logo-on-light.svg" width="320" alt="xeoIFC">
+    </picture>
+  </a>
+</h1>
 
-# xeoIFC - the xeoFoundry IFC toolkit.
+<h3 align="center">The IFC toolkit for browser, desktop and server</h3>
+
+<p align="center">
+  IFC 2x3 to IFC 4.3<br>
+  IFC to GLB, XKT, SLPK and HTML
+</p>
+
+<p align="center">
+  <a href="https://xeofoundry.github.io/xeoIFC/showcase/garabit/"><img src="docs/showcase/readme/xeoIFC-bridge-example.jpg"
+  width="100%" alt="xeoIFC viewer with the Garabit viaduct: a bearing of the arch, cut by a section plane, with the element tree and the property panel"></a>
+</p>
+
+<p align="center"><sub>In the picture: the Garabit viaduct. 9 IFC files in one scene, 678,768 rivets. Created with xeoIFC,
+see <a href="https://xeofoundry.github.io/xeoIFC/showcase/garabit/">showcase</a>.</sub></p>
 
 > [!TIP]
 > Quick start: open the [live demo](https://xeofoundry.github.io/xeoIFC/) to try xeoIFC in your browser (powered by WebAssembly).
 
+**[Showcase](https://xeofoundry.github.io/xeoIFC/showcase/)** · **[Downloads](https://github.com/xeofoundry/xeoIFC/releases/)** ·
+**[Licence and contact](#licence-and-pricing)**
 
-###   
-**xeoIFC is a Rust engine for reading, querying, tessellating, converting and writing IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3).**
-It is delivered in four forms:
+xeoIFC reads, queries, tessellates, converts and writes IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3). It is one Rust
+engine by [xeoFoundry](https://xeofoundry.com).
 
-1. **Command-line tool** - The successor to [cxconverter](https://github.com/Creoox/creoox-ifc2gltfcxconverter), offering better geometry quality and far more capabilities. It covers the standard IFC to glTF/GLB/XKT workflow with [xeokit](https://github.com/xeokit/xeokit-sdk) metadata, and also supports SLPK (I3S) for Esri ArcGIS and raw IFC metadata.
+- **Proven on real projects.** 95 GB of real-world IFC: 2,277 of 2,279 files converted in under 19 minutes on one
+  workstation (xeoIFC 1.0.21, October 2026).
+- **IFC 4.3 infrastructure.** Alignments, sectioned solids and georeferenced models, as in the
+  [Viadotto Acerno bridge](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
+- **Private by design.** In the browser the files are processed locally with WebAssembly and WebGPU; nothing is
+  uploaded.
+- **One engine, every platform.** Browser, Windows x64, Linux x64 and arm64.
+
+xeoIFC is delivered in four forms:
+
+1. **Command-line tool** - The successor to [cxconverter](https://github.com/Creoox/creoox-ifc2gltfcxconverter), offering better geometry quality and far more capabilities. It covers the standard IFC to glTF/GLB/XKT workflow with [xeokit](https://github.com/xeokit/xeokit-sdk) metadata, and also supports [SLPK (I3S) for Esri ArcGIS](esri/README.md) and raw IFC metadata.
 2. **Native library** - `xeoifc.dll` / `libxeoifc.so` with a C ABI, for desktop and server applications in C++, C#, Python, Java, ...
 3. **WebAssembly library** - wasm modules with a JavaScript/TypeScript API, for web applications.
 4. **Loader for xeokit** - loads IFC directly into a xeokit viewer, without server side conversion steps.
@@ -104,6 +136,27 @@ Documentation and live examples:
 
 The examples: a xeokit viewer that loads dropped files, and metadata from IFC for geometry from XKT.
 
+## Esri ArcGIS export
+
+The command-line converter and xeoIFC Web export IFC models as I3S scene layer packages (`.slpk`) for ArcGIS Pro, ArcGIS
+Online and the ArcGIS Maps SDK for JavaScript. Several IFC files go into one layer, and each element keeps its IFC
+attributes and property sets as fields. By default the layer is global: the vertices are transformed from the CRS the IFC
+files declare into WGS 84, so the model shows in its place over world imagery and terrain. A local layer in a projected
+CRS is written on request.
+
+```mermaid
+flowchart LR
+    IFC[".ifc / .ifczip<br/>IfcProjectedCRS, IfcMapConversion"] --> CLI["xeoifc CLI"]
+    IFC --> WEB["xeoIFC Web"]
+    CLI --> SLPK[".slpk (I3S)<br/>global WGS 84 or local"]
+    WEB --> SLPK
+    SLPK --> PRO["ArcGIS Pro"]
+    SLPK --> AGOL["ArcGIS Online<br/>Scene Viewer"]
+    SLPK --> JS["ArcGIS Maps SDK<br/>for JavaScript"]
+```
+
+Referencing, coordinate systems, configuration and how to check the placement: [Esri ArcGIS export](esri/README.md).
+
 ## Authoring
 
 > [!WARNING]
@@ -111,6 +164,28 @@ The examples: a xeokit viewer that loads dropped files, and metadata from IFC fo
 
 The document API creates IFC models from scratch, including geometry, materials and property sets. The command-line tool
 runs authoring scripts. See [Authoring](authoring/README.md) for examples, screenshots and code.
+
+## Licence and pricing
+
+Everything runs without a licence key, for testing and evaluation under the
+[xeoIFC Testing License](https://xeofoundry.github.io/xeoIFC/xeoIFC-Testing-License.txt). Without a key the output
+carries an "Evaluation version" mark. Commercial and production use needs a licence.
+
+<!--
+| Licence | What you get |
+| --- | --- |
+| **Pro** | Unmarked exports from the viewers: split, merge, reduced IFC, GLB, XKT, I3S. Per seat. |
+| **Server** | The command-line converter and the native library in your pipeline. Per machine. |
+| **Engine (OEM)** | The WebAssembly and native engine inside your product, with priority fixes on your files. |
+| **Custom build and support** | Branded viewers and checkers, with an SLA. |
+-->
+
+Contact: [contact@creoox.com](mailto:contact@creoox.com?subject=xeoIFC%20licence), ask for single-user license, server (CLI) license, or custom build and support.
+
+### Send us your hardest file
+
+Send up to three IFC files that your current engine struggles with. Within 48 hours you get back, privately: a
+self-contained HTML viewer of each file, rendered views, and the load time and memory. No commitment.
 
 ## Architecture
 

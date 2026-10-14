@@ -1462,8 +1462,9 @@ export function worker_export_run(licence_key, now_unix, bounds) {
 }
 
 /**
- * Run the export over the accumulated documents as one I3S scene layer package. `wkid`: the layer's EPSG code when no
- * file declares one in IfcProjectedCRS (0 = none; it must equal a declared one), `names` the file name of each
+ * Run the export over the accumulated documents as one I3S scene layer package. `wkid`: the EPSG code of the model
+ * coordinates when no file declares one in IfcProjectedCRS (0 = none; it must equal a declared one); `output_wkid`: the
+ * layer CRS, 4326 a global layer in WGS 84, 0 the CRS the files declare, else a projected EPSG code; `names` the file name of each
  * document (the SourceFile attribute), `layer_name` the layer's name. IfcSpace elements are left out; a non-empty
  * selection of a file limits it to those elements. A refused CRS leaves the documents for another call; any other
  * outcome uses them up. Without a valid `licence_key` the layer carries the evaluation
@@ -1473,18 +1474,19 @@ export function worker_export_run(licence_key, now_unix, bounds) {
  * @param {string} licence_key
  * @param {number} now_unix_ms
  * @param {number} wkid
+ * @param {number} output_wkid
  * @param {Array<any>} names
  * @param {string} layer_name
  * @param {number} circle_segments
  * @param {Function} on_progress
  * @returns {any}
  */
-export function worker_export_slpk(licence_key, now_unix_ms, wkid, names, layer_name, circle_segments, on_progress) {
+export function worker_export_slpk(licence_key, now_unix_ms, wkid, output_wkid, names, layer_name, circle_segments, on_progress) {
     const ptr0 = passStringToWasm0(licence_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ptr1 = passStringToWasm0(layer_name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.worker_export_slpk(ptr0, len0, now_unix_ms, wkid, names, ptr1, len1, circle_segments, on_progress);
+    const ret = wasm.worker_export_slpk(ptr0, len0, now_unix_ms, wkid, output_wkid, names, ptr1, len1, circle_segments, on_progress);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -1658,7 +1660,7 @@ export function worker_merge_meshes(positions, normals, groups, colors, center) 
  * Finish the chunked load WITHOUT geometry: complete the parse and keep the file as a metadata-only
  * document (no tessellation, no CSG), for a host that draws the geometry from another source (XKT,
  * GLB) and needs the tree and the property queries only. Works on a full IFC and on the metadata IFC
- * of the converter (`-m x.ifc`). Returns `{ tree: string|undefined, sourceId: number }`.
+ * of the converter (`-m x.ifc`). Returns `{ tree: string|undefined, sourceId: number, warnings: string[] }`.
  * @returns {any}
  */
 export function worker_metadata_finish() {
@@ -2101,6 +2103,16 @@ export function worker_save_sealed(doc_id) {
 }
 
 /**
+ * Continue the source-id sequence of a replaced worker: every id handed out from here on is at least `next`, so a
+ * model appended after a worker respawn cannot take the id of one the page still shows. A replacing load still
+ * restarts the sequence, because the page drops every model with it.
+ * @param {number} next
+ */
+export function worker_seed_source_id(next) {
+    wasm.worker_seed_source_id(next);
+}
+
+/**
  * Set the licence key ("" = none) for the saves of `worker_call` (`document.save`, `document.exportSubset` with
  * `bytes`): without a valid key they carry the "Evaluation version" text. The key stays set when models are cleared.
  * `now_unix`: seconds, from the page's clock. Returns `{"state":"licensed"|"evaluation"|"invalid"|"expired","expires":<unix>}`.
@@ -2135,7 +2147,7 @@ export function worker_set_load_profiling(enabled) {
  * count over all of them. Over the line budget the pass keeps the edges of the largest instances, up to
  * `EDGE_FORCED_LINE_BUDGET`. `force` (the user asked for the lines) lifts the triangle budget and the heap gate. Returns
  * `{ sources, edges, edgeElements, edgeTotal, deferred, heapMB }`: `edges[i]` and `edgeElements[i]` belong to model
- * `sources[i]`, `deferred` means an unforced pass went over the triangle budget and the scenes stay for a forced one,
+ * `sources[i]`, `deferred` means an unforced pass went over the triangle budget or the heap gate and the scenes stay for a forced one,
  * `edgeTotal` is the segment count of the whole scenes after a pass of the largest instances.
  * @param {boolean} force
  * @returns {any}
@@ -3494,17 +3506,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 421, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 438, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 459, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 476, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 421, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 438, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },

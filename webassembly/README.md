@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:a5b6b2b2485bd460 -->
+<!-- Generated file: edit the source in the dev repository. sha256:ce10c46cac28de7a -->
 # WebAssembly library
 
 [Back to xeoIFC](../README.md#1-webassembly-library)
@@ -39,5 +39,6 @@ xeoIFC Web supports
 - Load terrain from public GIS databases around georeferenced IFC models.
 - Export of selected elements to a new IFC file (split).
 - Export of several loaded files to a new IFC file (merge).
+- Export to I3S scene layer packages (`.slpk`) for Esri ArcGIS, global or local: [Esri ArcGIS export](../esri/README.md).
 - BCF, Minimap, storey shift, clip planes, measuring tool, compare revisions tool.
 - File types: .ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.las,.laz

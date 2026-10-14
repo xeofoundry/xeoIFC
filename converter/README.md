@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:58bef3d6ac058d32 -->
+<!-- Generated file: edit the source in the dev repository. sha256:88623b290a37aa40 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
@@ -12,7 +12,6 @@ metadata IFC) and a manifest JSON, with cxconverter-compatible configuration and
 - [Run the application](#run-the-application)
 - [Output file types](#output-file-types)
 - [Outer-shape extraction](#outer-shape-extraction)
-  - [Scripted folder conversion to SLPK](#scripted-folder-conversion-to-slpk)
 - [Metadata file types](#metadata-file-types)
 - [Manifest file](#manifest-file)
 - [Units and coordinate system](#units-and-coordinate-system)
@@ -81,6 +80,8 @@ More documentation:
 
 - [Configuration](#configuration) - the optional JSON configuration file: filters, geometry and glTF options.
 - [metadata-format.md](metadata-format.md) - the metadata JSON: objects, property sets, element quantities, units.
+- [Esri ArcGIS export](../esri/README.md) - SLPK output: global or local referencing, coordinate systems, I3S options and
+  how to check the layer in ArcGIS.
 
 ## Output file types
 
@@ -89,7 +90,7 @@ More documentation:
 | `.glb` | Binary glTF 2.0 in one file. Recommended: smaller and faster to read than `.gltf`. |
 | `.gltf` | The same content as JSON text, plus a `.bin` file with the binary buffers. |
 | `.xkt` | xeokit's native format, written directly (no separate xeokit-convert step). The metadata is embedded. |
-| `.slpk` | I3S 3D Object scene layer package for ArcGIS, with IFC element attributes and property sets embedded. Requires a projected coordinate system in metres. |
+| `.slpk` | I3S 3D Object scene layer package for ArcGIS, with IFC element attributes and property sets embedded. Global (WGS 84) by default, transformed from the projected CRS the IFC files declare; local in a projected CRS on request. See [Esri ArcGIS export](../esri/README.md). |
 | `.html` | The complete model in one self-contained HTML document with a 3D viewer and a tree view of the project structure. It can be shared and opened in a web browser without a web server and without installing anything. |
 | `.ifc`, `.ifczip` | With outer-shape extraction: the source IFC with reduced geometry, not a metadata-only IFC. See below. |
 
@@ -143,94 +144,9 @@ To select specific files instead of a folder, repeat `-i`. IFC and IFCZIP inputs
   --no-outer-shape-transparent-opaque --accept-terms
 ```
 
-For SLPK, the projected EPSG code comes from the inputs' `IfcProjectedCRS`. If none declares it, supply
-`inputParameters.i3sWkid` in a configuration file passed with `-c`. Choose the code matching the model coordinates;
-setting it does not transform them. Without a declared code and without `i3sWkid`, the layer is placed from the IfcSite
-latitude, longitude and elevation (EPSG:2056 in Switzerland, else the WGS84 UTM zone). SLPK keeps projected coordinates with Z up, rather than the glTF root rotation.
-
-### Scripted folder conversion to SLPK
-
-A Windows batch script can process all `.ifc` and `.ifczip` files in the current working folder in one conversion.
-The files form one federation: geometry in one file can hide geometry in another. Subfolders are not scanned, and the
-result is **one combined SLPK**, not a separate package for each input file. Passing the directory to `-i` replaces the
-need for a `for` loop over individual files.
-
-Save this portable version of `extract-outer-shape-to-i3s.cmd` next to your converter, for example in
-`C:\tools\xeoifc`, and change `XEOIFC` to the location of your executable:
-
-```bat
-@echo off
-setlocal
-set "XEOIFC=C:\tools\xeoifc\xeoifc.exe"
-set "DIR=%CD%"
-
-set "OUTER_SHAPE_OPTIONS="
-choice /c YN /n /t 5 /d Y /m "Treat transparent objects as opaque? [Y/N, default Y in 5 s] "
-if errorlevel 2 if not errorlevel 3 set "OUTER_SHAPE_OPTIONS=--no-outer-shape-transparent-opaque"
-
-if not exist "%DIR%\out" mkdir "%DIR%\out"
-"%XEOIFC%" -i "%DIR%" -o "%DIR%\out\outer-shape.slpk" ^
-  --extract-outer-shape %OUTER_SHAPE_OPTIONS% ^
-  --accept-terms %* --outer-shape-unresolved-policy drop
-exit /b %ERRORLEVEL%
-```
-
-Linux version:
-
-```bash
-#!/usr/bin/env bash
-XEOIFC="/opt/xeoifc/xeoifc"
-DIR="$PWD"
-
-OUTER_SHAPE_OPTIONS=()
-if [ -t 0 ]; then
-  read -r -n 1 -t 5 -p "Treat transparent objects as opaque? [Y/N, default Y in 5 s] " ANSWER
-  echo
-  case "$ANSWER" in [nN]) OUTER_SHAPE_OPTIONS=(--no-outer-shape-transparent-opaque) ;; esac
-fi
-
-mkdir -p "$DIR/out"
-"$XEOIFC" -i "$DIR" -o "$DIR/out/outer-shape.slpk" \
-  --extract-outer-shape "${OUTER_SHAPE_OPTIONS[@]}" \
-  --accept-terms "$@" --outer-shape-unresolved-policy drop
-```
-
-Save it as `extract-outer-shape-to-i3s.sh`, change `XEOIFC` to the location of your executable and make it executable
-with `chmod +x extract-outer-shape-to-i3s.sh`. Run it from the folder containing the models.
-
-The script asks whether transparent objects are treated as opaque. `Y` keeps the converter default: glazing and other
-transparent objects hide what lies behind them. `N` adds `--no-outer-shape-transparent-opaque`, so geometry seen through
-them is kept. Without an answer within 5 seconds, or when the script runs without a console, it continues with the
-default (`Y`).
-
-Run it from **Command Prompt**, after changing to the folder containing the models. The script uses that working folder,
-not the folder in which the script is stored:
-
-```bat
-cd /d "C:\models\campus"
-call "C:\tools\xeoifc\extract-outer-shape-to-i3s.cmd"
-```
-
-The result is `C:\models\campus\out\outer-shape.slpk`.
-As in the original script, the final `--outer-shape-unresolved-policy drop` forces unresolved GPU geometry to be removed;
-this can remove visible elements that sampling did not resolve. Check the output against the original models.
-
-Additional arguments are forwarded through `%*`. If the inputs do not declare an EPSG code, save a `wkid.json` in the
-model folder, using the projected CRS that matches the model coordinates (2056 is an example, not a coordinate conversion):
-
-```json
-{"inputParameters":{"i3sWkid":2056}}
-```
-
-Then run, for example:
-
-```bat
-call "C:\tools\xeoifc\extract-outer-shape-to-i3s.cmd" -c "wkid.json" --outer-shape-quality fine
-```
-
-For licensed conversion, set `XEO_IFC_LICENSE_KEY` in the environment before running the script; do not embed a key in a
-shared batch file. Without a key, `--accept-terms` accepts the testing license and runs in evaluation mode. This version
-omits the original script's `pause` and returns the converter's exit code, so it can be called from another script or job.
+For SLPK output, the referencing (global in WGS 84 by default, or local), the coordinate systems and the I3S options
+are described in [Esri ArcGIS export](../esri/README.md), as is a
+[script that converts a folder of models](../esri/README.md#scripted-folder-conversion) into one SLPK.
 
 ### Visibility settings
 
@@ -356,7 +272,9 @@ The converter reads optional settings from a JSON file before every conversion.
 3. Otherwise `cxconverter.json` next to the executable.
 
 The file name is the same as for cxconverter, so existing deployments keep working. A missing file is not an error; the
-converter then runs with the defaults listed below. The loaded path is printed as `Settings loaded: <path>`.
+converter then runs with the defaults listed below. The loaded path is printed as `Settings loaded: <path>`. A file that
+is there but cannot be read as settings (not JSON, or without an `inputParameters` object) stops the conversion with exit
+code 1.
 
 ### File layout
 
@@ -459,6 +377,11 @@ This violates the IFC standard, but it occurs. By default these elements are not
 
 IFC models repeat the same geometry very often (the mesh of one door type can occur thousands of times), so the three deduplication
 options typically reduce the output size by 50% to 80%. Switch them off only for debugging.
+
+### I3S options
+
+The keys of the I3S (`.slpk`) output, `i3sOutputWkid`, `i3sWkid`, `i3sVcsWkid` and the property field settings, are
+described in [Esri ArcGIS export](../esri/README.md#i3s-options).
 
 ### Accepted for compatibility
 

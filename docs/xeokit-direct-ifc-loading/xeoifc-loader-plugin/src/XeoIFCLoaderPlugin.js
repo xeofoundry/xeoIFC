@@ -60,8 +60,9 @@ class XeoIFCLoaderPlugin extends Plugin {
         this._worker = null;
         this._requests = new Map(); // request id -> {resolve, reject, onProgress}
         this._nextRequestId = 1;
-        this._models = {}; // model id -> {sourceId, isStep, entityIds: object id -> entity id in the file}
+        this._models = {}; // model id -> {sourceId, isStep, entityIds: object id -> entity id in the file, engineRun}
         this._loadsInFlight = 0;
+        this._engineRun = 0; // Counts the engine workers that failed: a parsed file lives in the run that loaded it
     }
 
     /**
@@ -114,7 +115,18 @@ class XeoIFCLoaderPlugin extends Plugin {
         const circleSegments = params.circleSegments || 18;
 
         this._request({type: "load", source, name, circleSegments}, [], params.onProgress)
-            .then((result) => sceneModel.destroyed ? this._releaseSource(result.sourceId, result.isStep) : this._buildModel(sceneModel, params, result))
+            .then((result) => {
+                const engineRun = this._engineRun; // The engine that holds the parsed file; it may fail during the build
+                if (sceneModel.destroyed) {
+                    this._releaseSource(result.sourceId, result.isStep, engineRun);
+                    return;
+                }
+                // A build that fails never enters the model in _models: nothing else would free its file
+                return this._buildModel(sceneModel, params, result, engineRun).catch((e) => {
+                    this._releaseSource(result.sourceId, result.isStep, engineRun);
+                    throw e;
+                });
+            })
             .catch((e) => {
                 this.error(e);
                 sceneModel.fire("error", e);
@@ -177,7 +189,7 @@ class XeoIFCLoaderPlugin extends Plugin {
                         this.unloadMetadata(modelId);
                     }
                 });
-                this._models[modelId] = {sourceId: result.sourceId, isStep: false, entityIds, onModelUnloaded};
+                this._models[modelId] = {sourceId: result.sourceId, isStep: false, entityIds, onModelUnloaded, engineRun: this._engineRun};
                 return {metaObjects};
             })
             .finally(() => {
@@ -206,12 +218,16 @@ class XeoIFCLoaderPlugin extends Plugin {
      *
      * @param {String} objectId ID of an {@link Entity} or {@link MetaObject} loaded by this plugin.
      * @returns {Promise<{pset: String, props: {name: String, value: String, unit: String}[]}[]>} The property sets; empty when
-     * the object was not loaded by this plugin.
+     * the object was not loaded by this plugin. Rejects when the engine failed (a load that fires "error" with "xeoIFC engine
+     * failed") after the object's model was loaded: its parsed file went with the engine, load the model again.
      */
     getProperties(objectId) {
         for (const model of Object.values(this._models)) {
             const entityId = model.entityIds[objectId];
             if (entityId !== undefined) {
+                if (model.engineRun !== this._engineRun) {
+                    return Promise.reject("The xeoIFC engine failed after this model was loaded: load the model again for its properties");
+                }
                 return this._request({type: "properties", sourceId: model.sourceId, entityId, isStep: model.isStep})
                     .then((result) => result.json ? JSON.parse(result.json) : []);
             }
@@ -238,6 +254,10 @@ class XeoIFCLoaderPlugin extends Plugin {
                 ? new Worker(this._workerSrc, {type: "module"})
                 : new Worker(new URL("./xeoifc.worker.js", import.meta.url), {type: "module"});
             this._worker.onmessage = ({data: response}) => {
+                if (response.fatal) {
+                    this._discardWorker(response.message);
+                    return;
+                }
                 const request = this._requests.get(response.id);
                 if (!request) {
                     return;
@@ -271,6 +291,16 @@ class XeoIFCLoaderPlugin extends Plugin {
         this._requests.clear();
     }
 
+    // The engine trapped (panic, out of memory): its wasm instance stays locked, every later call into it would fail
+    // too. The worker goes, the next request starts a fresh one. The parsed files of the models loaded so far go with
+    // it: the models stay in the Viewer, getProperties() rejects for them.
+    _discardWorker(message) {
+        this._worker.terminate();
+        this._worker = null;
+        this._engineRun++;
+        this._failRequests("xeoIFC engine failed: " + message);
+    }
+
     // The engine keeps every loaded file for property queries. A model's file is freed when the model goes
     // (_releaseModel); once no model of this plugin is left the engine is cleared as a whole, load state included.
     _clearWorkerIfUnused() {
@@ -287,12 +317,13 @@ class XeoIFCLoaderPlugin extends Plugin {
             return;
         }
         delete this._models[modelId];
-        this._releaseSource(model.sourceId, model.isStep);
+        this._releaseSource(model.sourceId, model.isStep, model.engineRun);
     }
 
-    // Frees one parsed file in the engine (also for a load whose model was destroyed before it finished)
-    _releaseSource(sourceId, isStep) {
-        if (this._worker) {
+    // Frees one parsed file in the engine (also for a load whose model was destroyed before it finished). A file of
+    // an engine that failed went with its worker: the fresh engine hands out the same source ids again.
+    _releaseSource(sourceId, isStep, engineRun) {
+        if (this._worker && engineRun === this._engineRun) {
             this._worker.postMessage({type: "release", sourceId, isStep: !!isStep});
         }
         this._clearWorkerIfUnused();
@@ -337,7 +368,8 @@ class XeoIFCLoaderPlugin extends Plugin {
         return {metaObjects, objectIds, types, entityIds, objectId};
     }
 
-    async _buildModel(sceneModel, params, result) {
+    // engineRun: the run of the engine that holds the parsed file (the engine may fail while the model is built)
+    async _buildModel(sceneModel, params, result, engineRun) {
 
         const modelId = sceneModel.id;
         const {globalize, typeLoads} = this._filters(params);
@@ -438,6 +470,7 @@ class XeoIFCLoaderPlugin extends Plugin {
                 await nextTask();
                 if (sceneModel.destroyed) {
                     channel.port1.close();
+                    this._releaseSource(result.sourceId, result.isStep, engineRun); // Not in _models yet
                     return;
                 }
                 sliceStart = performance.now();
@@ -485,7 +518,7 @@ class XeoIFCLoaderPlugin extends Plugin {
 
         this.viewer.metaScene.createMetaModel(modelId, {metaObjects});
 
-        this._models[modelId] = {sourceId: result.sourceId, isStep: result.isStep, entityIds};
+        this._models[modelId] = {sourceId: result.sourceId, isStep: result.isStep, entityIds, engineRun};
         sceneModel.once("destroyed", () => {
             this._releaseModel(modelId);
             this.viewer.metaScene.destroyMetaModel(modelId);

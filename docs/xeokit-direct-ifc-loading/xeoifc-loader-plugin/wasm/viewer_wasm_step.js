@@ -67,6 +67,15 @@ export function step_properties(source_id, entity_id) {
 export function step_release_model(source_id) {
     wasm.step_release_model(source_id);
 }
+
+/**
+ * Continue the source-id sequence of a replaced worker: the next STEP model gets sequence number `next` or higher,
+ * so it cannot take the id of a model the page still shows.
+ * @param {number} next
+ */
+export function step_seed_source_id(next) {
+    wasm.step_seed_source_id(next);
+}
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
