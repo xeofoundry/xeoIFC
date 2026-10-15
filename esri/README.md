@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:c53400eb974fd98b -->
+<!-- Generated file: edit the source in the dev repository. sha256:9de4b13e164fe907 -->
 # Esri ArcGIS export (I3S / SLPK)
 
 [Back to xeoIFC](../README.md#esri-arcgis-export)
@@ -68,9 +68,11 @@ heights (EPSG:5773), a local layer as the vertical CRS the IFC files declare. `i
 
 The CRS of each IFC file is the EPSG code of its `IfcProjectedCRS` (in IFC 4.3 also as the target of an
 `IfcRigidOperation`), and its `IfcMapConversion` places the model coordinates in that CRS. In a federation, each file is
-placed with its own map conversion, and files that declare different CRSs are transformed into the layer CRS.
+placed with its own map conversion, and files that declare different CRSs are transformed into the layer CRS. When the
+Name gives a code xeoIFC cannot transform and another attribute names one it can, that one is used, with a warning:
+some Deutsche Bahn exports name 'EPSG:6258' (the ETRS89 datum) and give EPSG:5684 in the Description.
 
-The transformations cover the projected CRSs of the EPSG database in common use, 568 projected and 118 compound CRSs:
+The transformations cover the projected CRSs of the EPSG database in common use, 570 projected and 122 compound CRSs:
 the UTM zones (WGS 84, ETRS89, NAD83), LV95 and LV03, Gauss-Krueger, Lambert-93, RD New, the British National Grid, EOV,
 MGA, the Japan plane rectangular CRSs, CGCS2000 Gauss-Krueger, Web Mercator and more. The datum shifts are the ones PROJ
 applies without grid files, and the results match PROJ to below a millimetre. A CRS outside them, such as S-JTSK /
@@ -286,8 +288,9 @@ To check the position of a global layer, look at it over satellite imagery and t
 
 ## Messages
 
-The converter prints these messages and lists them in the manifest. xeoIFC Web shows them in its own terms: *Model EPSG
-code* for `i3sWkid`, the referencing and *Layer EPSG code* for `i3sOutputWkid`.
+The converter lists these messages in the manifest (`errors`, `warnings`). A note that concerns several input files comes
+once, with the list of the files. xeoIFC Web shows them in its own terms: *Model EPSG code* for `i3sWkid`, the referencing
+and *Layer EPSG code* for `i3sOutputWkid`; the notes of an export that succeeded are shown as notes, not as an error.
 
 | Message | Meaning |
 |---|---|
@@ -296,8 +299,9 @@ code* for `i3sWkid`, the referencing and *Layer EPSG code* for `i3sOutputWkid`.
 | `EPSG:... is a geographic CRS` | `i3sWkid` must be a projected CRS in metres; a global layer needs no code. `i3sOutputWkid` takes 4326 or a projected CRS. |
 | `... lie at ..., ... km from its IfcSite position` | The coordinates are not in the CRS given as `i3sWkid`; often they are local coordinates near the origin. Without `i3sWkid` the layer is placed from IfcSite. |
 | `I3S output needs a projected CRS: no input declares an EPSG code ...` | No declared CRS, no `i3sWkid` and no IfcSite latitude and longitude, or a map conversion without an EPSG code. Set `i3sWkid`, or add the georeferencing to the IFC file. |
+| Warning: `... EPSG:... in IfcProjectedCRS, not a projected CRS xeoIFC can transform; EPSG:... of its (their) other attributes is used` | The name of the CRS has a code xeoIFC cannot transform (often not a CRS code at all), another attribute one it can. Check that it is the CRS of the coordinates. |
 | Warning: `... inputs declare no EPSG code and are assumed to use EPSG:...` | Files of a federation without a CRS are taken to be in the CRS most files declare. Check that they are. |
-| Warning: `... km from its IfcSite latitude/longitude ...` | The map conversion and the IfcSite position are more than 50 km apart: one of them is wrong. |
+| Warning: `... km from its (their) IfcSite latitude/longitude ...; the layer uses its (their) IfcMapConversion ...` | The map conversion and the IfcSite position are more than 50 km apart. The layer is placed with the map conversion: if the model sits in the right place, the IfcSite position is wrong. |
 | Warning: `... km from the other inputs and has no IfcMapConversion` | A file in local coordinates among georeferenced files. |
 | Warning: `... lie within 1 km of the origin of EPSG:...` | The coordinates given an `i3sWkid` look like local model coordinates. |
 | Warning: `no vertical datum declared` | A local layer without a vertical CRS: set `i3sVcsWkid`. |

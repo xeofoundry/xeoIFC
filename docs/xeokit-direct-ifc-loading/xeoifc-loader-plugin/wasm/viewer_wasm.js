@@ -1277,6 +1277,17 @@ export class Viewer {
 if (Symbol.dispose) Viewer.prototype[Symbol.dispose] = Viewer.prototype.free;
 
 /**
+ * Whether the I3S export can transform EPSG:`code` (projected, or compound over a projected CRS). Of the codes an
+ * IfcProjectedCRS names, the export takes the first such one (`xeo_i3s_ifc::declared_crs`).
+ * @param {number} code
+ * @returns {boolean}
+ */
+export function i3s_crs_supported(code) {
+    const ret = wasm.i3s_crs_supported(code);
+    return ret !== 0;
+}
+
+/**
  * What the About panel shows for a licence key: `{"state":"licensed"|"evaluation"|"invalid"|"expired","expires":<unix>}`.
  * Loading and viewing never ask for a key; a save or export without a valid one carries the "Evaluation version" text
  * (`worker_set_licence_key`, `worker_export_run`, `worker_export_slpk`). `now_unix`: seconds, from the page's clock.
@@ -3511,7 +3522,7 @@ function __wbg_get_imports() {
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 476, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 477, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
