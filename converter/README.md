@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:88623b290a37aa40 -->
+<!-- Generated file: edit the source in the dev repository. sha256:b0d7f8c24652a588 -->
 # xeoIFC command-line converter
 
 The xeoIFC converter is a native command-line application (Windows AMD64, Linux ARM64, Linux AMD64) for `.ifc` and `.ifczip` files. It
@@ -126,7 +126,8 @@ For a federation, repeat `-i` or supply a directory. A directory includes its `.
 Visibility is computed jointly, so elements in one input can hide elements in another.
 Without `-o`, each input gets its own `out/{name}.outer.ifc`. An explicit multi-input IFC output with a `{name}` pattern,
 for example `-o 'out/{name}.outer.ifc'`, also writes one IFC per input; without `{name}`, for example `-o all.ifc`, the
-inputs are merged into one IFC. A `.glb` or `.slpk` output always holds all inputs.
+inputs are merged into one IFC, which they must share a schema generation for (IFC2X3, IFC4, IFC4X3; a mix is refused).
+A `.glb` or `.slpk` output always holds all inputs.
 
 Create one SLPK from a folder of models, allowing visibility through transparent objects:
 

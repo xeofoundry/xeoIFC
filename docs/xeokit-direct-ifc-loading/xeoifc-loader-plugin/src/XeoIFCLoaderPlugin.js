@@ -28,7 +28,7 @@ const Z_UP_TO_Y_UP = math.mat4([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]
  *
  * ````javascript
  * import {Viewer} from "@xeokit/xeokit-sdk";
- * import {XeoIFCLoaderPlugin} from "@xeofoundry/xeoifc-loader-plugin";
+ * import {XeoIFCLoaderPlugin} from "@xeofoundrybim/xeoifc-loader-plugin";
  *
  * const viewer = new Viewer({canvasId: "myCanvas"});
  * const xeoIFCLoader = new XeoIFCLoaderPlugin(viewer);
@@ -88,7 +88,9 @@ class XeoIFCLoaderPlugin extends Plugin {
      * @param {Number} [params.circleSegments=18] Number of segments the engine uses to tessellate a full circle (4..64).
      * @param {Function} [params.onProgress] Called with ````(phase, done, total)````, phases "read" (in MB; total 0 when
      * unknown), "parse", "geom", "pack", "edges" and "scene" (building the SceneModel, in time slices on the main thread).
-     * @returns {SceneModel} The model; fires "loaded" when ready and "error" when loading failed.
+     * @returns {SceneModel} The model; fires "loaded" when ready and "error" when loading failed. A file that could only be
+     * read in part (truncated, unreadable records) first fires "warnings" with the messages, a String[], as what loaded may
+     * be incomplete; when nothing of it could be read it fires "error" with them instead of "loaded".
      */
     load(params = {}) {
 
@@ -164,7 +166,8 @@ class XeoIFCLoaderPlugin extends Plugin {
      * @param {String[]} [params.excludeTypes] Drop objects with these types.
      * @param {Boolean} [params.globalizeObjectIds=false] Prefix every object ID with the model ID; set it on the geometry loader too.
      * @param {Function} [params.onProgress] Called with ````(phase, done, total)````, phases "read" (in MB) and "parse".
-     * @returns {Promise<{metaObjects: {id: String, name: String, type: String, parent: String}[]}>} xeokit metamodel JSON.
+     * @returns {Promise<{metaObjects: {id: String, name: String, type: String, parent: String}[], warnings: String[]}>} xeokit
+     * metamodel JSON, plus what of the file could not be read (truncated, unreadable records): the metadata may be incomplete.
      */
     loadMetadata(params = {}) {
         const modelId = params.id;
@@ -190,7 +193,9 @@ class XeoIFCLoaderPlugin extends Plugin {
                     }
                 });
                 this._models[modelId] = {sourceId: result.sourceId, isStep: false, entityIds, onModelUnloaded, engineRun: this._engineRun};
-                return {metaObjects};
+                const warnings = result.warnings || [];
+                warnings.forEach((warning) => this.warn(warning));
+                return {metaObjects, warnings};
             })
             .finally(() => {
                 spinner.processes--;
@@ -331,11 +336,15 @@ class XeoIFCLoaderPlugin extends Plugin {
 
     // {globalize, typeLoads} of a load / loadMetadata call, with the plugin defaults applied
     _filters(params) {
-        const includeTypes = params.includeTypes || this._includeTypes;
-        const excludeTypes = params.excludeTypes || this._excludeTypes;
+        const typeSet = (types) => types && new Set(types.map((type) => type.toUpperCase())); // "IFCWALL" names IfcWall too
+        const includeTypes = typeSet(params.includeTypes || this._includeTypes);
+        const excludeTypes = typeSet(params.excludeTypes || this._excludeTypes);
         return {
             globalize: (params.globalizeObjectIds !== undefined) ? !!params.globalizeObjectIds : this._globalizeObjectIds,
-            typeLoads: (type) => (!includeTypes || includeTypes.includes(type)) && !(excludeTypes && excludeTypes.includes(type))
+            typeLoads: (type) => {
+                const upper = String(type).toUpperCase();
+                return (!includeTypes || includeTypes.has(upper)) && !(excludeTypes && excludeTypes.has(upper));
+            }
         };
     }
 
@@ -383,6 +392,11 @@ class XeoIFCLoaderPlugin extends Plugin {
         const center = new Float64Array(packed, 0, 3); // Geometry is rebased around this point (meters)
         const origin = [center[0], center[2], -center[1]];
         const [meshCount, instanceCount, elementCount, vertexFloats] = u32.subarray(10, 14);
+        const warnings = result.warnings || []; // The STEP reader reports none
+        if (!result.tree && elementCount === 0 && warnings.length > 0) {
+            throw warnings.join("; "); // Nothing of the file came through: not a model that loaded
+        }
+        warnings.forEach((warning) => this.warn(warning));
         const spansAt = HEADER_WORDS;
         const instancesAt = spansAt + meshCount * SPAN_WORDS;
         const elementsAt = instancesAt + instanceCount * INSTANCE_WORDS;
@@ -527,6 +541,9 @@ class XeoIFCLoaderPlugin extends Plugin {
         sceneModel.scene.once("tick", () => {
             if (sceneModel.destroyed) {
                 return;
+            }
+            if (warnings.length > 0) {
+                sceneModel.fire("warnings", warnings, false);
             }
             sceneModel.scene.fire("modelLoaded", modelId); // FIXME: Assumes listeners know order of these two events
             sceneModel.fire("loaded", true, false); // Don't forget the event, for late subscribers

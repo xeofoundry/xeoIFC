@@ -1,5 +1,5 @@
 This licence applies to the example programs in this folder. The xeoifc library they call is not part of it (see
-sdk/LICENSE.txt in xeoifc-qt-source.zip).
+LICENSE.txt in xeoifc-lib-<platform>.zip).
 
 MIT License
 

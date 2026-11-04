@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:fb00a59070d4dc1f -->
+<!-- Generated file: edit the source in the dev repository. sha256:70480b677431405a -->
 # xeoIFC examples
 
 The same small program in C, C# and Python on the native library (`xeoifc.dll` / `libxeoifc.so`, one plain C header).
@@ -19,16 +19,18 @@ language.
 
 ## The library
 
-Download `xeoifc-qt-source.zip` from [Releases](https://github.com/xeofoundry/xeoIFC/releases/). Its folder
-`xeoifc-qt/sdk` holds:
+Download the package of your platform from [Releases](https://github.com/xeofoundry/xeoIFC/releases/) and unpack it:
 
-- `include/xeoifc.h`
-- `lib/windows-x64/xeoifc.dll` (with `xeoifc.dll.lib`)
-- `lib/linux-x64/libxeoifc.so` and `lib/linux-arm64/libxeoifc.so`
-- `LICENSE.txt`, the xeoIFC Testing License of the library
+| Package | Library |
+|---|---|
+| `xeoifc-lib-windows-amd64.zip` | `lib/windows-x64/xeoifc.dll` (with `xeoifc.dll.lib`) |
+| `xeoifc-lib-linux-amd64.zip` | `lib/linux-x64/libxeoifc.so` |
+| `xeoifc-lib-linux-arm64.zip` | `lib/linux-arm64/libxeoifc.so` |
 
-Use `<sdk>` for that folder and `<library>` for the file that matches your platform. On Windows the library needs the
-Microsoft Visual C++ Redistributable (VCRUNTIME140.dll).
+Each one also holds `include/xeoifc.h` and `LICENSE.txt`, the xeoIFC Testing License of the library.
+
+Use `<sdk>` for the unpacked folder and `<library>` for the library file in it. On Windows the library needs the
+Microsoft Visual C++ Redistributable (VCRUNTIME140.dll); on Linux it needs glibc 2.35 or newer.
 
 A test model is [villa.ifc](https://xeofoundry.github.io/xeoIFC/showcase/villa/villa.ifc) from the showcase: an
 IFC4 model with 14 external walls.
@@ -57,4 +59,4 @@ file is plain and the line prints `False`. For a key or an evaluation, contact [
 ## Licence
 
 The example programs are MIT licensed ([LICENSE](LICENSE)). The xeoifc library is covered by its own licence
-(`sdk/LICENSE.txt`).
+(`LICENSE.txt` in the library package).

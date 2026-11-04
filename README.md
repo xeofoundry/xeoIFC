@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:2fb85bbcc47729a3 -->
+<!-- Generated file: edit the source in the dev repository. sha256:8ee807a684682ef4 -->
 <h1 align="center">
   <a href="https://xeofoundry.github.io/xeoIFC/">
     <picture>
@@ -143,17 +143,16 @@ The examples: a xeokit viewer that loads dropped files, and metadata from IFC fo
 ## Esri ArcGIS export
 
 The command-line converter and xeoIFC Web export IFC models as I3S scene layer packages (`.slpk`) for ArcGIS Pro, ArcGIS
-Online and the ArcGIS Maps SDK for JavaScript. Several IFC files go into one layer, and each element keeps its IFC
+Online and the ArcGIS Maps SDK for JavaScript. One or several IFC files go into one layer, and each element keeps its IFC
 attributes and property sets as fields. By default the layer is global: the vertices are transformed from the CRS the IFC
 files declare into WGS 84, so the model shows in its place over world imagery and terrain. A local layer in a projected
 CRS is written on request.
 
 ```mermaid
 flowchart LR
-    IFC[".ifc / .ifczip<br/>IfcProjectedCRS, IfcMapConversion"] --> CLI["xeoifc CLI"]
-    IFC --> WEB["xeoIFC Web"]
-    CLI --> SLPK[".slpk (I3S)<br/>global WGS 84 or local"]
-    WEB --> SLPK
+    IFC[".ifc / .ifczip<br/>IfcProjectedCRS, IfcMapConversion"]
+    IFC --> xeoIFC["xeoIFC<br/>CLI · web · native library"]
+    xeoIFC --> SLPK[".slpk (I3S)<br/>global WGS 84 or local"]
     SLPK --> PRO["ArcGIS Pro"]
     SLPK --> AGOL["ArcGIS Online<br/>Scene Viewer"]
     SLPK --> JS["ArcGIS Maps SDK<br/>for JavaScript"]

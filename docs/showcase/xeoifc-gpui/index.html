@@ -115,9 +115,9 @@
     <ul>
         <li><code>xeoifc-gpui-windows-amd64.zip</code>: the application ready to run. Unpack it and start
             <code>xeoifc-gpui.exe</code>.</li>
-        <li><code>xeoifc-gpui-source.zip</code>: the Cargo project with the source code (MIT licence), <code>xeoifc.h</code>,
-            <code>xeoifc.dll</code> with its import library for Windows x64, a README with the build steps, the licence texts
-            and the notices of the open-source parts.</li>
+        <li>In the same zip, <code>source/xeoifc-gpui</code>: the Cargo project with the source code (MIT licence),
+            <code>xeoifc.h</code>, <code>xeoifc.dll</code> with its import library for Windows x64, a README with the build
+            steps, the licence texts and the notices of the open-source parts.</li>
     </ul>
 
     <h2>3. How a gpui window hosts the 3D view</h2>
@@ -233,7 +233,7 @@ viewer.view_section(Some(&amp;[x, y, z, 0.0, 1.0, 0.0]));     // a 2D view strai
 
     <p>You need 64-bit Windows 10 or 11, the Rust stable toolchain with the MSVC target, and the Visual Studio 2022 or 2026 Build
         Tools with a Windows SDK. In release builds gpui compiles its shaders with <code>fxc.exe</code> of the Windows SDK, so
-        build from a Visual Studio developer prompt. In the unpacked <code>xeoifc-gpui-source.zip</code>:</p>
+        build from a Visual Studio developer prompt. In <code>source/xeoifc-gpui</code> of the unpacked zip:</p>
 
     <pre><code>cargo run --release -- model.ifc</code></pre>
 
@@ -249,10 +249,10 @@ viewer.view_section(Some(&amp;[x, y, z, 0.0, 1.0, 0.0]));     // a 2D view strai
 
     <p>xeoIFC gpui is open source under the MIT licence. You can use, change and distribute it, also in commercial products.
         gpui, gpui-component and the other Rust crates in the executable have their own licences (Apache-2.0, MIT and similar);
-        <code>THIRD-PARTY-NOTICES-gpui.txt</code> in both zips lists them with their texts.</p>
+        <code>THIRD-PARTY-NOTICES-gpui.txt</code> in the zip lists them with their texts.</p>
 
     <p><code>xeoifc.dll</code> is not open source. It is licensed under the
-        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>sdk/LICENSE.txt</code> in the source zip): you
+        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>source/xeoifc-gpui/sdk/LICENSE.txt</code> in the zip): you
         can use and redistribute it unmodified, in binary form and free of charge, solely for testing and evaluation. For
         commercial or production use, contact <a href="https://xeofoundry.com">xeoFoundry</a>. All functions work without a
         licence key. Without a key, each IFC file that the library writes gets one more element: an

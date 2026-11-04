@@ -108,9 +108,9 @@
         <li><code>xeoifc-wpf-windows-amd64.zip</code>: the application ready to run. It needs the
             <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 Desktop Runtime</a> (x64) or a newer one. Unpack
             the zip and start <code>xeoifc-wpf.exe</code>.</li>
-        <li><code>xeoifc-wpf-source.zip</code>: the .NET project with the source code (MIT licence), <code>xeoifc.h</code>,
-            <code>xeoifc.dll</code> for Windows x64, a README with the build steps, the licence texts and the notices of the
-            open-source parts in the library.</li>
+        <li>In the same zip, <code>source/xeoifc-wpf</code>: the .NET project with the source code (MIT licence),
+            <code>xeoifc.h</code>, <code>xeoifc.dll</code> for Windows x64, a README with the build steps, the licence texts and
+            the notices of the open-source parts in the library.</li>
     </ul>
 
     <h2>3. How a WPF window hosts the 3D view</h2>
@@ -302,7 +302,7 @@ _viewport.Viewer?.ViewSection([plane.Point.X, plane.Point.Y, plane.Point.Z, plan
     <h2>5. Build it yourself</h2>
 
     <p>You need 64-bit Windows 10 or 11 and the <a href="https://dotnet.microsoft.com/download/dotnet/10.0">.NET 10 SDK</a>.
-        The project uses no NuGet packages. In the unpacked <code>xeoifc-wpf-source.zip</code>:</p>
+        The project uses no NuGet packages. In <code>source/xeoifc-wpf</code> of the unpacked zip:</p>
 
     <pre><code>dotnet run -c Release -- model.ifc</code></pre>
 
@@ -319,10 +319,10 @@ _viewport.Viewer?.ViewSection([plane.Point.X, plane.Point.Y, plane.Point.Z, plan
 
     <p>xeoIFC WPF is open source under the MIT licence. You can use, change and distribute it, also in commercial products.
         The xeokit logo files in <code>Resources/</code> and the logo shape in <code>Styles.xaml</code> are not covered by the
-        MIT licence. The application uses no third-party packages, and .NET is not in the zips.</p>
+        MIT licence. The application uses no third-party packages, and .NET is not in the zip.</p>
 
     <p><code>xeoifc.dll</code> is not open source. It is licensed under the
-        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>sdk/LICENSE.txt</code> in the source zip): you
+        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>source/xeoifc-wpf/sdk/LICENSE.txt</code> in the zip): you
         can use and redistribute it unmodified, in binary form and free of charge, solely for testing and evaluation. For
         commercial or production use, contact <a href="https://xeofoundry.com">xeoFoundry</a>. All functions work without a
         licence key. Without a key, each IFC file that the library writes gets one more element: an

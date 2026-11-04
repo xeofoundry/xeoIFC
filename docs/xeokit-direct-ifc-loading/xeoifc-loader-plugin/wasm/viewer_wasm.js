@@ -268,6 +268,19 @@ export class Viewer {
     clear_hover() {
         wasm.viewer_clear_hover(this.__wbg_ptr);
     }
+    /**
+     * `replace_model_elements` with an empty pack: the geometry of `handles` (all of one model) goes, every handle stays
+     * valid. An outer shape Keep clears the elements its run never tested, whose bodies the IFC drops.
+     * @param {Uint32Array} handles
+     */
+    clear_model_elements(handles) {
+        const ptr0 = passArray32ToWasm0(handles, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.viewer_clear_model_elements(this.__wbg_ptr, ptr0, len0);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
     clear_preview_scene() {
         wasm.viewer_clear_preview_scene(this.__wbg_ptr);
     }
@@ -1417,6 +1430,17 @@ export function worker_element_info(source_id, entity_id) {
 }
 
 /**
+ * Fails with the reason when the accumulated documents cannot be one IFC file (`Session::check_mergeable`): called
+ * before `worker_export_run` when that file is the output, not when GLB or XKT is made from it.
+ */
+export function worker_export_check() {
+    const ret = wasm.worker_export_check();
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+}
+
+/**
  * Feed the next slice of the current source file (same sniffing as the load
  * path, so `.ifczip` sources work too).
  * @param {Uint8Array} chunk
@@ -1625,9 +1649,12 @@ export function worker_load_chunk(chunk) {
  * "parse", "geom", "pack") and `on_snapshot(Uint8Array)` with a packed
  * preview of the elements finished so far. Returns
  * `{ packed: Uint8Array, tree: string|undefined, groupings: string, sourceId: number, heapMB: number,
- * edgesAvailable: boolean, edgesDeferred: boolean, lineLayers: Float32Array[], lineOwners: Uint32Array[] }`: `lineLayers`
- * holds the drafting line segments per layer, `lineOwners` the entity id of each segment. `edgesDeferred`: the scene is
- * over the sharp-edge triangle budget and stays for `worker_sharp_edges(true)`.
+ * edgesAvailable: boolean, edgesDeferred: boolean, lineLayers: Float32Array[], lineOwners: Uint32Array[], entityClasses: string[], warnings: string[] }`:
+ * `warnings` says what of the file could not be read or was left out (a truncated file loads without an error): a host has
+ * to show them.
+ * `lineLayers` holds the drafting line segments per layer, `lineOwners` the entity id of each segment. `edgesDeferred`: the scene is
+ * over the sharp-edge triangle budget and stays for `worker_sharp_edges(true)`. `entityClasses`: the classes of the file's records,
+ * from before the metadata prune.
  * @param {Function} on_progress
  * @param {Function} on_snapshot
  * @returns {any}
@@ -1689,6 +1716,28 @@ export function worker_metadata_finish() {
 export function worker_model_count() {
     const ret = wasm.worker_model_count();
     return ret >>> 0;
+}
+
+/**
+ * Parser worker: the opening group of each of `entity_ids` in document `doc_id` (the editable twin), for
+ * `worker_outer_shape_model_bodies` (`ifc_session::geometry::opening_groups`); throws the API error JSON for an unknown
+ * document.
+ * @param {string} doc_id
+ * @param {Uint32Array} entity_ids
+ * @returns {Uint32Array}
+ */
+export function worker_opening_groups(doc_id, entity_ids) {
+    const ptr0 = passStringToWasm0(doc_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passArray32ToWasm0(entity_ids, wasm.__wbindgen_malloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_opening_groups(ptr0, len0, ptr1, len1);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v3 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+    return v3;
 }
 
 /**
@@ -1832,11 +1881,17 @@ export function worker_outer_shape_federation_run(positions, groups, colors, gro
 /**
  * IFC payload of the last run for `worker_replace_bodies`: `{ status: Uint8Array, positions: Float32Array, owners:
  * Uint32Array, colorOf: Uint32Array, colors: Float32Array }`. The triangles are the kept ones of the rewritten
- * elements in viewer space, with the run element and the colour index of each; `colors` holds sRGB RGBA.
+ * elements in viewer space, with the run element and the colour index of each; `colors` holds sRGB RGBA. `groups`
+ * holds the opening group of each run element (`worker_opening_groups`, 0 none): an untouched element of a group with a
+ * rewritten one is rewritten too, with all its kept triangles, here and in the swap. A host loses its openings only
+ * when all its parts change, and a kept opening would cut the kept triangles again.
+ * @param {Uint32Array} groups
  * @returns {any}
  */
-export function worker_outer_shape_model_bodies() {
-    const ret = wasm.worker_outer_shape_model_bodies();
+export function worker_outer_shape_model_bodies(groups) {
+    const ptr0 = passArray32ToWasm0(groups, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_outer_shape_model_bodies(ptr0, len0);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
@@ -1924,7 +1979,7 @@ export function worker_outer_shape_model_removed() {
  * `Viewer.preview_append_scene`), per run element the status (0 untouched, 1 rewritten, 2 dropped) and the proxy kind
  * (0 none, 1 outdoor, 2 facade), and JSON `{ elements, untouched, rewritten, dropped, trianglesBefore, trianglesAfter,
  * outdoor, facade, simplifiedBefore, simplifiedAfter, simplifyMs, shapeMs, packMs }`. A zero-area triangle does not
- * change the status.
+ * change the status, but with a visibility test (`quality` 1..3) an element without another one is dropped.
  * @param {Float32Array} positions
  * @param {Uint32Array} groups
  * @param {Float32Array} colors
@@ -2045,7 +2100,9 @@ export function worker_release_model(source_id) {
  * as one change. `entity_ids` and `status` hold one entry per run element; `positions` (viewer space), `owners` (run
  * element) and `color_of` (index into the sRGB RGBA `colors`) describe the triangles. Each corner goes to world metres
  * as placement^-1 * (v + center) in f64; the weld distance of an element is max(1e-5, 4 * f32::EPSILON * max |v|)
- * metres. Rewritten elements get a new body of their triangles, dropped ones lose their body. Returns
+ * metres. Rewritten elements get a new body of their triangles, dropped ones lose their body. With `drop_untested` (a
+ * visibility test ran) every other product with a body loses it too, as untested counts as inside, but for the openings
+ * of a host that keeps them: the result lists them under "untested" (`Session::replace_tested_bodies`). Returns
  * `{"result": .., "warnings": [..]}` (`Session::replace_bodies`); throws the API error JSON or a text for bad input.
  * @param {string} doc_id
  * @param {Uint32Array} entity_ids
@@ -2056,9 +2113,10 @@ export function worker_release_model(source_id) {
  * @param {Float32Array} colors
  * @param {Float64Array} center
  * @param {Float64Array} placement
+ * @param {boolean} drop_untested
  * @returns {string}
  */
-export function worker_replace_bodies(doc_id, entity_ids, status, positions, owners, color_of, colors, center, placement) {
+export function worker_replace_bodies(doc_id, entity_ids, status, positions, owners, color_of, colors, center, placement, drop_untested) {
     let deferred11_0;
     let deferred11_1;
     try {
@@ -2080,7 +2138,7 @@ export function worker_replace_bodies(doc_id, entity_ids, status, positions, own
         const len7 = WASM_VECTOR_LEN;
         const ptr8 = passArrayF64ToWasm0(placement, wasm.__wbindgen_malloc);
         const len8 = WASM_VECTOR_LEN;
-        const ret = wasm.worker_replace_bodies(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8);
+        const ret = wasm.worker_replace_bodies(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, ptr7, len7, ptr8, len8, drop_untested);
         var ptr10 = ret[0];
         var len10 = ret[1];
         if (ret[3]) {
@@ -3517,17 +3575,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 438, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 432, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 477, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 471, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 438, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 432, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-DeeqD2oD.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-B4RXgnE4.js">
+    <script type="module" crossorigin src="./assets/main-DEKW5dgj.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-CDZ8DsiK.js">
     <link rel="stylesheet" crossorigin href="./assets/main-CasC1klk.css">
   </head>
   <body>
@@ -64,7 +64,7 @@
           <div id="export-settings-panel" role="dialog" aria-labelledby="export-settings-title" hidden>
             <button id="export-settings-close" class="panel-close" type="button" aria-label="Close export settings"></button>
             <h2 id="export-settings-title">Export settings</h2>
-            <label><span>Format</span><select id="export-format"><option value="ifc">IFC (.ifc)</option><option value="glb">glTF binary (.glb)</option><option value="slpk">I3S scene layer (.slpk)</option></select></label>
+            <label><span>Format</span><select id="export-format"><option value="ifc">IFC (.ifc)</option><option value="glb">glTF binary (.glb)</option><option value="xkt">xeokit (.xkt)</option><option value="slpk">I3S scene layer (.slpk)</option></select></label>
             <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
             <label id="export-separate-row" title="Edited models are not merged into one file, but written to separate IFC files instead."><span>Keep IFC files separate</span><input id="export-separate" type="checkbox" /></label>
             <p id="export-separate-hint" hidden>Separate files use the original model names, with numbered suffixes for duplicates.</p>
@@ -725,7 +725,7 @@
               </div>
               <div class="bcf-header">
                 <button id="bcf-server-pull" class="panel-secondary" type="button" title="Replace the topics of the panel with those of the project" disabled>Pull topics</button>
-                <button id="bcf-server-push" class="panel-secondary" type="button" title="Send new topics, comments, viewpoints and changed fields, then pull again" disabled>Push changes</button>
+                <button id="bcf-server-push" class="panel-secondary" type="button" title="Send new topics, comments, viewpoints and changed fields, then pull again unless that would replace what stays in the panel" disabled>Push changes</button>
               </div>
               <span id="bcf-server-status" class="section-hint" aria-live="polite"></span>
             </details>
@@ -814,7 +814,7 @@
               <label><span>Endpoint</span><input id="ai-endpoint" type="text" placeholder="http://host:8000/v1" autocomplete="off" spellcheck="false" /></label>
               <label><span>Model</span><input id="ai-model" type="text" autocomplete="off" spellcheck="false" /></label>
               <label><span>API key</span><input id="ai-api-key" type="password" autocomplete="off" spellcheck="false" /></label>
-              <span class="ai-note">The key is stored unencrypted in this browser and sent only to the chosen provider, together with your request and facts about the model.</span>
+              <span class="ai-note">Each provider has its own key, stored unencrypted in this browser and sent only to that provider, or to the endpoint it was entered for (a new server forgets it), together with your request and facts about the model.</span>
             </div>
             <div id="ai-body">
               <div id="ai-script" hidden>

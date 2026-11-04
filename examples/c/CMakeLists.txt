@@ -1,6 +1,6 @@
 # The external-walls sample in C on the prebuilt xeoifc library.
 #
-#   cmake -S . -B build -DXEOIFC_SDK_DIR=<xeoifc-qt/sdk from xeoifc-qt-source.zip>
+#   cmake -S . -B build -DXEOIFC_SDK_DIR=<unpacked xeoifc-lib-<platform>.zip>
 #   cmake --build build --config Release
 #
 # The executable lands in build/ (build/Release with Visual Studio), next to a copy of the xeoifc library.
@@ -8,9 +8,9 @@
 cmake_minimum_required(VERSION 3.21)
 project(external_walls LANGUAGES C)
 
-set(XEOIFC_SDK_DIR "" CACHE PATH "Directory with include/xeoifc.h and lib/<platform> (xeoifc-qt/sdk of xeoifc-qt-source.zip)")
+set(XEOIFC_SDK_DIR "" CACHE PATH "Directory with include/xeoifc.h and lib/<platform> (an unpacked xeoifc-lib-<platform>.zip)")
 if(NOT EXISTS "${XEOIFC_SDK_DIR}/include/xeoifc.h")
-    message(FATAL_ERROR "Set XEOIFC_SDK_DIR to the sdk folder of xeoifc-qt-source.zip (it holds include/xeoifc.h).")
+    message(FATAL_ERROR "Set XEOIFC_SDK_DIR to the unpacked xeoifc-lib-<platform>.zip (it holds include/xeoifc.h).")
 endif()
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "xeoifc is a 64-bit library: configure a 64-bit build (Visual Studio: -A x64).")

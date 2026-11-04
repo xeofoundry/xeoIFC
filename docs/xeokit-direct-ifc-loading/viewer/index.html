@@ -223,7 +223,7 @@
 <script type="module">
 
     import {Viewer, NavCubePlugin, TreeViewPlugin} from "@xeokit/xeokit-sdk";
-    // npm package @xeofoundry/xeoifc-loader-plugin, copied into the parent folder by web/scripts/sync-xeokit-demo.mjs
+    // npm package @xeofoundrybim/xeoifc-loader-plugin, copied into the parent folder by web/scripts/sync-xeokit-demo.mjs
     import {XeoIFCLoaderPlugin} from "../xeoifc-loader-plugin/src/index.js";
 
     const viewer = new Viewer({
@@ -283,6 +283,12 @@
             }
         });
 
+        // A file read only in part: shown under the status line that "loaded" writes
+        let warnings = [];
+        model.on("warnings", (messages) => {
+            warnings = messages;
+        });
+
         model.on("loaded", () => {
             viewer.cameraFlight.jumpTo(model);
             // Stop the clock when the model is on screen, not when xeokit reports "loaded": the first frames upload the
@@ -293,6 +299,7 @@
                 gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
                 const seconds = (performance.now() - t0) / 1000;
                 statusElement.innerHTML = "Model loaded in " + (seconds < 10 ? seconds.toFixed(1) : Math.round(seconds)) + " seconds<br>Objects: " + model.numEntities;
+                statusElement.append(...warnings.flatMap((warning) => [document.createElement("br"), warning]));
             }));
         });
 

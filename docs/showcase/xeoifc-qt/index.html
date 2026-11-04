@@ -108,16 +108,18 @@
 
     <h2>2. Download</h2>
 
-    <p>Download <code>xeoifc-qt-source.zip</code> (14 MB) from the <a href="https://github.com/xeofoundry/xeoIFC/releases/">releases
-        page</a>. It has all that you need to build xeoIFC Qt, except Qt:</p>
+    <p>Download <code>xeoifc-qt-windows-amd64.zip</code> from the <a href="https://github.com/xeofoundry/xeoIFC/releases/">releases
+        page</a>. Unpack it and start <code>xeoifc-qt.exe</code>: the Qt and MSVC runtimes are in the zip. Its folder
+        <code>source/xeoifc-qt</code> has all that you need to build xeoIFC Qt, except Qt:</p>
     <ul>
         <li>The source code of the application (MIT licence).</li>
-        <li>The library: <code>xeoifc.h</code>, <code>xeoifc.dll</code> with its import library for Windows x64, and
-            <code>libxeoifc.so</code> for Linux x64 and Linux arm64.</li>
+        <li>The library: <code>xeoifc.h</code>, and <code>xeoifc.dll</code> with its import library for Windows x64.</li>
         <li>A Visual Studio solution for Windows (no Qt Visual Studio Tools needed) and a <code>CMakeLists.txt</code> for Windows,
             Linux and macOS.</li>
         <li>A README with the build steps, the licence texts and the notices of the open-source parts in the library.</li>
     </ul>
+    <p>For Linux, <code>xeoifc-lib-linux-amd64.zip</code> and <code>xeoifc-lib-linux-arm64.zip</code> have
+        <code>libxeoifc.so</code>.</p>
 
     <h2>3. Using the library</h2>
 
@@ -288,8 +290,8 @@ evaluation marker: True</code></pre>
 
     <h2>5. Build it yourself</h2>
 
-    <p>You need Qt 6.3 or newer with Qt Widgets and the Qt SVG plugins, and a C++20 compiler. The README in the zip has all
-        steps.</p>
+    <p>You need Qt 6.3 or newer with Qt Widgets and the Qt SVG plugins, and a C++20 compiler. The README in
+        <code>source/xeoifc-qt</code> has all steps; the commands run in that folder.</p>
 
     <h3>Windows x64</h3>
 
@@ -303,7 +305,8 @@ cmake --build build --config Release</code></pre>
     <h3>Linux x64 and arm64</h3>
 
     <p>Ubuntu 24.04, or another distribution with glibc 2.35 and Qt 6.3 or newer. The renderer uses Vulkan on X11; on a Wayland
-        desktop the application runs through XWayland.</p>
+        desktop the application runs through XWayland. First unpack <code>xeoifc-lib-linux-amd64.zip</code> (or
+        <code>-arm64</code>) into <code>sdk/</code>.</p>
 
     <pre><code>sudo apt install build-essential cmake qt6-base-dev libqt6svg6 qt6-qpa-plugins libgl-dev libvulkan1 mesa-vulkan-drivers
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -321,7 +324,7 @@ cmake --build build -j
         xeokit logo files in <code>resources/</code> are not covered by the MIT licence.</p>
 
     <p><code>xeoifc.dll</code> and <code>libxeoifc.so</code> are not open source. They are licensed under the
-        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>sdk/LICENSE.txt</code> in the zip): you can use and redistribute them unmodified, in binary form and free
+        <a href="../../xeoIFC-Testing-License.txt">xeoIFC Testing License</a> (<code>source/xeoifc-qt/sdk/LICENSE.txt</code> in the zip): you can use and redistribute them unmodified, in binary form and free
         of charge, solely for testing and evaluation. For commercial or production use, contact
         <a href="https://xeofoundry.com">xeoFoundry</a>. All functions work without a licence key. Without a key, each IFC file
         that the library writes gets one more element: an <code>IfcBuildingElementProxy</code> with the text "xeoIFC evaluation

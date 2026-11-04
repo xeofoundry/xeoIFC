@@ -7,9 +7,9 @@
 // Requests carry an `id` that every response echoes:
 //   {id, type: "load", source, name, circleSegments}   source = absolute URL | Blob | ArrayBuffer
 //                                                    -> {id, type: "progress", phase, done, total}*
-//                                                       {id, type: "loaded", packed, edges, tree, sourceId, isStep}
+//                                                       {id, type: "loaded", packed, edges, tree, sourceId, isStep, warnings}
 //   {id, type: "metadata", source}                    -> {id, type: "progress", phase, done, total}*      (IFC only, no geometry)
-//                                                       {id, type: "metadata", tree, sourceId}
+//                                                       {id, type: "metadata", tree, sourceId, warnings}
 //   {id, type: "properties", sourceId, entityId, isStep} -> {id, type: "properties", json}
 //   {type: "release", sourceId, isStep}                (no response; frees that one model)
 //   {type: "clear"}                                    (no response; frees every model)
@@ -134,12 +134,12 @@ async function handle(msg) {
             const packed = result.packed.buffer;
             onProgress("edges", 0, 1);
             const edges = buildPackEdges(packed);
-            postMessage({id, type: "loaded", packed, edges, tree: result.tree, sourceId: result.sourceId, isStep},
+            postMessage({id, type: "loaded", packed, edges, tree: result.tree, sourceId: result.sourceId, isStep, warnings: result.warnings},
                 [packed, edges.indices.buffer, edges.offsets.buffer]);
         } else if (msg.type === "metadata") {
             const onProgress = (phase, done, total) => postMessage({id, type: "progress", phase, done, total});
             const {result} = await load(msg, onProgress);
-            postMessage({id, type: "metadata", tree: result.tree, sourceId: result.sourceId});
+            postMessage({id, type: "metadata", tree: result.tree, sourceId: result.sourceId, warnings: result.warnings});
         } else if (msg.type === "properties") {
             const query = msg.isStep ? step_properties : worker_properties;
             postMessage({id, type: "properties", json: query(msg.sourceId, msg.entityId)});
