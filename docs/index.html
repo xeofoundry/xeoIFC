@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-DEKW5dgj.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-CDZ8DsiK.js">
+    <script type="module" crossorigin src="./assets/main-BnQyNb-L.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-D_WEWcQX.js">
     <link rel="stylesheet" crossorigin href="./assets/main-CasC1klk.css">
   </head>
   <body>
@@ -37,7 +37,7 @@
           <div id="sidebar-resizer" title="Drag to resize"></div>
           <div id="properties" class="properties empty">Select an element to inspect properties</div>
           <footer id="status-bar" aria-live="polite">
-            <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.ids,.rvm,.las,.laz,.xml,.landxml" multiple hidden />
+            <input id="file-input" type="file" accept=".ifc,.ifczip,.jt,.stp,.step,.glb,.bcf,.bcfzip,.ids,.rvm,.usd,.usda,.usdc,.usdz,.las,.laz,.xml,.landxml" multiple hidden />
             <button id="about-link" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About</button>
             <button id="open-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="open-menu">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -64,7 +64,7 @@
           <div id="export-settings-panel" role="dialog" aria-labelledby="export-settings-title" hidden>
             <button id="export-settings-close" class="panel-close" type="button" aria-label="Close export settings"></button>
             <h2 id="export-settings-title">Export settings</h2>
-            <label><span>Format</span><select id="export-format"><option value="ifc">IFC (.ifc)</option><option value="glb">glTF binary (.glb)</option><option value="xkt">xeokit (.xkt)</option><option value="slpk">I3S scene layer (.slpk)</option></select></label>
+            <label><span>Format</span><select id="export-format"><option value="ifc">IFC (.ifc)</option><option value="glb">glTF binary (.glb)</option><option value="xkt">xeokit (.xkt)</option><option value="usdz">OpenUSD package (.usdz)</option><option value="usdc">OpenUSD binary (.usdc)</option><option value="usda">OpenUSD text (.usda)</option><option value="slpk">I3S scene layer (.slpk)</option></select></label>
             <label><span>Export file name</span><input id="setting-export-file-name" type="text" autocomplete="off" spellcheck="false" disabled /></label>
             <label id="export-separate-row" title="Edited models are not merged into one file, but written to separate IFC files instead."><span>Keep IFC files separate</span><input id="export-separate" type="checkbox" /></label>
             <p id="export-separate-hint" hidden>Separate files use the original model names, with numbered suffixes for duplicates.</p>
@@ -755,7 +755,7 @@
           </div>
           <div id="welcome-drop-zone">
             <div>Drop files here</div>
-            <div class="drop-formats">(.ifc/.ifczip/.stp/.jt/.glb/.rvm/.las/.laz/LandXML .xml)</div>
+            <div class="drop-formats">(.ifc/.ifczip/.stp/.jt/.glb/.rvm/.usd/.usdz/.las/.laz/LandXML .xml)</div>
             <div class="drop-privacy">Fully browser-based &mdash; no server upload.</div>
           </div>
           <div id="welcome-panel">

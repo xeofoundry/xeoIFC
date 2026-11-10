@@ -1469,6 +1469,48 @@ export function worker_export_file_done(selection) {
 }
 
 /**
+ * Add a viewer source that is not IFC (a mesh, point-cloud, CAD, USD or LandXML file the viewer packed) to the export as
+ * one more IFC document: one IfcBuildingElementProxy per packed element with its triangles (IfcTriangulatedFaceSet, an
+ * IfcFacetedBrep / surface model in IFC2X3), its colour and a `Source` property set, in a storey named after the file. The
+ * document takes the schema, length and angle unit of the first IFC already fed (IFC4 in metres without one), so it merges
+ * with them. `pack` is the source's packed scene, `tree` its spatial tree JSON (element names), `placement` its viewer placement
+ * and `frame` the viewer placement of the first IFC source (column-major 4x4s, metres; empty = identity): the meshes are
+ * written in that IFC's own coordinates. `selection` limits it to those entity ids; `selected` = the export is of a
+ * selection, so the document's elements are its selection. Returns the number of elements written (0 = nothing to add,
+ * no document).
+ * @param {string} name
+ * @param {string} kind
+ * @param {Uint8Array} pack
+ * @param {string | null | undefined} tree
+ * @param {Float64Array} placement
+ * @param {Float64Array} frame
+ * @param {Uint32Array} selection
+ * @param {boolean} selected
+ * @returns {number}
+ */
+export function worker_export_meshes(name, kind, pack, tree, placement, frame, selection, selected) {
+    const ptr0 = passStringToWasm0(name, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(kind, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ptr2 = passArray8ToWasm0(pack, wasm.__wbindgen_malloc);
+    const len2 = WASM_VECTOR_LEN;
+    var ptr3 = isLikeNone(tree) ? 0 : passStringToWasm0(tree, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    var len3 = WASM_VECTOR_LEN;
+    const ptr4 = passArrayF64ToWasm0(placement, wasm.__wbindgen_malloc);
+    const len4 = WASM_VECTOR_LEN;
+    const ptr5 = passArrayF64ToWasm0(frame, wasm.__wbindgen_malloc);
+    const len5 = WASM_VECTOR_LEN;
+    const ptr6 = passArray32ToWasm0(selection, wasm.__wbindgen_malloc);
+    const len6 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_export_meshes(ptr0, len0, ptr1, len1, ptr2, len2, ptr3, len3, ptr4, len4, ptr5, len5, ptr6, len6, selected);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] >>> 0;
+}
+
+/**
  * Drop any accumulated export state and start over.
  */
 export function worker_export_reset() {
@@ -2053,6 +2095,29 @@ export function worker_outer_shape_model_swap(merge, unchanged, hidden, edges) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * `format` = "usda", "usdc" or "usdz"; `tree` = the spatial tree JSON of the model.
+ * @param {Uint8Array} pack
+ * @param {string | null | undefined} tree
+ * @param {string} format
+ * @returns {Uint8Array}
+ */
+export function worker_pack_usd(pack, tree, format) {
+    const ptr0 = passArray8ToWasm0(pack, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    var ptr1 = isLikeNone(tree) ? 0 : passStringToWasm0(tree, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    var len1 = WASM_VECTOR_LEN;
+    const ptr2 = passStringToWasm0(format, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len2 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_pack_usd(ptr0, len0, ptr1, len1, ptr2, len2);
+    if (ret[3]) {
+        throw takeFromExternrefTable0(ret[2]);
+    }
+    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v4;
 }
 
 /**
@@ -3575,17 +3640,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 432, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 456, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 471, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 494, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 432, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 456, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },
