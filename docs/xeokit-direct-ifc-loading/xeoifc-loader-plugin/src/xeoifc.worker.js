@@ -106,7 +106,7 @@ async function load(msg, onProgress) {
         onProgress("parse", 0, 1);
         return {isStep: false, result: worker_metadata_finish()};
     }
-    return {isStep: false, result: worker_load_finish(onProgress, () => {})};
+    return {isStep: false, result: worker_load_finish(onProgress, null)}; // no preview scenes: none are packed
 }
 
 // One request at a time: a streamed load awaits between chunks, and the engine has a single ingest slot

@@ -1301,6 +1301,44 @@ export function i3s_crs_supported(code) {
 }
 
 /**
+ * Split load, in a worker of its own per piece: start on the bytes of the file from offset `start` on. `end`: where
+ * the next piece begins, negative for the last piece. The pieces parse side by side, and `worker_load_piece` joins
+ * them in the worker that loads the model. Plain STEP text only.
+ * @param {number} start
+ * @param {number} end
+ */
+export function ingest_piece_begin(start, end) {
+    wasm.ingest_piece_begin(start, end);
+}
+
+/**
+ * Feed the next bytes of the file. `true`: the piece has its last record, stop reading.
+ * @param {Uint8Array} chunk
+ * @returns {boolean}
+ */
+export function ingest_piece_chunk(chunk) {
+    const ptr0 = passArray8ToWasm0(chunk, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.ingest_piece_chunk(ptr0, len0);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
+}
+
+/**
+ * The finished piece as buffers a worker can transfer: the argument of `worker_load_piece`.
+ * @returns {any}
+ */
+export function ingest_piece_finish() {
+    const ret = wasm.ingest_piece_finish();
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return takeFromExternrefTable0(ret[0]);
+}
+
+/**
  * What the About panel shows for a licence key: `{"state":"licensed"|"evaluation"|"invalid"|"expired","expires":<unix>}`.
  * Loading and viewing never ask for a key; a save or export without a valid one carries the "Evaluation version" text
  * (`worker_set_licence_key`, `worker_export_run`, `worker_export_slpk`). `now_unix`: seconds, from the page's clock.
@@ -1472,8 +1510,9 @@ export function worker_export_file_done(selection) {
  * Add a viewer source that is not IFC (a mesh, point-cloud, CAD, USD or LandXML file the viewer packed) to the export as
  * one more IFC document: one IfcBuildingElementProxy per packed element with its triangles (IfcTriangulatedFaceSet, an
  * IfcFacetedBrep / surface model in IFC2X3), its colour and a `Source` property set, in a storey named after the file. The
- * document takes the schema, length and angle unit of the first IFC already fed (IFC4 in metres without one), so it merges
- * with them. `pack` is the source's packed scene, `tree` its spatial tree JSON (element names), `placement` its viewer placement
+ * document takes the schema, length and angle unit of the first IFC already fed (IFC4 in metres without one; metres for a
+ * length unit other than mm, cm, dm, m or km, which `document.create` has no name for), so it merges with them. `pack` is
+ * the source's packed scene, `tree` its spatial tree JSON (element names), `placement` its viewer placement
  * and `frame` the viewer placement of the first IFC source (column-major 4x4s, metres; empty = identity): the meshes are
  * written in that IFC's own coordinates. `selection` limits it to those entity ids; `selected` = the export is of a
  * selection, so the document's elements are its selection. Returns the number of elements written (0 = nothing to add,
@@ -1697,16 +1736,37 @@ export function worker_load_chunk(chunk) {
  * `lineLayers` holds the drafting line segments per layer, `lineOwners` the entity id of each segment. `edgesDeferred`: the scene is
  * over the sharp-edge triangle budget and stays for `worker_sharp_edges(true)`. `entityClasses`: the classes of the file's records,
  * from before the metadata prune.
+ * `for_export`: the scene is made for an export (GLB, XKT, USD) and runs the passthrough needle passes on every mesh, as the
+ * CLI does; a view runs them on the first meshes only. `on_snapshot` null: no previews, and none of their re-packs.
  * @param {Function} on_progress
- * @param {Function} on_snapshot
+ * @param {Function | null} [on_snapshot]
+ * @param {boolean | null} [for_export]
  * @returns {any}
  */
-export function worker_load_finish(on_progress, on_snapshot) {
-    const ret = wasm.worker_load_finish(on_progress, on_snapshot);
+export function worker_load_finish(on_progress, on_snapshot, for_export) {
+    const ret = wasm.worker_load_finish(on_progress, isLikeNone(on_snapshot) ? 0 : addToExternrefTable0(on_snapshot), isLikeNone(for_export) ? 0xFFFFFF : for_export ? 1 : 0);
     if (ret[2]) {
         throw takeFromExternrefTable0(ret[1]);
     }
     return takeFromExternrefTable0(ret[0]);
+}
+
+/**
+ * Split load: hand over the next piece of the file, in file order, as `ingest_piece_finish` made it; `worker_load_begin`
+ * comes before the first and `worker_load_finish` after the last. `wait_ms`: what the piece took since the one before
+ * it, `bytes`: its share of the file, both for the statistics of the load. `false`: the piece does not join the one
+ * before it (`StoreStitcher::add`); the ingest is dropped and the host loads the file with `worker_load_chunk`.
+ * @param {any} piece
+ * @param {number} wait_ms
+ * @param {number} bytes
+ * @returns {boolean}
+ */
+export function worker_load_piece(piece, wait_ms, bytes) {
+    const ret = wasm.worker_load_piece(piece, wait_ms, bytes);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return ret[0] !== 0;
 }
 
 /**
@@ -2105,19 +2165,17 @@ export function worker_outer_shape_model_swap(merge, unchanged, hidden, edges) {
  * @returns {Uint8Array}
  */
 export function worker_pack_usd(pack, tree, format) {
-    const ptr0 = passArray8ToWasm0(pack, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    var ptr1 = isLikeNone(tree) ? 0 : passStringToWasm0(tree, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    var len1 = WASM_VECTOR_LEN;
-    const ptr2 = passStringToWasm0(format, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len2 = WASM_VECTOR_LEN;
-    const ret = wasm.worker_pack_usd(ptr0, len0, ptr1, len1, ptr2, len2);
+    var ptr0 = isLikeNone(tree) ? 0 : passStringToWasm0(tree, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    var len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(format, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.worker_pack_usd(pack, ptr0, len0, ptr1, len1);
     if (ret[3]) {
         throw takeFromExternrefTable0(ret[2]);
     }
-    var v4 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    var v3 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
-    return v4;
+    return v3;
 }
 
 /**
@@ -2342,6 +2400,12 @@ function __wbg_get_imports() {
             const ret = arg0 === undefined;
             return ret;
         },
+        __wbg___wbindgen_number_get_394265ed1e1b84ee: function(arg0, arg1) {
+            const obj = arg1;
+            const ret = typeof(obj) === 'number' ? obj : undefined;
+            getDataViewMemory0().setFloat64(arg0 + 8 * 1, isLikeNone(ret) ? 0 : ret, true);
+            getDataViewMemory0().setInt32(arg0 + 4 * 0, !isLikeNone(ret), true);
+        },
         __wbg___wbindgen_string_get_b0ca35b86a603356: function(arg0, arg1) {
             const obj = arg1;
             const ret = typeof(obj) === 'string' ? obj : undefined;
@@ -2530,6 +2594,10 @@ function __wbg_get_imports() {
             const ret = arg0[arg1 >>> 0];
             return ret;
         },
+        __wbg_get_78f252d074a84d0b: function() { return handleError(function (arg0, arg1) {
+            const ret = Reflect.get(arg0, arg1);
+            return ret;
+        }, arguments); },
         __wbg_get_b2053e9bfdf3ca8e: function(arg0, arg1) {
             const ret = arg0[arg1 >>> 0];
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
@@ -2649,6 +2717,10 @@ function __wbg_get_imports() {
             getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
         },
         __wbg_length_0133fa10e3234c57: function(arg0) {
+            const ret = arg0.length;
+            return ret;
+        },
+        __wbg_length_12e0b1cb009a7e96: function(arg0) {
             const ret = arg0.length;
             return ret;
         },
@@ -2848,6 +2920,10 @@ function __wbg_get_imports() {
             const ret = new Object();
             return ret;
         },
+        __wbg_new_from_slice_36bac521fad54bb4: function(arg0, arg1) {
+            const ret = new BigUint64Array(getArrayU64FromWasm0(arg0, arg1));
+            return ret;
+        },
         __wbg_new_from_slice_7568ba55b4a7e81f: function(arg0, arg1) {
             const ret = new Uint32Array(getArrayU32FromWasm0(arg0, arg1));
             return ret;
@@ -2923,6 +2999,12 @@ function __wbg_get_imports() {
         },
         __wbg_prototypesetcall_4770620bbe4688a0: function(arg0, arg1, arg2) {
             Uint8Array.prototype.set.call(getArrayU8FromWasm0(arg0, arg1), arg2);
+        },
+        __wbg_prototypesetcall_62396032bc038599: function(arg0, arg1, arg2) {
+            Uint32Array.prototype.set.call(getArrayU32FromWasm0(arg0, arg1), arg2);
+        },
+        __wbg_prototypesetcall_936e9a8f84c83f7c: function(arg0, arg1, arg2) {
+            BigUint64Array.prototype.set.call(getArrayU64FromWasm0(arg0, arg1), arg2);
         },
         __wbg_prototypesetcall_ba9c9a7197c11933: function(arg0, arg1, arg2) {
             Float32Array.prototype.set.call(getArrayF32FromWasm0(arg0, arg1), arg2);
@@ -3640,17 +3722,17 @@ function __wbg_get_imports() {
             arg0.writeBuffer(arg1, arg2, getArrayU8FromWasm0(arg3, arg4), arg5, arg6);
         }, arguments); },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 456, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 468, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true_);
             return ret;
         },
         __wbindgen_cast_0000000000000002: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 494, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [Externref], shim_idx: 505, ret: Result(Unit), inner_ret: Some(Result(Unit)) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue__core_9b3796e30d99ddb7___result__Result_____wasm_bindgen_e5b56900f987f3b9___JsError___true_);
             return ret;
         },
         __wbindgen_cast_0000000000000003: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 456, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            // Cast intrinsic for `Closure(Closure { owned: true, function: Function { arguments: [NamedExternref("GPUUncapturedErrorEvent")], shim_idx: 468, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
             const ret = makeMutClosure(arg0, arg1, wasm_bindgen_e5b56900f987f3b9___convert__closures_____invoke___wasm_bindgen_e5b56900f987f3b9___JsValue______true__2);
             return ret;
         },
@@ -3884,9 +3966,22 @@ function getArrayU32FromWasm0(ptr, len) {
     return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
 }
 
+function getArrayU64FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getBigUint64ArrayMemory0().subarray(ptr / 8, ptr / 8 + len);
+}
+
 function getArrayU8FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
+}
+
+let cachedBigUint64ArrayMemory0 = null;
+function getBigUint64ArrayMemory0() {
+    if (cachedBigUint64ArrayMemory0 === null || cachedBigUint64ArrayMemory0.byteLength === 0) {
+        cachedBigUint64ArrayMemory0 = new BigUint64Array(wasm.memory.buffer);
+    }
+    return cachedBigUint64ArrayMemory0;
 }
 
 let cachedDataViewMemory0 = null;
@@ -4079,6 +4174,7 @@ function __wbg_finalize_init(instance, module) {
     wasmInstance = instance;
     wasm = instance.exports;
     wasmModule = module;
+    cachedBigUint64ArrayMemory0 = null;
     cachedDataViewMemory0 = null;
     cachedFloat32ArrayMemory0 = null;
     cachedFloat64ArrayMemory0 = null;

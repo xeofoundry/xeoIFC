@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>xeoIFC Web</title>
     <link rel="icon" type="image/svg+xml" href="./xeokit-icon.svg?v=2" />
-    <script type="module" crossorigin src="./assets/main-BnQyNb-L.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-D_WEWcQX.js">
-    <link rel="stylesheet" crossorigin href="./assets/main-CasC1klk.css">
+    <script type="module" crossorigin src="./assets/main-rmuV66Xf.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/viewer_wasm-DGvSVJSa.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-CI9AWKaD.css">
   </head>
   <body>
     <div id="open-menu" role="menu" aria-label="Open file" hidden>
@@ -645,7 +645,7 @@
                 </select>
                 <label id="outer-shape-i3s-mode-row" title="Global: WGS 84, for a global ArcGIS scene with world basemaps and elevation; the vertices are transformed from the CRS the IFC files declare. Local: a projected CRS, for a local scene in that CRS." hidden>Referencing <select id="outer-shape-i3s-mode" aria-label="Referencing of the I3S layer"><option value="global">Global (WGS 84)</option><option value="local">Local</option></select></label>
                 <label id="outer-shape-i3s-crs-row" title="EPSG code of the local layer's projected CRS, pre-filled with the one most IFC files declare. Blank keeps the declared CRS; 3857 is Web Mercator. Files in other CRSs are transformed." hidden>Layer EPSG <input id="outer-shape-i3s-crs" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the local I3S layer" /></label>
-                <label id="outer-shape-epsg-row" title="Only for IFC files that declare no CRS in IfcProjectedCRS: the projected CRS their coordinates are in. It names the coordinates, it does not transform them; a declared code must be the same. Blank places such files from IfcSite latitude/longitude." hidden>Model EPSG <input id="outer-shape-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the model coordinates" /></label>
+                <label id="outer-shape-epsg-row" title="Only for IFC files that declare no CRS in IfcProjectedCRS: the projected CRS their coordinates are in. It names the coordinates, it does not transform them; a declared code must be the same. Blank places such files from IfcSite latitude/longitude. Entered as the code the files declare, it confirms a declaration refused as outside its area of use." hidden>Model EPSG <input id="outer-shape-epsg" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="from IFC" style="width: 6em" aria-label="EPSG code of the model coordinates" /></label>
                 <a id="outer-shape-i3s-help" href="https://github.com/xeofoundry/xeoIFC/blob/main/esri/README.md" target="_blank" rel="noopener" title="Esri ArcGIS export: referencing, CRS and placement checks" hidden>Esri export help</a>
                 <button id="outer-shape-download" class="panel-secondary" type="button" title="Export kept IFC results, or selected models directly when removal is None and simplification is off. A result that is not kept yet is kept first. Separate files are packaged in one ZIP download; an I3S scene layer package holds all models, for ArcGIS." disabled>Export results</button>
               </div>
@@ -767,6 +767,7 @@
             <button id="welcome-open" type="button">Open file</button>
             <div class="hint">or drop files above</div>
             <button id="welcome-about" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-panel">About xeoIFC</button>
+            <div class="legal-links"><a href="https://xeofoundry.com/imprint" target="_blank" rel="noopener">Imprint</a> &middot; <a href="https://xeofoundry.com/privacy" target="_blank" rel="noopener">Privacy</a></div>
           </div>
           <div id="about-panel" role="dialog" aria-labelledby="about-title" hidden>
             <button id="about-close" class="panel-close" type="button" aria-label="Close about"></button>
@@ -794,6 +795,8 @@
             <p id="about-versions-row" hidden><b>Versions: </b><span id="about-versions"></span></p>
 
             <p><b>Licence: </b>Loading, viewing and all tools work without a licence key. Exported files then carry an "Evaluation version" text; with a licence key they are written without it. The key is entered in the Settings panel. The xeoIFC WebAssembly library is licensed under the <a href="./xeoIFC-Testing-License.txt" target="_blank" rel="noreferrer">xeoIFC Testing License</a>.</p>
+
+            <p><b>Legal: </b><a href="https://xeofoundry.com/imprint" target="_blank" rel="noopener">Imprint</a> &middot; <a href="https://xeofoundry.com/privacy" target="_blank" rel="noopener">Privacy</a></p>
 
             <p class="powered-by">Powered by xeoFoundry - <a href="https://xeofoundry.com" target="_blank">www.xeofoundry.com</a></p>
           </div>

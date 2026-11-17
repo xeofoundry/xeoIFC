@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:36f7bb905c3b6964 -->
+<!-- Generated file: edit the source in the dev repository. sha256:125f9cd1262c4909 -->
 # Esri ArcGIS export (I3S / SLPK)
 
 [Back to xeoIFC](../README.md#esri-arcgis-export)
@@ -87,8 +87,9 @@ area of use, within 1 km of its origin, or near latitude and longitude 0, 0: its
 local coordinates, or the code is wrong. So is EPSG:3857 with an identity `IfcMapConversion` more than 1000 km from the
 file's IfcSite, as Revit writes it. Correct the file, or set `"i3sIgnoreDeclaredCrs": "yes"` to place it like a file
 that declares no CRS: IfcSite places model coordinates near their origin, and `i3sWkid` must name the CRS of
-coordinates far from it, such as those Revit writes for EPSG:3857. For a zone used beyond its band, such as UTM zone 33 for all of Norway, name the same code in
-`i3sWkid` as well: outside the area of use is then a warning. The two origin checks are skipped for a grid whose origin
+coordinates far from it, such as those Revit writes for EPSG:3857. For a zone used beyond its band, such as UTM zone 33 for all of Norway, naming the
+declared code in `i3sWkid` is enough, without setting the declaration aside (xeoIFC Web: *Model EPSG code*): outside the
+area of use is then a warning, and so are EPSG:3857 coordinates far from IfcSite. The two origin checks are skipped for a grid whose origin
 is a real place (the Japan plane rectangular CRSs, Portugal TM06). Local coordinates inside the area of use, such as a
 local model under the British National Grid or EPSG:3857, cannot be told from map coordinates. The converter has this
 setting; xeoIFC Web does not. A code that EPSG gives to a geodetic datum as well as to a projected CRS, such as 6619 (the SWEREF99
@@ -124,7 +125,7 @@ Choose *I3S scene layer (.slpk)* as the format:
 |---|---|
 | Referencing | *Global (WGS 84)* or *Local (projected CRS)*, see [Global or local referencing](#global-or-local-referencing). The viewer remembers the choice. |
 | Layer EPSG code | Local only: the projected CRS of the layer. It is pre-filled with the CRS most loaded IFC files declare, and the dialog shows which CRSs the files declare. Blank keeps the declared CRS; `3857` is Web Mercator. Files in other CRSs are transformed. |
-| Model EPSG code | Only for IFC files that declare no CRS: the projected CRS their coordinates are in (`i3sWkid`). Blank places such files from their IfcSite latitude and longitude. |
+| Model EPSG code | For IFC files that declare no CRS: the projected CRS their coordinates are in (`i3sWkid`). Blank places such files from their IfcSite latitude and longitude. For files that declare a CRS, entering the same code confirms it. |
 
 *Export* then writes the selected elements, or all loaded IFC models when nothing is selected, into one package.
 
@@ -168,9 +169,9 @@ All keys go under `inputParameters`:
 | Key | Default | Effect |
 |---|---|---|
 | `i3sOutputWkid` | `4326` | The layer CRS. `4326` or `"global"`: a global WGS 84 layer. `"source"` (or `"local"`): the CRS the inputs declare (the one most of them declare; inputs in other CRSs are transformed into it), or the IfcSite placement in EPSG:2056 / the WGS 84 UTM zone. A projected EPSG code, e.g. `3857`: a local layer in that CRS. Vertices are transformed, never relabelled. |
-| `i3sWkid` | none | The projected CRS of the coordinates of inputs that declare none. It names them, it does not transform them; it must equal a code the inputs declare. |
+| `i3sWkid` | none | The projected CRS of the coordinates of inputs that declare none. It names them, it does not transform them; it must equal a code the inputs declare. Equal to a declared code, it confirms it: coordinates outside the CRS's area of use, or in EPSG:3857 far from IfcSite, are then a warning. |
 | `i3sVcsWkid` | none | The vertical CRS, overriding a declared one (e.g. 5728 for LN02). A global layer writes 5773 (EGM96) without it. The heights are not transformed. |
-| `i3sIgnoreDeclaredCrs` | `"no"` | `"yes"` (or `true`): the inputs count as declaring no CRS, for a declaration that is wrong. `i3sWkid` then names the CRS of the coordinates, and an `IfcMapConversion` still applies; without it IfcSite places the layer. |
+| `i3sIgnoreDeclaredCrs` | `"no"` | `"yes"` (or `true`): the inputs count as declaring no CRS, for a declaration that is wrong. `i3sWkid` then names the CRS of the coordinates, and an `IfcMapConversion` still applies; without it IfcSite places the layer. With `i3sWkid`, an IfcSite far from the coordinates is a warning, also for files that declare nothing (a wrong IfcSite). Without `i3sWkid`, files with different IfcMapConversions lose their relative positions (a warning). |
 | `i3sMaxPropertyFields` | `250` | The number of typed property fields, 0 to 1000; the other properties go to `OtherProperties`. |
 | `i3sPropertySets` | `["*"]` | The property sets to include, by name: globs with `*` and `?`, not case sensitive. |
 | `i3sExcludePropertySets` | `[]` | The property sets to leave out (globs). |
@@ -317,11 +318,11 @@ and *Layer EPSG code* for `i3sOutputWkid`; the notes of an export that succeeded
 | `EPSG:... is in feet` | The coordinates of a layer are metres. Set `"i3sIgnoreDeclaredCrs": "yes"` and name the metric CRS of the same grid in `i3sWkid`. |
 | `EPSG:... is no projected CRS` | A datum, a geographic or a vertical code. Set `"i3sIgnoreDeclaredCrs": "yes"` and name the projected CRS in `i3sWkid`, or leave it out to place the layer from IfcSite. |
 | `... has a unit of ... m` | A projected CRS neither in metres nor in feet. As for feet. |
-| `... are not coordinates in that CRS` | The coordinates lie at the origin of the CRS or outside its area of use, or in EPSG:3857 with an identity map conversion far from IfcSite: the map conversion does not place them, or the code is wrong. Correct the file, or set `"i3sIgnoreDeclaredCrs": "yes"`, with `i3sWkid` set to the CRS of the coordinates (the same code for a zone used beyond its band). Check the position then: an exporter's default IfcSite is no real position. |
+| `... are not coordinates in that CRS` | The coordinates lie at the origin of the CRS or outside its area of use, or in EPSG:3857 with an identity map conversion far from IfcSite: the map conversion does not place them, or the code is wrong. Correct the file, or set `"i3sIgnoreDeclaredCrs": "yes"`, with `i3sWkid` set to the CRS of the coordinates (the same code for a zone used beyond its band), or set `i3sWkid` to the declared code if the coordinates are in it after all. Check the position then: an exporter's default IfcSite is no real position. |
 | `... km from the model origin, which the layer places at the IfcSite position` | No CRS is declared and the coordinates are map coordinates. Name their CRS with `i3sWkid`; the message suggests one when they fit. |
 | `the inputs declare EPSG:..., inputParameters.i3sWkid is ...` | `i3sWkid` differs from the CRS the files declare. It is only for files without a declaration: remove it. The layer CRS is set with `i3sOutputWkid`. |
 | `EPSG:... is a geographic CRS` | `i3sWkid` must be a projected CRS in metres; a global layer needs no code. `i3sOutputWkid` takes 4326 or a projected CRS. |
-| `... lie at ..., ... km from its IfcSite position` | The coordinates are not in the CRS given as `i3sWkid`; often they are local coordinates near the origin. Without `i3sWkid` the layer is placed from IfcSite. For a file whose declaration `i3sIgnoreDeclaredCrs` set aside this is a warning, since `i3sWkid` is then the correction. |
+| `... lie at ..., ... km from its IfcSite position` | The coordinates are not in the CRS given as `i3sWkid`; often they are local coordinates near the origin. Without `i3sWkid` the layer is placed from IfcSite. For any file with `i3sIgnoreDeclaredCrs` and `i3sWkid` this is a warning, since `i3sWkid` is then the correction. |
 | `I3S output needs a projected CRS: no input declares an EPSG code ...` | No declared CRS, no `i3sWkid` and no IfcSite latitude and longitude, or a map conversion without an EPSG code. Set `i3sWkid`, or add the georeferencing to the IFC file. |
 | Warning: `... EPSG:... in IfcProjectedCRS, not a projected CRS xeoIFC can transform; EPSG:... of its (their) other attributes is used` | The name of the CRS has a code xeoIFC cannot transform (often not a CRS code at all), another attribute one it can. Check that it is the CRS of the coordinates. |
 | Warning: `... inputs declare no EPSG code and are assumed to use EPSG:...` | Files of a federation without a CRS are taken to be in the CRS most files declare. Check that they are. |
@@ -329,7 +330,9 @@ and *Layer EPSG code* for `i3sOutputWkid`; the notes of an export that succeeded
 | Warning: `... km from the other inputs and has no IfcMapConversion` | A file in local coordinates among georeferenced files. |
 | Warning: `... lie within 1 km of the origin of EPSG:...` | The coordinates given an `i3sWkid` look like local model coordinates. |
 | Warning: `EPSG:... is also the code of the datum ...` | EPSG gives the code to a geodetic datum as well as to a projected CRS, and it is read as the CRS. Exports sometimes write a datum's code: check that the CRS is the one of the coordinates. |
-| Warning: `... more than 3 degrees outside the area of use of that CRS` | The CRS named in `i3sWkid` for a file whose declaration was set aside is used beyond its area. Check that it is the CRS of the coordinates. |
+| Warning: `... more than 3 degrees outside the area of use of that CRS` | The CRS named in `i3sWkid` for a file whose declaration was set aside, or a declared code confirmed by `i3sWkid`, is used beyond its area. Check that it is the CRS of the coordinates. |
+| Warning: `... km from the model origin ...: if that is the position of the model, they are probably map coordinates` | No CRS is declared and the coordinates lie 10 to 50 km from the origin the layer is placed at. If they are map coordinates, name their CRS with `i3sWkid`. |
+| Warning: `the inputs have different IfcMapConversions, set aside ...` | `i3sIgnoreDeclaredCrs` set the declarations aside and one IfcSite position now places files whose map conversions differed. Set `i3sWkid` to keep their relative positions. |
 | Warning: `EPSG:... is not in the EPSG database, so its unit is not known` | A local layer in a company or custom code. The coordinates are written in metres: check that the CRS is in metres. |
 | Warning: `no vertical datum declared` | A local layer without a vertical CRS: set `i3sVcsWkid`. |
 
