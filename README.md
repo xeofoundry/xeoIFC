@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:517efe098068d795 -->
+<!-- Generated file: edit the source in the dev repository. sha256:77489384e616b502 -->
 <h1 align="center">
   <a href="https://xeofoundry.github.io/xeoIFC/">
     <picture>
@@ -57,14 +57,14 @@ xeoIFC is delivered in four forms:
 ```mermaid
 flowchart TD
     E["xeoIFC engine (Rust)<br/>read, query, tessellate, convert, write"]
-    E --> CLI["1. Command-line tool<br/>xeoifc.exe"]
-    E --> NAT["2. Native library<br/>xeoifc.dll / libxeoifc.so"]
-    E --> WASM["3. WebAssembly library<br/>wasm + JS/TS API"]
-    WASM --> XL["4. Loader for xeokit<br/>XeoIFCLoaderPlugin"]
+    E --> CLI["1\. Command-line tool<br/>xeoifc.exe"]
+    E --> NAT["2\. Native library<br/>xeoifc.dll / libxeoifc.so"]
+    E --> WASM["3\. WebAssembly library<br/>wasm + JS/TS API"]
+    WASM --> XL["4\. Loader for xeokit<br/>XeoIFCLoaderPlugin"]
     CLI --> U1["Batch conversion<br/>on a server or in CI"]
     NAT --> U2["Desktop and server apps<br/>C++, C#, Python, Java"]
     WASM --> U3["Web apps that process<br/>IFC in the browser"]
-    XL --> U4["xeokit viewers that load<br/>IFC with no conversion step"]
+    XL --> U4["xeokit viewers that load<br/>IFC, no XKT or glTF needed"]
 ```
 
 Example use cases: [xeoIFC showcase](https://xeofoundry.github.io/xeoIFC/showcase/).
@@ -77,13 +77,13 @@ The native converter turns `.ifc` and `.ifczip` files into glTF 2.0 (`.glb`, `.g
 .\xeoifc.exe -i Duplex.ifc -o test\duplex.glb
 ```
 
-```mermaid
-flowchart LR
-    IFC[".ifc / .ifczip"] --> CLI["xeoifc CLI"]
-    CLI --> GLB[".glb / .gltf<br/>+ xeokit metadata"] --> V1["xeokit, three.js,<br/>other glTF viewers"]
-    CLI --> XKT[".xkt"] --> V2["xeokit viewer"]
-    CLI --> SLPK[".slpk (I3S)"] --> V3["Esri ArcGIS"]
-```
+| Output | Used in |
+|---|---|
+| `.glb`, `.gltf` with xeokit metadata | xeokit, three.js and other glTF viewers |
+| `.xkt` | xeokit, written directly |
+| `.slpk` (I3S) | ArcGIS Pro, ArcGIS Online, ArcGIS Maps SDK for JavaScript |
+| `.html` | One self-contained file with a 3D viewer and a tree view; opens in any browser, no server |
+| `.ifc`, `.ifczip` | The source IFC reduced to its outer shape |
 
 Features, options, output files and license key: [converter/README.md](converter/README.md)
 
@@ -92,14 +92,14 @@ Features, options, output files and license key: [converter/README.md](converter
 `xeoifc.dll` (`libxeoifc.so` on Linux) exposes the engine through a C ABI for desktop and server applications in C++, C#,
 Python, Java and other languages.
 
-```mermaid
-flowchart LR
-    IFC[".ifc / .ifczip"] --> LIB["xeoifc.dll / libxeoifc.so<br/>C ABI"]
-    LIB --> D["Desktop app<br/>C++ / Qt, C#"]
-    LIB --> S["Server or pipeline<br/>Python, Java"]
-    D --> R1["View, query and<br/>edit models"]
-    S --> R2["Convert, validate and<br/>extract data at scale"]
-```
+<p align="center">
+  <a href="https://xeofoundry.github.io/xeoIFC/showcase/xeoifc-qt/"><img src="docs/showcase/readme/xeoIFC-Qt-Clinic.png"
+  width="100%" alt="xeoIFC Qt, an open-source desktop IFC viewer on xeoifc.dll: steel frame, ducts and plumbing of a clinic building, with a selected duct and its flow properties"></a>
+</p>
+
+<p align="center"><sub>In the picture: xeoIFC Qt, an open-source desktop viewer for Windows and Linux: about 4,500 lines
+of C++ on <code>xeoifc.dll</code>. Loaded: structure, HVAC, plumbing and electrical models of the Medical Clinic sample
+building in one scene, with a selected duct and its properties.</sub></p>
 
 Library details, examples and the Qt, gpui and WPF demo viewers: [Native library](native/README.md).
 
@@ -108,33 +108,24 @@ Library details, examples and the Qt, gpui and WPF demo viewers: [Native library
 The WebAssembly library is the xeoIFC engine for web applications: wasm modules with JavaScript bindings and TypeScript
 declarations. IFC files are processed in the browser; nothing is uploaded.
 
-```mermaid
-flowchart LR
-    U["User drops<br/>.ifc file"] --> B
-    subgraph B["Browser"]
-        W["xeoIFC wasm module"] --> APP["Your web app<br/>(JS / TS)"]
-    end
-    APP --> R["Viewer, property query,<br/>model edit, export"]
-```
-
 Library details, demo viewer, features and downloads: [WebAssembly library](webassembly/README.md).
 
 ## 4. Loader for xeokit (XeoIFCLoaderPlugin)
 
-The WebAssembly library also feeds a [xeokit](https://github.com/xeokit/xeokit-sdk) viewer directly, without a conversion step:
+The WebAssembly library also feeds a [xeokit](https://github.com/xeokit/xeokit-sdk) viewer directly, with no XKT or glTF file in between:
 the plugin runs xeoIFC in a Web Worker, unpacks its geometry buffer into a xeokit `SceneModel`, builds the `MetaModel` from the
 object tree and queries property sets from the loaded model. It loads `.ifc` and `.ifczip` files (no upload of
 any data).
 
-```mermaid
-flowchart LR
-    IFC[".ifc / .ifczip"] --> WK
-    subgraph Browser
-        WK["Web Worker<br/>xeoIFC wasm"] -- geometry buffer --> SM["xeokit SceneModel"]
-        WK -- object tree --> MM["xeokit MetaModel"]
-        SM --> V["xeokit Viewer"]
-        MM --> V
-    end
+```javascript
+import {Viewer} from "@xeokit/xeokit-sdk";
+import {XeoIFCLoaderPlugin} from "@xeofoundrybim/xeoifc-loader-plugin";
+
+const viewer = new Viewer({canvasId: "myCanvas"});
+const xeoIFCLoader = new XeoIFCLoaderPlugin(viewer);
+
+const sceneModel = xeoIFCLoader.load({src: "Duplex.ifc"});   // or file: aFile, or data: anArrayBuffer
+sceneModel.on("loaded", () => viewer.cameraFlight.jumpTo(sceneModel));
 ```
 
 Documentation and live examples:
@@ -149,16 +140,6 @@ Online and the ArcGIS Maps SDK for JavaScript. One or several IFC files go into 
 attributes and property sets as fields. By default the layer is global: the vertices are transformed from the CRS the IFC
 files declare into WGS 84, so the model shows in its place over world imagery and terrain. A local layer in a projected
 CRS is written on request.
-
-```mermaid
-flowchart LR
-    IFC[".ifc / .ifczip<br/>IfcProjectedCRS, IfcMapConversion"]
-    IFC --> xeoIFC["xeoIFC<br/>CLI · web · native library"]
-    xeoIFC --> SLPK[".slpk (I3S)<br/>global WGS 84 or local"]
-    SLPK --> PRO["ArcGIS Pro"]
-    SLPK --> AGOL["ArcGIS Online<br/>Scene Viewer"]
-    SLPK --> JS["ArcGIS Maps SDK<br/>for JavaScript"]
-```
 
 Referencing, coordinate systems, configuration and how to check the placement: [Esri ArcGIS export](esri/README.md).
 
