@@ -1,4 +1,4 @@
-<!-- Generated file: edit the source in the dev repository. sha256:8ee807a684682ef4 -->
+<!-- Generated file: edit the source in the dev repository. sha256:517efe098068d795 -->
 <h1 align="center">
   <a href="https://xeofoundry.github.io/xeoIFC/">
     <picture>
@@ -34,8 +34,10 @@ see <a href="https://xeofoundry.github.io/xeoIFC/showcase/garabit/">showcase</a>
 
 xeoIFC reads, queries, tessellates, converts and writes IFC (`.ifc`, `.ifczip`; IFC 2x3 to IFC 4.3).
 
-- **Proven on real projects.** 95 GB of real-world IFC: > 2.2k files converted in under 20 minutes on one
-  workstation (xeoIFC 1.0.21, October 2026).
+- **Proven on real projects.** 100 GB of real-world IFC, > 2.4k files: the whole set is converted and checked in
+  under 15 minutes on one 20-core workstation, routinely during development and before every release. Every output
+  is validated, its metadata is checked against the IFC source by an independent reader, meshes are tested for open
+  edges, gaps and missing openings, and each element is compared with the previous release.
 - **IFC 4.3 infrastructure.** Alignments, sectioned solids and georeferenced models, as in the
   [Viadotto Acerno bridge](https://xeofoundry.github.io/xeoIFC/?load=Viadotto-Acerno.ifczip).
 
